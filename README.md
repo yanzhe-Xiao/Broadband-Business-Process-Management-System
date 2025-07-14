@@ -7,3 +7,8 @@
 - Seata
 - Nacos
 - Sentinal
+- Spark：Hadoop
+- Redis
+- RabbitMQ
+- Zookeeper
+- MongoDB
