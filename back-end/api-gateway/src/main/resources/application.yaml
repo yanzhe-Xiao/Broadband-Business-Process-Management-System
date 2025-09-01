@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: bss
+          uri: http://localhost:8081         # 先写死地址，未来换 lb://bss-core
+          predicates:
+            - Path=/api/**                   # 业务接口都转到 bss-core
+      default-filters:
+        - RemoveRequestHeader=Cookie
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin RETAIN_UNIQUE
+
+  # 直接把 JWT 公钥/密钥放配置（演示用，生产放 Secret）
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8082/auth/jwks # 如果用RSA并提供JWKS端点
+          # ——或——
+          # jwt:
+          #   secret: your-hmac-secret                # 如果用 HMAC（Spring Boot 3 需自定义解码器）
