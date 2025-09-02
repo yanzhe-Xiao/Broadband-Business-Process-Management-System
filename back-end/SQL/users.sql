@@ -132,7 +132,7 @@ INSERT INTO role (role_code, role_name) VALUES ('ROLE_FIN',   '财务人员');
 INSERT INTO app_user (username, password, full_name, email, status)
 VALUES (
            'admin',
-           '{bcrypt}$2a$10$7EqJtq98hPqEX7fNZaFWoOe.F7fxe7cZ2i9Vwqj/3GJ8UViT7hZGa',
+           '{bcrypt}$2a$10$dHiyqQRYOjeios6uDKtkzuRGw0pP9grjDvcuQ0slW2H0Cbdg.dOOK',
            '系统管理员',
            'admin@example.com',
            'ACTIVE'

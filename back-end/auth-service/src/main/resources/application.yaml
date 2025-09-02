@@ -7,12 +7,16 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: 192.168.3.16:8848
     inetutils:
       ignored-interfaces:
         - VMware.*
         - veth.*
         - VirtualBox.*
+  data:
+    redis:
+      host: localhost
+      port: 6379
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@localhost:1521:FREE
@@ -20,7 +24,12 @@ spring:
     password: 123456
     hikari:
       maximum-pool-size: 10
-      minimum-idle: 2
+      connection-timeout: 30000  # 30s，避免无限等
+      leak-detection-threshold: 15000
+
+logging:
+  level:
+    com.zaxxer.hikari: DEBUG
 
 mybatis-plus:
   configuration:
@@ -28,26 +37,19 @@ mybatis-plus:
     cache-enabled: false
   global-config:
     db-config:
-      id-type: AUTO
+      id-type: assign_id
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
 
 auth:
   keys:
-    mode: pem
-    kid: key-2025-09   # 可选；不配则随机
-    pem:
-      private-path: /etc/keys/jwt-private.pkcs8.pem   # 必填（PKCS#8）
-      public-path:  /etc/keys/jwt-public.pem          # 可选；不填则从私钥推导
-auth:
+    load-from: memory   # ← 关键：使用内存生成
+
   jwt:
     ttl-seconds: 604800
-spring:
-  data:
-    redis:
-      host: localhost
-      port: 6379
+
+
 
 
 management.endpoints.web.exposure.include: health,info
