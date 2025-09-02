@@ -12,6 +12,8 @@
         <module>api-gateway</module>
         <module>bss-core</module>
         <module>auth-service</module>
+        <module>common-dto</module>
+        <module>domain</module>
     </modules>
 
     <properties>
@@ -67,6 +69,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.xyz</groupId>
+            <artifactId>common-dto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+
     <build>
         <pluginManagement>
             <plugins>
@@ -75,8 +86,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
                         <compilerArgs>
                             <arg>-parameters</arg>
                         </compilerArgs>
