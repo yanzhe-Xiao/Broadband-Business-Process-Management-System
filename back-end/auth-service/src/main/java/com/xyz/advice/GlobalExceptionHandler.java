@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseResult<Void> handleBadCred(BadCredentialsException e) {
+//        System.out.println(passwordEncoder.encode("123456"));
         return ResponseResult.fail(401, "用户名或密码错误");
     }
 

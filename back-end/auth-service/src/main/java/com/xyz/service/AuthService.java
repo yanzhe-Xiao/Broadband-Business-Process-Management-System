@@ -5,6 +5,7 @@ import com.xyz.mapper.AppUserMapper;
 import com.xyz.mapper.RoleMapper;
 import com.xyz.user.AppUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,5 +34,25 @@ public class AuthService {
     public List<String> loadUserRoles(Long userId) {
         // 返回如 ["ROLE_ADMIN","ROLE_TECH"]
         return roleMapper.selectRoleCodesByUserId(userId);
+    }
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public AppUser register(String username, String rawPassword, String fullName,
+                            String phone, String email, String tenantId) {
+        AppUser appUser = new AppUser();
+        appUser.setUsername(username);
+        appUser.setPassword(passwordEncoder.encode(rawPassword));
+        int insert = userMapper.insert(appUser);
+
+        return appUser;
+    }
+
+    /**
+     * 确保用户拥有某角色；若无则插入 user_role 关系
+     */
+    public void ensureRole(Long userId, String roleCode) {
+
     }
 }

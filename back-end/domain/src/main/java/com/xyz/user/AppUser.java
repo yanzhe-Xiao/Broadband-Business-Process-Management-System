@@ -28,8 +28,8 @@ public class AppUser {
     private String status;   // ACTIVE/LOCKED/...
     private String tenantId; // 可选
     private int deleted;
-    private Date daletedAt;
+    private Date deletedAt;
     private int version;
-    private Date cretedAt;
+    private Date createdAt;
     private Date updatedAt;
 }

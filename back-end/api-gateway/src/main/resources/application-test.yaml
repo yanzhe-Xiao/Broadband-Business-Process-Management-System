@@ -1,0 +1,28 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+    gateway:
+      routes:
+        - id: bss-core
+          uri: http://localhost:${wiremock.port}
+          predicates:
+            - Path=/api/**
+        - id: auth-service
+          uri: http://localhost:${wiremock.port}
+          predicates:
+            - Path=/auth/**
+      default-filters:
+        - RemoveRequestHeader=Cookie
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin RETAIN_UNIQUE
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:${wiremock.port}/auth/jwks

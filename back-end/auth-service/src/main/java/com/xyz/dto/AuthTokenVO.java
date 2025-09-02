@@ -31,6 +31,15 @@ public class AuthTokenVO {
     @Schema(description = "用户名")
     private String username;
 
+    @Schema(description = "全名")
+    private String fullName;
+
+    @Schema(description = "电话")
+    private String phone;
+
+    @Schema(description = "邮箱")
+    private String email;
+
     @Schema(description = "角色（鉴权用）")
     private List<String> roles;
 }
