@@ -56,10 +56,10 @@ public class AuthController {
         // 1. 调用认证服务，验证用户名和密码
         AppUser user = authService.authenticate(req.username(), req.password());
         // 2. 加载用户角色
-        String roles = authService.loadUserRoles(user.getId());
+        String roleName = authService.loadUserRoles(user.getId());
 
         // 3. 签发JWT令牌
-        var issued = tokenService.issueToken(user.getUsername(), roles, user.getTenantId());
+        var issued = tokenService.issueToken(user.getUsername(), roleName, user.getTenantId());
         // 4. 解析令牌元数据（如JTI、过期时间等）
         var meta = tokenService.parseMeta(issued.accessToken());
 
@@ -72,7 +72,7 @@ public class AuthController {
                 .issuedAt(meta.issuedAtMs())
                 .expireAt(meta.expireAtMs())
                 .username(user.getUsername())
-                .roles(roles)
+                .roles(roleName)
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .email(user.getEmail())

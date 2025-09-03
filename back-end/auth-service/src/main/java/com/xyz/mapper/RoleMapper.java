@@ -26,12 +26,12 @@ public interface RoleMapper {
      * @return 包含该用户所有角色编码的字符串列表。如果用户没有任何角色，则返回空列表。
      */
     @Select("""
-        SELECT r.role_code
+        SELECT r.role_name
           FROM user_role ur
           JOIN role r ON r.id = ur.role_id
          WHERE ur.user_id = #{userId}
     """)
-    List<String> selectRoleCodesByUserId(Long userId);
+    String selectRoleNameByUserId(Long userId);
 
     /**
      * 为指定用户ID关联一个指定的角色名。

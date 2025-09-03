@@ -69,7 +69,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public String loadUserRoles(Long userId) {
         // 调用RoleMapper查询用户的所有角色编码
-        return roleMapper.selectRoleCodesByUserId(userId).get(0);
+        return roleMapper.selectRoleNameByUserId(userId);
     }
 
     /**
