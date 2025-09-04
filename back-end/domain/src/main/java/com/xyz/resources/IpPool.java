@@ -5,7 +5,10 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * IP地址资源池表，用于管理IP地址的分配和使用
@@ -13,6 +16,8 @@ import lombok.Data;
  */
 @TableName(value ="IP_POOL")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class IpPool {
     /**
      * IP资源ID，主键，自动递增

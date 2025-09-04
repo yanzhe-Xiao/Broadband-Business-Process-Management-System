@@ -2,6 +2,7 @@ package com.xyz.mapper;
 
 import com.xyz.orders.Orders;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author X
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2025-09-04 14:45:21
 * @Entity com.xyz.orders.Orders
 */
+@Mapper
 public interface OrdersMapper extends BaseMapper<Orders> {
 
 }

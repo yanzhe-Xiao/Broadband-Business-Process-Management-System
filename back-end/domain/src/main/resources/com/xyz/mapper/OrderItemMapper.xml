@@ -20,4 +20,11 @@
         ID,ORDER_ID,PLAN_CODE,START_BILLING_AT,END_BILLING,QTY,
         PRICE,CREATED_AT,UPDATED_AT
     </sql>
+    <select id="searchAllByOrderId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from ORDER_ITEM
+        where
+        ORDER_ID = #{orderId,jdbcType=NUMERIC}
+    </select>
 </mapper>

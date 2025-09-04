@@ -12,4 +12,8 @@ package com.xyz.constraints;
 public class IpConstraint {
     public final static String IP_AVALIABLE_STATUS = "FREE";
     public final static String IP_NOAVALIABLE_STATUS = "ASSIGNED";
+
+    public static final String IPV4_STRICT =
+            "^(?:(?:25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}"
+                    +   "(?:25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)$";
 }

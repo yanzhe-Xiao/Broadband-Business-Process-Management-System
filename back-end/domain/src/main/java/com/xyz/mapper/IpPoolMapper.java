@@ -39,14 +39,6 @@ public interface IpPoolMapper extends BaseMapper<IpPool> {
      */
     List<IpPool> searchAllByOrderId(@Param("orderId") Long orderId);
 
-
-    /**
-     * 批量插入ip
-     * @param ipPoolCollection ipPool的集合
-     * @return 结果
-     */
-    int insertBatch(@Param("ipPoolCollection") Collection<IpPool> ipPoolCollection);
-
     /**
      * 更新可用带宽
      * @param avaliableBandwidth 目标可用带宽
@@ -67,6 +59,7 @@ public interface IpPoolMapper extends BaseMapper<IpPool> {
      * @return 更新结果
      */
     int updateStatus(@Param("status") String status);
+
 
 
 }

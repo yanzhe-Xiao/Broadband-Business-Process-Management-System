@@ -1,8 +1,8 @@
 package com.xyz.controller;
 
 import com.xyz.common.ResponseResult;
-import com.xyz.dto.AuthTokenVO;
-import com.xyz.dto.AuthVo;
+import com.xyz.vo.AuthTokenVO;
+import com.xyz.vo.AuthVo;
 import com.xyz.security.JwkKeyProvider;
 import com.xyz.service.AuthService;
 import com.xyz.service.TokenService;
@@ -13,12 +13,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * <p>Package Name: com.xyz.controller </p>

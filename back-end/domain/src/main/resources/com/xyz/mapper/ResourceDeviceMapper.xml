@@ -20,4 +20,52 @@
         ID,SN,MODEL,QTY,PRICE,STATUS,
         ORDER_ID,CREATED_AT,UPDATED_AT
     </sql>
+    <insert id="insertBatch">
+        insert into RESOURCE_DEVICE(ID,SN,MODEL,
+        QTY,PRICE,STATUS,
+        ORDER_ID,CREATED_AT,UPDATED_AT)
+        values
+        <foreach collection="resourceDeviceCollection" item="item" separator=",">
+            (#{item.id,jdbcType=NUMERIC},#{item.sn,jdbcType=VARCHAR},#{item.model,jdbcType=VARCHAR},
+            #{item.qty,jdbcType=NUMERIC},#{item.price,jdbcType=NUMERIC},#{item.status,jdbcType=VARCHAR},
+            #{item.orderId,jdbcType=NUMERIC},#{item.createdAt,jdbcType=TIMESTAMP},#{item.updatedAt,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+    <select id="selectAllByStatus" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from RESOURCE_DEVICE
+        where
+        STATUS = #{status,jdbcType=VARCHAR}
+    </select>
+    <select id="selectByModel" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from RESOURCE_DEVICE
+        where
+        MODEL = #{model,jdbcType=VARCHAR}
+    </select>
+    <select id="selectByPriceLessThanEqual" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from RESOURCE_DEVICE
+        where
+        PRICE <![CDATA[  <= ]]> #{price,jdbcType=NUMERIC}
+    </select>
+    <update id="updateStatus">
+        update RESOURCE_DEVICE
+        set STATUS = #{status,jdbcType=VARCHAR}
+    </update>
+    <update id="updateModel">
+        update RESOURCE_DEVICE
+        set MODEL = #{model,jdbcType=VARCHAR}
+    </update>
+    <update id="updatePrice">
+        update RESOURCE_DEVICE
+        set PRICE = #{price,jdbcType=NUMERIC}
+    </update>
+    <update id="updateQty">
+        update RESOURCE_DEVICE
+        set QTY = #{qty,jdbcType=NUMERIC}
+    </update>
 </mapper>

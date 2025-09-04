@@ -1,11 +1,8 @@
-package com.xyz.dto;
+package com.xyz.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 /**
  * <p>Package Name: com.xyz.dto </p>

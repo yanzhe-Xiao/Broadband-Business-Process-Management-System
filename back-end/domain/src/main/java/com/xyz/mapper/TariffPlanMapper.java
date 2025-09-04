@@ -2,6 +2,7 @@ package com.xyz.mapper;
 
 import com.xyz.orders.TariffPlan;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author X
@@ -9,8 +10,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2025-09-04 14:45:04
 * @Entity com.xyz.orders.TariffPlan
 */
+@Mapper
 public interface TariffPlanMapper extends BaseMapper<TariffPlan> {
-
+    
 }
 
 

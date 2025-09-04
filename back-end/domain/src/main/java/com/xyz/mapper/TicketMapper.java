@@ -2,6 +2,7 @@ package com.xyz.mapper;
 
 import com.xyz.workflow.Ticket;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author X
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2025-09-04 14:46:09
 * @Entity com.xyz.workflow.Ticket
 */
+@Mapper
 public interface TicketMapper extends BaseMapper<Ticket> {
 
 }

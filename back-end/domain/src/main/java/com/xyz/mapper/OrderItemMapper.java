@@ -1,4 +1,8 @@
 package com.xyz.mapper;
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.xyz.orders.OrderItem;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -9,7 +13,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2025-09-04 14:45:17
 * @Entity com.xyz.orders.OrderItem
 */
+@Mapper
 public interface OrderItemMapper extends BaseMapper<OrderItem> {
+    List<OrderItem> searchAllByOrderId(@Param("orderId") Long orderId);
+
 
 }
 

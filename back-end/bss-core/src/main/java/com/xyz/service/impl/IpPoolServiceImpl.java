@@ -2,11 +2,16 @@ package com.xyz.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xyz.constraints.IpConstraint;
+import com.xyz.dto.IpPoolDTO;
 import com.xyz.mapper.IpPoolMapper;
 import com.xyz.resources.IpPool;
 import com.xyz.service.IpPoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * @author X
@@ -20,9 +25,34 @@ public class IpPoolServiceImpl extends ServiceImpl<IpPoolMapper, IpPool>
     @Autowired
     private IpPoolMapper ipPoolMapper;
     @Override
-    public void getAvaliableIp() {
-        ipPoolMapper.selectByStatusAndIpBandwidth(IpConstraint.IP_AVALIABLE_STATUS,null);
+    public List<IpPool> getAvaliableIp() {
+        return ipPoolMapper.selectAllByStatus(IpConstraint.IP_AVALIABLE_STATUS);
     }
+
+
+    @Override
+    @Transactional
+    public Integer addIps(List<IpPoolDTO.AddIpPool> addIpPools) {
+        // 将 AddIpPool DTO 转换为 IpPool 实体
+        List<IpPool> ipPools = addIpPools.stream()
+                .map(dto -> {
+                    IpPool ipPool = new IpPool();
+                    ipPool.setIp(dto.ip());
+                    ipPool.setStatus(dto.status());
+                    ipPool.setIpBandwidth(dto.ipBandwidth());
+                    ipPool.setAvaliableBandwidth(dto.avaliableBandwidth());
+                    return ipPool;
+                })
+                .collect(Collectors.toList());
+
+        // 使用 MyBatis-Plus 的 saveBatch 方法
+        boolean result = this.saveBatch(ipPools);
+
+        // 返回插入成功的记录数
+        return result ? ipPools.size() : 0;
+    }
+
+
 }
 
 
