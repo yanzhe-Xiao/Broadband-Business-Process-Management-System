@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xyz.mapper.IpPoolMapper">
 
-    <resultMap id="BaseResultMap" type="com.xyz.resources.IpPoolresources">
+    <resultMap id="BaseResultMap" type="com.xyz.resources.IpPool">
             <id property="id" column="ID" />
             <result property="ip" column="IP" />
             <result property="status" column="STATUS" />
@@ -12,17 +12,62 @@
             <result property="createdAt" column="CREATED_AT" />
             <result property="updatedAt" column="UPDATED_AT" />
             <result property="ipBandwidth" column="IP_BANDWIDTH" />
+            <result property="avaliableBandwidth" column="AVALIABLE_BANDWIDTH" />
     </resultMap>
 
     <sql id="Base_Column_List">
         ID,IP,STATUS,ORDER_ID,CREATED_AT,UPDATED_AT,
-        IP_BANDWIDTH
+        IP_BANDWIDTH,AVALIABLE_BANDWIDTH
     </sql>
-    <select id="selectByIp" resultMap="BaseResultMap">
+    <select id="selectAllByStatusAndAvaliableBandwidthGreaterThanEqual" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from IP_POOL
         where
-        IP = #{ip,jdbcType=VARCHAR}
+        STATUS = #{status,jdbcType=VARCHAR}
+        AND AVALIABLE_BANDWIDTH >= #{avaliableBandwidth,jdbcType=NUMERIC}
     </select>
+    <select id="selectAllByStatus" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from IP_POOL
+        where
+        STATUS = #{status,jdbcType=VARCHAR}
+    </select>
+    <select id="searchAllByOrderId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from IP_POOL
+        where
+        ORDER_ID = #{orderId,jdbcType=NUMERIC}
+    </select>
+    <insert id="insertBatch">
+        insert into IP_POOL(ID,IP,STATUS,
+        ORDER_ID,CREATED_AT,UPDATED_AT,
+        IP_BANDWIDTH,AVALIABLE_BANDWIDTH)
+        values
+        <foreach collection="ipPoolCollection" item="item" separator=",">
+            (#{item.id,jdbcType=NUMERIC},#{item.ip,jdbcType=VARCHAR},#{item.status,jdbcType=VARCHAR},
+            #{item.orderId,jdbcType=NUMERIC},#{item.createdAt,jdbcType=TIMESTAMP},#{item.updatedAt,jdbcType=TIMESTAMP},
+            #{item.ipBandwidth,jdbcType=NUMERIC},#{item.avaliableBandwidth,jdbcType=NUMERIC})
+        </foreach>
+    </insert>
+    <update id="updateAvaliableBandwidth">
+        update IP_POOL
+        set AVALIABLE_BANDWIDTH = #{avaliableBandwidth,jdbcType=NUMERIC}
+    </update>
+    <update id="updateIpBandwidth">
+        update IP_POOL
+        set IP_BANDWIDTH = #{ipBandwidth,jdbcType=NUMERIC}
+    </update>
+    <update id="updateStatus">
+        update IP_POOL
+        set STATUS = #{status,jdbcType=VARCHAR}
+    </update>
+    <update id="updateOrderId">
+        update IP_POOL
+        set ORDER_ID = #{orderId,jdbcType=NUMERIC}
+    </update>
+
+
 </mapper>

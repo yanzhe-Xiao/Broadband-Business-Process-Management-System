@@ -64,13 +64,13 @@
             <option name="needToStringHashcodeEquals" value="true" />
             <option name="needsComment" value="true" />
             <option name="needsModel" value="true" />
-            <option name="relativePackage" value="workflow" />
+            <option name="relativePackage" value="resources" />
             <option name="superClass" value="" />
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="Ticket" />
-                  <option name="tableName" value="TICKET" />
+                  <option name="className" value="IpPool" />
+                  <option name="tableName" value="IP_POOL" />
                 </TableUIInfo>
               </list>
             </option>

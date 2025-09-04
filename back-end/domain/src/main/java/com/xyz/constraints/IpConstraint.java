@@ -1,0 +1,15 @@
+package com.xyz.constraints;
+
+/**
+ * <p>Package Name: com.xyz.constant </p>
+ * <p>Description: 约束IP常量 </p>
+ * <p>Create Time: 2025/9/4 </p>
+ *
+ * @author <a href="https://github.com/yanzhe-xiao">YANZHE XIAO</a>
+ * @version 1.0
+ * @since
+ */
+public class IpConstraint {
+    public final static String IP_AVALIABLE_STATUS = "FREE";
+    public final static String IP_NOAVALIABLE_STATUS = "ASSIGNED";
+}
