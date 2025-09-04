@@ -1,0 +1,44 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/auth/jwks
+  application:
+    name: bss-core
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.3.16:8848
+    inetutils:
+      ignored-interfaces:
+        - VMware.*
+        - veth.*
+        - VirtualBox.*
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@localhost:1521:FREE
+    username: C##BSS_DATA
+    password: 123456
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 30000  # 30s，避免无限等
+      leak-detection-threshold: 15000
+  flyway:
+    enabled: true
+    # 你的表/索引已经存在，先做一次基线登记
+    baseline-on-migrate: true
+    baseline-version: 0           # 基线版本号，随意，但建议 0 或 1
+    baseline-description: "baseline existing schema"
+    # 指定 schema，避免连错（Oracle 区分大小写，写全）
+    schemas: C##BSS_DATA
+    default-schema: C##BSS_DATA
+    # 迁移脚本位置（按你的工程放置）
+    locations: classpath:db/migration
+
+server:
+  port: 8081

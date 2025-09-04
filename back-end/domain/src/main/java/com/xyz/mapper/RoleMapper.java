@@ -4,8 +4,6 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
-
 /**
  * <p>Package Name: com.xyz.mapper </p>
  * <p>Description: 角色数据访问层接口，用于处理用户与角色相关的数据库操作。这里使用MyBatis的注解方式来定义SQL语句。</p>
