@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.mapper.WorkflowStepMapper">
+
+    <resultMap id="BaseResultMap" type="com.xyz.workflow.WorkflowStep">
+            <id property="id" column="ID" />
+            <result property="instanceId" column="INSTANCE_ID" />
+            <result property="stepCode" column="STEP_CODE" />
+            <result property="status" column="STATUS" />
+            <result property="createdAt" column="CREATED_AT" />
+            <result property="updatedAt" column="UPDATED_AT" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,INSTANCE_ID,STEP_CODE,STATUS,CREATED_AT,UPDATED_AT,
+        DATA_IN,DATA_OUT
+    </sql>
+</mapper>

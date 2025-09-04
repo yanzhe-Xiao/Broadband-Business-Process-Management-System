@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.mapper.TariffPlanMapper">
+
+    <resultMap id="BaseResultMap" type="com.xyz.orders.TariffPlan">
+            <id property="planCode" column="PLAN_CODE" />
+            <result property="name" column="NAME" />
+            <result property="monthlyFee" column="MONTHLY_FEE" />
+            <result property="yearlyFee" column="YEARLY_FEE" />
+            <result property="foreverFee" column="FOREVER_FEE" />
+            <result property="planPeriod" column="PLAN_PERIOD" />
+            <result property="discount" column="DISCOUNT" />
+            <result property="status" column="STATUS" />
+            <result property="createdAt" column="CREATED_AT" />
+            <result property="updatedAt" column="UPDATED_AT" />
+            <result property="isIp" column="IS_IP" />
+            <result property="ipId" column="IP_ID" />
+            <result property="deviceId" column="DEVICE_ID" />
+            <result property="bandwith" column="BANDWITH" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        PLAN_CODE,NAME,MONTHLY_FEE,YEARLY_FEE,FOREVER_FEE,PLAN_PERIOD,
+        DISCOUNT,STATUS,CREATED_AT,UPDATED_AT,IS_IP,
+        IP_ID,DEVICE_ID,BANDWITH
+    </sql>
+</mapper>

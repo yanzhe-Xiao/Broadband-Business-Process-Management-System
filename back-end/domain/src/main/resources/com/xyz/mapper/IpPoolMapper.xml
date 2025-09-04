@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.mapper.IpPoolMapper">
+
+    <resultMap id="BaseResultMap" type="com.xyz.resources.IpPoolresources">
+            <id property="id" column="ID" />
+            <result property="ip" column="IP" />
+            <result property="status" column="STATUS" />
+            <result property="orderId" column="ORDER_ID" />
+            <result property="createdAt" column="CREATED_AT" />
+            <result property="updatedAt" column="UPDATED_AT" />
+            <result property="ipBandwidth" column="IP_BANDWIDTH" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,IP,STATUS,ORDER_ID,CREATED_AT,UPDATED_AT,
+        IP_BANDWIDTH
+    </sql>
+    <select id="selectByIp" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from IP_POOL
+        where
+        IP = #{ip,jdbcType=VARCHAR}
+    </select>
+</mapper>

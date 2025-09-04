@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.mapper.ResourceDeviceMapper">
+
+    <resultMap id="BaseResultMap" type="com.xyz.resources.ResourceDevice">
+            <id property="id" column="ID" />
+            <result property="sn" column="SN" />
+            <result property="model" column="MODEL" />
+            <result property="qty" column="QTY" />
+            <result property="price" column="PRICE" />
+            <result property="status" column="STATUS" />
+            <result property="orderId" column="ORDER_ID" />
+            <result property="createdAt" column="CREATED_AT" />
+            <result property="updatedAt" column="UPDATED_AT" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,SN,MODEL,QTY,PRICE,STATUS,
+        ORDER_ID,CREATED_AT,UPDATED_AT
+    </sql>
+</mapper>

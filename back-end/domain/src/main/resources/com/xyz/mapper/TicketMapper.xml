@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.mapper.TicketMapper">
+
+    <resultMap id="BaseResultMap" type="com.xyz.workflow.Ticket">
+            <id property="id" column="ID" />
+            <result property="orderId" column="ORDER_ID" />
+            <result property="status" column="STATUS" />
+            <result property="assignee" column="ASSIGNEE" />
+            <result property="note" column="NOTE" />
+            <result property="deleted" column="DELETED" />
+            <result property="deletedAt" column="DELETED_AT" />
+            <result property="createdAt" column="CREATED_AT" />
+            <result property="updatedAt" column="UPDATED_AT" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,ORDER_ID,STATUS,ASSIGNEE,NOTE,DELETED,
+        DELETED_AT,CREATED_AT,UPDATED_AT
+    </sql>
+</mapper>
