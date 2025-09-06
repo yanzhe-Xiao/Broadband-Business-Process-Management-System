@@ -1,4 +1,4 @@
-package com.xyz.vo.ip_pool;
+package com.xyz.vo.resources;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

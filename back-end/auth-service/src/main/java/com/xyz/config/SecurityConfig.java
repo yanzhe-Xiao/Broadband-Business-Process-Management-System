@@ -40,8 +40,7 @@ public class SecurityConfig {
                         // 除了上述明确允许的路径外，所有其他请求都必须经过身份验证。
                         .anyRequest().authenticated()
                 )
-                // 启用HTTP Basic认证，这是一种简单的基于用户名和密码的认证方式。
-                // 通常用于开发和调试，生产环境中可能会使用更安全的认证机制（如JWT）。
+
                 .httpBasic(Customizer.withDefaults())
                 // 构建并返回配置好的SecurityFilterChain。
                 .build();

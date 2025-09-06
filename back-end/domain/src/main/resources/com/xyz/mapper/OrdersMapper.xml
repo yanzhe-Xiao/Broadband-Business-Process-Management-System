@@ -14,10 +14,11 @@
             <result property="version" column="VERSION" />
             <result property="createdAt" column="CREATED_AT" />
             <result property="updatedAt" column="UPDATED_AT" />
+            <result property="installationFee" column="INSTALLATION_FEE" />
     </resultMap>
 
     <sql id="Base_Column_List">
         ID,USER_ID,STATUS,INSTALL_ADDRESS,DELETED,DELETED_AT,
-        VERSION,CREATED_AT,UPDATED_AT
+        VERSION,CREATED_AT,UPDATED_AT,INSTALLATION_FEE
     </sql>
 </mapper>

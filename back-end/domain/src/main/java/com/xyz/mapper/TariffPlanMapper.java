@@ -7,12 +7,12 @@ import org.apache.ibatis.annotations.Mapper;
 /**
 * @author X
 * @description 针对表【TARIFF_PLAN(套餐资费表，存储宽带套餐信息)】的数据库操作Mapper
-* @createDate 2025-09-04 14:45:04
+* @createDate 2025-09-05 22:27:46
 * @Entity com.xyz.orders.TariffPlan
 */
 @Mapper
 public interface TariffPlanMapper extends BaseMapper<TariffPlan> {
-    
+
 }
 
 

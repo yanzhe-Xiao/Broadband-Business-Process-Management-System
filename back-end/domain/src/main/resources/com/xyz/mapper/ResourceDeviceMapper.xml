@@ -68,4 +68,31 @@
         update RESOURCE_DEVICE
         set QTY = #{qty,jdbcType=NUMERIC}
     </update>
+    <update id="updateStatusBySn">
+        update RESOURCE_DEVICE
+        set STATUS = #{status,jdbcType=VARCHAR}
+        where SN = #{sn,jdbcType=VARCHAR}
+    </update>
+    <update id="updateModelBySn">
+        update RESOURCE_DEVICE
+        set MODEL = #{model,jdbcType=VARCHAR}
+        where SN = #{sn,jdbcType=VARCHAR}
+    </update>
+    <update id="updatePriceBySn">
+        update RESOURCE_DEVICE
+        set PRICE = #{price,jdbcType=NUMERIC}
+        where SN = #{sn,jdbcType=VARCHAR}
+    </update>
+    <update id="updateQtyBySn">
+        update RESOURCE_DEVICE
+        set QTY = #{qty,jdbcType=NUMERIC}
+        where SN = #{sn,jdbcType=VARCHAR}
+    </update>
+    <select id="selectBySn" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from RESOURCE_DEVICE
+        where
+        SN = #{sn,jdbcType=VARCHAR}
+    </select>
 </mapper>

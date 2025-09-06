@@ -1,5 +1,6 @@
 package com.xyz.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xyz.dto.IpPoolDTO;
 import com.xyz.resources.IpPool;
@@ -13,8 +14,7 @@ import java.util.List;
 */
 public interface IpPoolService extends IService<IpPool> {
 
-    public List<IpPool> getAvaliableIp();
-
+    public IPage<IpPool> getAvaliableIp(int current, int size);
     public Integer addIps(List<IpPoolDTO.AddIpPool> addIpPools);
 
 }

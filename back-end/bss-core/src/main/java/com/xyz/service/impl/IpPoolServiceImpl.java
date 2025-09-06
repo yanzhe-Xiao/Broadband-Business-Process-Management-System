@@ -1,5 +1,7 @@
 package com.xyz.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xyz.constraints.IpConstraint;
 import com.xyz.dto.IpPoolDTO;
@@ -25,8 +27,9 @@ public class IpPoolServiceImpl extends ServiceImpl<IpPoolMapper, IpPool>
     @Autowired
     private IpPoolMapper ipPoolMapper;
     @Override
-    public List<IpPool> getAvaliableIp() {
-        return ipPoolMapper.selectAllByStatus(IpConstraint.IP_AVALIABLE_STATUS);
+    public IPage<IpPool> getAvaliableIp(int current, int size) {
+        IPage<IpPool> ipPools = new Page<>(current, size);
+        return ipPoolMapper.selectAllByStatus(ipPools,IpConstraint.IP_AVALIABLE_STATUS);
     }
 
 

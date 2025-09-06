@@ -14,7 +14,7 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration cfg = new CorsConfiguration();
 
-        // 允许的前端来源 —— 你用 VSCode Live Server 就是这两个
+        // 允许的前端来源
         cfg.addAllowedOriginPattern("http://127.0.0.1:3000");
         cfg.addAllowedOriginPattern("http://localhost:3000");
 

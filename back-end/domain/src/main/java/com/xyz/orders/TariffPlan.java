@@ -79,12 +79,27 @@ public class TariffPlan {
     /**
      * 
      */
-    private Long deviceId;
+    private String deviceSn;
 
     /**
      * 套餐的带宽
      */
     private Integer bandwith;
+
+    /**
+     * 
+     */
+    private String description;
+
+    /**
+     * 
+     */
+    private Integer deviceQty;
+
+    /**
+     * 数量
+     */
+    private Integer qty;
 
     @Override
     public boolean equals(Object that) {
@@ -110,8 +125,11 @@ public class TariffPlan {
             && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()))
             && (this.getIsIp() == null ? other.getIsIp() == null : this.getIsIp().equals(other.getIsIp()))
             && (this.getIpId() == null ? other.getIpId() == null : this.getIpId().equals(other.getIpId()))
-            && (this.getDeviceId() == null ? other.getDeviceId() == null : this.getDeviceId().equals(other.getDeviceId()))
-            && (this.getBandwith() == null ? other.getBandwith() == null : this.getBandwith().equals(other.getBandwith()));
+            && (this.getDeviceSn() == null ? other.getDeviceSn() == null : this.getDeviceSn().equals(other.getDeviceSn()))
+            && (this.getBandwith() == null ? other.getBandwith() == null : this.getBandwith().equals(other.getBandwith()))
+            && (this.getDescription() == null ? other.getDescription() == null : this.getDescription().equals(other.getDescription()))
+            && (this.getDeviceQty() == null ? other.getDeviceQty() == null : this.getDeviceQty().equals(other.getDeviceQty()))
+            && (this.getQty() == null ? other.getQty() == null : this.getQty().equals(other.getQty()));
     }
 
     @Override
@@ -130,8 +148,11 @@ public class TariffPlan {
         result = prime * result + ((getUpdatedAt() == null) ? 0 : getUpdatedAt().hashCode());
         result = prime * result + ((getIsIp() == null) ? 0 : getIsIp().hashCode());
         result = prime * result + ((getIpId() == null) ? 0 : getIpId().hashCode());
-        result = prime * result + ((getDeviceId() == null) ? 0 : getDeviceId().hashCode());
+        result = prime * result + ((getDeviceSn() == null) ? 0 : getDeviceSn().hashCode());
         result = prime * result + ((getBandwith() == null) ? 0 : getBandwith().hashCode());
+        result = prime * result + ((getDescription() == null) ? 0 : getDescription().hashCode());
+        result = prime * result + ((getDeviceQty() == null) ? 0 : getDeviceQty().hashCode());
+        result = prime * result + ((getQty() == null) ? 0 : getQty().hashCode());
         return result;
     }
 
@@ -153,8 +174,11 @@ public class TariffPlan {
         sb.append(", updatedAt=").append(updatedAt);
         sb.append(", isIp=").append(isIp);
         sb.append(", ipId=").append(ipId);
-        sb.append(", deviceId=").append(deviceId);
+        sb.append(", deviceSn=").append(deviceSn);
         sb.append(", bandwith=").append(bandwith);
+        sb.append(", description=").append(description);
+        sb.append(", deviceQty=").append(deviceQty);
+        sb.append(", qty=").append(qty);
         sb.append("]");
         return sb.toString();
     }

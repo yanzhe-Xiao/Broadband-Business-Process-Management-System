@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
 
@@ -60,6 +61,11 @@ public class Orders {
      */
     private Date updatedAt;
 
+    /**
+     * 安装费
+     */
+    private BigDecimal installationFee;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -80,7 +86,8 @@ public class Orders {
             && (this.getDeletedAt() == null ? other.getDeletedAt() == null : this.getDeletedAt().equals(other.getDeletedAt()))
             && (this.getVersion() == null ? other.getVersion() == null : this.getVersion().equals(other.getVersion()))
             && (this.getCreatedAt() == null ? other.getCreatedAt() == null : this.getCreatedAt().equals(other.getCreatedAt()))
-            && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()));
+            && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()))
+            && (this.getInstallationFee() == null ? other.getInstallationFee() == null : this.getInstallationFee().equals(other.getInstallationFee()));
     }
 
     @Override
@@ -96,6 +103,7 @@ public class Orders {
         result = prime * result + ((getVersion() == null) ? 0 : getVersion().hashCode());
         result = prime * result + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
         result = prime * result + ((getUpdatedAt() == null) ? 0 : getUpdatedAt().hashCode());
+        result = prime * result + ((getInstallationFee() == null) ? 0 : getInstallationFee().hashCode());
         return result;
     }
 
@@ -114,6 +122,7 @@ public class Orders {
         sb.append(", version=").append(version);
         sb.append(", createdAt=").append(createdAt);
         sb.append(", updatedAt=").append(updatedAt);
+        sb.append(", installationFee=").append(installationFee);
         sb.append("]");
         return sb.toString();
     }

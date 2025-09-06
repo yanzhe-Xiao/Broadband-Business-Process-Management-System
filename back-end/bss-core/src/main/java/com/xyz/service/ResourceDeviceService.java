@@ -1,7 +1,12 @@
 package com.xyz.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.xyz.dto.DeviceDTO;
 import com.xyz.resources.ResourceDevice;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xyz.vo.resources.DeviceAvaliableVO;
+
+import java.util.List;
 
 /**
 * @author X
@@ -9,5 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-09-04 14:44:00
 */
 public interface ResourceDeviceService extends IService<ResourceDevice> {
+    public IPage<DeviceAvaliableVO> getAvaliableDevice(int current,int size);
 
+    public Integer addDevices(List<DeviceDTO.DeviceAvaliableDTO> devices);
 }

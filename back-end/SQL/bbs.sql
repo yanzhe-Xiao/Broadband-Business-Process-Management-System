@@ -758,7 +758,8 @@ CREATE TABLE ip_pool (
                          order_id   NUMBER(19),
                          created_at TIMESTAMP(6) DEFAULT SYSTIMESTAMP NOT NULL,
                          updated_at TIMESTAMP(6),
-                         ip_bandwith NUMBER(10) DEFAULT 1000 NOT NULL
+                         ip_bandwith NUMBER(10) DEFAULT 1000 NOT NULL,
+                         avaliable_bandwidth NUMBER(10) DEFAULT 1000 NOT NULL
 );
 ALTER TABLE ip_pool
     ADD CONSTRAINT uq_ip_pool_ip UNIQUE (ip);

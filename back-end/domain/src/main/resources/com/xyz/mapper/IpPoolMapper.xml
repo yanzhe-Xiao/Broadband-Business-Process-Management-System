@@ -68,6 +68,26 @@
         update IP_POOL
         set ORDER_ID = #{orderId,jdbcType=NUMERIC}
     </update>
+    <update id="updateIpBandwidthByIp">
+        update IP_POOL
+        set IP_BANDWIDTH = #{ipBandwidth,jdbcType=NUMERIC}
+        where IP = #{ip,jdbcType=VARCHAR}
+    </update>
+    <update id="updateStatusByIp">
+        update IP_POOL
+        set STATUS = #{status,jdbcType=VARCHAR}
+        where IP = #{ip,jdbcType=VARCHAR}
+    </update>
+    <update id="updateAvaliableBandwidthByIp">
+        update IP_POOL
+        set AVALIABLE_BANDWIDTH = #{avaliableBandwidth,jdbcType=NUMERIC}
+        where IP = #{ip,jdbcType=VARCHAR}
+    </update>
+    <select id="selectMaxAvaliableBandwidth">
+        select MAX(AVALIABLE_BANDWIDTH) AS max_bandwidth
+        from IP_POOL
+        where STATUS = 'FREE'
+    </select>
 
 
 </mapper>

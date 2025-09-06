@@ -1,7 +1,6 @@
 package com.xyz.resources;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.util.Date;
@@ -38,7 +37,7 @@ public class ResourceDevice {
     /**
      * 
      */
-    private Integer price;
+    private Double price;
 
     /**
      * 设备状态，STOCK-库存，ASSIGNED-已分配，RETIRED-退役

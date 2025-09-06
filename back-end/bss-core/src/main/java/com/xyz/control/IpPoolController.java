@@ -1,18 +1,17 @@
 package com.xyz.control;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.IpPoolDTO;
 import com.xyz.resources.IpPool;
 import com.xyz.service.IpPoolService;
-import com.xyz.vo.ip_pool.IpPoolAvaliableVO;
+import com.xyz.vo.resources.IpPoolAvaliableVO;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>Package Name: com.xyz.control </p>
@@ -31,18 +30,24 @@ public class IpPoolController {
     IpPoolService ipPoolService;
 
     @GetMapping("/avaliable")
-    public ResponseResult<List<IpPoolAvaliableVO>> getAvaliableIpPool(){
-        List<IpPool> avaliableIps = ipPoolService.getAvaliableIp();
-        return ResponseResult.success(avaliableIps.stream()
-                .map(ipPool -> IpPoolAvaliableVO.builder()
+    public ResponseResult<PageResult<IpPoolAvaliableVO>> getAvaliableIpPool(
+            @RequestParam(defaultValue = "1") int current,
+            @RequestParam(defaultValue = "10") int size) {
+
+        IPage<IpPool> pageResult = ipPoolService.getAvaliableIp(current, size);
+
+        // 转换为 VO 对象的分页结果
+        IPage<IpPoolAvaliableVO> voPage = pageResult.convert(ipPool ->
+                IpPoolAvaliableVO.builder()
                         .ip(ipPool.getIp())
                         .status(ipPool.getStatus())
                         .ipBandwidth(ipPool.getIpBandwidth())
-                        .avaliableBandwidth(ipPool.getAvaliableBandwidth()) // 注意字段名拼写
-                        .build())
-                .collect(Collectors.toList()));
-    }
+                        .avaliableBandwidth(ipPool.getAvaliableBandwidth())
+                        .build()
+        );
 
+        return ResponseResult.success(PageResult.of(voPage));
+    }
 
 
     @PostMapping("/add")

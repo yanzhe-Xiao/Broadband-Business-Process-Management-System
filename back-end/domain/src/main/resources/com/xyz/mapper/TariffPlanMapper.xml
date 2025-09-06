@@ -17,13 +17,17 @@
             <result property="updatedAt" column="UPDATED_AT" />
             <result property="isIp" column="IS_IP" />
             <result property="ipId" column="IP_ID" />
-            <result property="deviceId" column="DEVICE_ID" />
+            <result property="deviceSn" column="DEVICE_SN" />
             <result property="bandwith" column="BANDWITH" />
+            <result property="description" column="DESCRIPTION" />
+            <result property="deviceQty" column="DEVICE_QTY" />
+            <result property="qty" column="QTY" />
     </resultMap>
 
     <sql id="Base_Column_List">
         PLAN_CODE,NAME,MONTHLY_FEE,YEARLY_FEE,FOREVER_FEE,PLAN_PERIOD,
         DISCOUNT,STATUS,CREATED_AT,UPDATED_AT,IS_IP,
-        IP_ID,DEVICE_ID,BANDWITH
+        IP_ID,DEVICE_SN,BANDWITH,DESCRIPTION,DEVICE_QTY,
+        QTY
     </sql>
 </mapper>
