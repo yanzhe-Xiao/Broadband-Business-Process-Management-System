@@ -1,0 +1,102 @@
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.admin-plans-page {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-plans-card {
+    border-radius: 16px !important;
+    background: linear-gradient(180deg, #ffffff, #f7fafc) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .06), 0 4px 12px rgba(0, 0, 0, .04);
+}
+
+.admin-plans-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.admin-plans-header .badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: .5px;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(59, 130, 246, .25);
+}
+
+.admin-plans-header .title-wrap {
+    flex: 1;
+}
+
+.admin-plans-header .title-wrap h3 {
+    margin: 0 0 2px;
+}
+
+.admin-plans-header .title-wrap p {
+    margin: 0;
+    color: rgba(2, 6, 23, .62);
+}
+
+.admin-plans-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 8px 0 12px;
+}
+
+.admin-plans-toolbar .tilde {
+    opacity: .5;
+    margin: 0 4px;
+}
+
+.gradient-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    box-shadow: 0 8px 16px rgba(20, 184, 166, .25) !important;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+/* .admin-plans-table .ant-table-thead>tr>th {
+    background: rgba(99, 102, 241, .06) !important;
+}
+
+*/
+
+/* 固定列在滚动时的背景与层级，避免“透底/重叠”的错觉 */
+.admin-plans-table .ant-table-cell-fix-right,
+.admin-plans-table .ant-table-cell-fix-left {
+    background: #fff;
+    /* 或者用 var(--ant-color-bg-container) */
+    z-index: 30;
+    /* 比普通单元格更高 */
+}
+
+/* 固定在右侧第一列的阴影（视觉分割） */
+.admin-plans-table .ant-table-cell-fix-right-first,
+.admin-plans-table .ant-table-ping-right .ant-table-cell-fix-right-first {
+    box-shadow: -8px 0 8px -4px rgba(0, 0, 0, .08);
+}
+
+/* 操作列专用，进一步兜底背景 */
+.admin-plans-table .action-col {
+    background: #fff;
+}
+
+/* 如果表格外层卡片使用了渐变背景，建议给表格容器也统一白底 */
+.admin-products-card .ant-table-container,
+.admin-plans-card .ant-table-container {
+    background: #fff;
+}

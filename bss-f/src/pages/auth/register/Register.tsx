@@ -17,11 +17,17 @@ export default function RegisterPage() {
         const { confirmPassword, ...payload } = values
         setLoading(true)
         try {
+            console.log(1111);
             await registerApi(payload)
-            messageApi.open({ type: 'success', content: '注册成功，请登录' })
-            nav('/login', { replace: true })
+            messageApi.open({
+                type: 'success',
+                content: '注册成功，请登录',
+                duration: 1,             // 展示 1s
+                onClose: () => nav('/login', { replace: true }), // 关闭后再跳转
+            })
+
         } catch (e: any) {
-            messageApi.open({ type: 'error', content: e?.response?.data?.message ?? '注册失败，请稍后重试' })
+            messageApi.open({ type: 'error', content: e?.response?.data?.message ?? '注册失败' })
         } finally {
             setLoading(false)
         }
@@ -128,7 +134,9 @@ export default function RegisterPage() {
                             size="large"
                             options={[
                                 { value: '客户', label: '客户' },
-                                { value: '管理员', label: '管理员' },
+                                { value: '平台管理员', label: '平台管理员' },
+                                { value: '客服坐席', label: '客服坐席' },
+                                { value: '装维工程师', label: '装维工程师' }
                             ]}
                             suffixIcon={<TeamOutlined />}
                         />

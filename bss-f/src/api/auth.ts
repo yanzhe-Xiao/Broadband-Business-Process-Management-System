@@ -9,14 +9,14 @@ export interface LoginReq {
 }
 export interface LoginResp {
     token: string
-    role: 'user' | 'admin'
+    roleName: 'user' | 'admin' | '客户' | '平台管理员' | '客服坐席' | '装维工程师'
     username: string
 }
 
 
 export async function loginApi(data: LoginReq): Promise<LoginResp> {
     try {
-        const res = await http.post<LoginResp>('/api/auth/me', data)
+        const res = await http.post<LoginResp>('/auth/me', data)
         return res.data
     } catch (e: any) {
         const status = e?.response?.status

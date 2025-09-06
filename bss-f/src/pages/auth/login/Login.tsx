@@ -17,10 +17,26 @@ export default function LoginPage() {
         setLoading(true)
         try {
             const data = await loginApi(values)
-            login({ token: data.token, role: data.role, username: data.username })
-            messageApi.open({ type: 'success', content: '登录成功' })
+            login({ token: data.token, roleName: data.roleName, username: data.username })
             const from = loc.state?.from?.pathname as string | undefined
-            nav(from ?? (data.role === 'admin' ? '/admin' : '/app'), { replace: true })
+            let address = '/login';
+            if (data.roleName === '客户') {
+                address = '/app'
+            } else if (data.roleName === '平台管理员') {
+                address = '/admin'
+            } else if (data.roleName === '客服坐席') {
+                address = '/servicer'
+            } else if (data.roleName === '装维工程师') {
+                address = '/engineer'
+            }
+            messageApi.open({
+                type: 'success',
+                content: '登录成功',
+                duration: 1,
+                onClose: () => nav(from ?? address, { replace: true })
+            })
+
+
         } catch (e: any) {
             const msg = e.message
             messageApi.open({ type: 'error', content: msg })

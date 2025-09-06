@@ -9,8 +9,8 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     return <>{children}</>
 }
 
-export function RequireRole({ role, children }: { role: 'user' | 'admin'; children: ReactNode }) {
-    const current = useAuthStore((s) => s.role)
-    if (current !== role) return <Navigate to="/login" replace />
+export function RequireRole({ roleName, children }: { roleName: 'user' | 'admin' | '客户' | '平台管理员' | '客服坐席' | '装维工程师'; children: ReactNode }) {
+    const current = useAuthStore((s) => s.roleName)
+    if (current !== roleName) return <Navigate to="/login" replace />
     return <>{children}</>
 }
