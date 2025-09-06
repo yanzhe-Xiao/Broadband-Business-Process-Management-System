@@ -33,6 +33,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -254,6 +255,14 @@ public class GlobalExceptionHandler {
 
     // ============================ 业务/编程错误 & 兜底 ============================
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseResult<Void> handleNoResource(NoResourceFoundException e) {
+        // 这里的 e.getResourcePath() 可拿到请求的静态资源路径（如 932ce97f....jpg）
+        log.warn("[404] Static resource not found: {}", e.getResourcePath());
+        return ResponseResult.fail(HttpStatus.NOT_FOUND.value(),
+                "静态资源不存在：" + e.getResourcePath());
+    }
     /** 非法参数 / 非法状态 */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})

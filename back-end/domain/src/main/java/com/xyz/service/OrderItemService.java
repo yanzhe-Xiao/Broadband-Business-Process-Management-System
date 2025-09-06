@@ -1,18 +1,13 @@
 package com.xyz.service;
 
-import com.xyz.dto.OrderItemDTO;
 import com.xyz.orders.OrderItem;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
 * @author X
 * @description 针对表【ORDER_ITEM(订单明细表，存储订单中的具体套餐信息)】的数据库操作Service
-* @createDate 2025-09-04 14:45:17
+* @createDate 2025-09-06 16:24:44
 */
 public interface OrderItemService extends IService<OrderItem> {
-
-    public int addOrderItem(List<OrderItemDTO.OrderItemAvailable> orderItemAvailable);
 
 }

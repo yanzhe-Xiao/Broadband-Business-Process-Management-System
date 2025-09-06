@@ -101,6 +101,16 @@ public class TariffPlan {
      */
     private Integer qty;
 
+    /**
+     * 图片的url
+     */
+    private String imageUrl;
+
+    /**
+     * 评分 满分5分
+     */
+    private BigDecimal rating;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -129,7 +139,9 @@ public class TariffPlan {
             && (this.getBandwith() == null ? other.getBandwith() == null : this.getBandwith().equals(other.getBandwith()))
             && (this.getDescription() == null ? other.getDescription() == null : this.getDescription().equals(other.getDescription()))
             && (this.getDeviceQty() == null ? other.getDeviceQty() == null : this.getDeviceQty().equals(other.getDeviceQty()))
-            && (this.getQty() == null ? other.getQty() == null : this.getQty().equals(other.getQty()));
+            && (this.getQty() == null ? other.getQty() == null : this.getQty().equals(other.getQty()))
+            && (this.getImageUrl() == null ? other.getImageUrl() == null : this.getImageUrl().equals(other.getImageUrl()))
+            && (this.getRating() == null ? other.getRating() == null : this.getRating().equals(other.getRating()));
     }
 
     @Override
@@ -153,6 +165,8 @@ public class TariffPlan {
         result = prime * result + ((getDescription() == null) ? 0 : getDescription().hashCode());
         result = prime * result + ((getDeviceQty() == null) ? 0 : getDeviceQty().hashCode());
         result = prime * result + ((getQty() == null) ? 0 : getQty().hashCode());
+        result = prime * result + ((getImageUrl() == null) ? 0 : getImageUrl().hashCode());
+        result = prime * result + ((getRating() == null) ? 0 : getRating().hashCode());
         return result;
     }
 
@@ -179,6 +193,8 @@ public class TariffPlan {
         sb.append(", description=").append(description);
         sb.append(", deviceQty=").append(deviceQty);
         sb.append(", qty=").append(qty);
+        sb.append(", imageUrl=").append(imageUrl);
+        sb.append(", rating=").append(rating);
         sb.append("]");
         return sb.toString();
     }

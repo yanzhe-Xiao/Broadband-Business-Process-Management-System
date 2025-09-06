@@ -1,5 +1,6 @@
 package com.xyz.control;
 
+import com.xyz.advice.SuccessAdvice;
 import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.TariffPlanDTO;
@@ -26,13 +27,13 @@ public class TariffPlanController {
     TariffPlanService tariffPlanService;
 
     @PostMapping("/customer/menu")
-    public PageResult<TariffPlanVO.TariffPlanDetail> getTariffPlanService(int current, int size){
-        return PageResult.of(tariffPlanService.getTariffPlanDetail(current, size));
+    public PageResult<TariffPlanVO.TariffPlanDetail> getTariffPlanService(@RequestBody TariffPlanDTO.TariffPlanSearchCriteria searchCriteria){
+        return PageResult.of(tariffPlanService.getTariffPlanDetail(searchCriteria));
     }
 
     @PostMapping("/tariffplan/add")
     public ResponseResult addTariffPlans(@RequestBody List<TariffPlanDTO.TariffPlanAvaliable>  plans){
         Integer i = tariffPlanService.addTariffPlanService(plans);
-        return ResponseResult.success("成功插入"+i+"行数据");
+        return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
     }
 }

@@ -31,6 +31,8 @@ public class TariffPlanVO {
             Integer isIp, // 是否需要IP
             Integer bandwidth, // 带宽，单位MB
             Integer qty,
+            BigDecimal rating,
+            String imageUrl,
             // 设备资源信息
             String requireDeviceSn,
             String requiredDeviceModel, // 所需设备型号

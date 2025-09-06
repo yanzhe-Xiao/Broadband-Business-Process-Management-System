@@ -1,9 +1,7 @@
 package com.xyz.orders;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
@@ -61,6 +59,21 @@ public class OrderItem {
      */
     private Date updatedAt;
 
+    /**
+     * 只有三个状态 在购物车中 待支付 已支付
+     */
+    private String status;
+
+    /**
+     * 
+     */
+    private String username;
+
+    /**
+     * 只能是month year forever三种类型
+     */
+    private String planType;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -81,7 +94,10 @@ public class OrderItem {
             && (this.getQty() == null ? other.getQty() == null : this.getQty().equals(other.getQty()))
             && (this.getPrice() == null ? other.getPrice() == null : this.getPrice().equals(other.getPrice()))
             && (this.getCreatedAt() == null ? other.getCreatedAt() == null : this.getCreatedAt().equals(other.getCreatedAt()))
-            && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()));
+            && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()))
+            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+            && (this.getUsername() == null ? other.getUsername() == null : this.getUsername().equals(other.getUsername()))
+            && (this.getPlanType() == null ? other.getPlanType() == null : this.getPlanType().equals(other.getPlanType()));
     }
 
     @Override
@@ -97,6 +113,9 @@ public class OrderItem {
         result = prime * result + ((getPrice() == null) ? 0 : getPrice().hashCode());
         result = prime * result + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
         result = prime * result + ((getUpdatedAt() == null) ? 0 : getUpdatedAt().hashCode());
+        result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
+        result = prime * result + ((getUsername() == null) ? 0 : getUsername().hashCode());
+        result = prime * result + ((getPlanType() == null) ? 0 : getPlanType().hashCode());
         return result;
     }
 
@@ -115,6 +134,9 @@ public class OrderItem {
         sb.append(", price=").append(price);
         sb.append(", createdAt=").append(createdAt);
         sb.append(", updatedAt=").append(updatedAt);
+        sb.append(", status=").append(status);
+        sb.append(", username=").append(username);
+        sb.append(", planType=").append(planType);
         sb.append("]");
         return sb.toString();
     }

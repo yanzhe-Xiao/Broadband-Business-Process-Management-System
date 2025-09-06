@@ -22,12 +22,21 @@
             <result property="description" column="DESCRIPTION" />
             <result property="deviceQty" column="DEVICE_QTY" />
             <result property="qty" column="QTY" />
+            <result property="imageUrl" column="IMAGE_URL" />
+            <result property="rating" column="RATING" />
     </resultMap>
 
     <sql id="Base_Column_List">
         PLAN_CODE,NAME,MONTHLY_FEE,YEARLY_FEE,FOREVER_FEE,PLAN_PERIOD,
         DISCOUNT,STATUS,CREATED_AT,UPDATED_AT,IS_IP,
         IP_ID,DEVICE_SN,BANDWITH,DESCRIPTION,DEVICE_QTY,
-        QTY
+        QTY,IMAGE_URL,RATING
     </sql>
+    <select id="selectOneByPlanCode" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from TARIFF_PLAN
+        where
+        PLAN_CODE = #{planCode,jdbcType=VARCHAR}
+    </select>
 </mapper>

@@ -1,6 +1,7 @@
 package com.xyz.control;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.xyz.advice.SuccessAdvice;
 import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.IpPoolDTO;
@@ -53,6 +54,6 @@ public class IpPoolController {
     @PostMapping("/add")
     public ResponseResult addIp(@RequestBody @Valid List< IpPoolDTO.@Valid AddIpPool> ips){
         Integer i = ipPoolService.addIps(ips);
-        return ResponseResult.success("成功插入"+i+"行数据");
+        return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
     }
 }

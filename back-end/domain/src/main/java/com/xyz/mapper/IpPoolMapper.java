@@ -73,6 +73,7 @@ public interface IpPoolMapper extends BaseMapper<IpPool> {
      */
     Integer selectMaxAvaliableBandwidth();
 
+
 }
 
 

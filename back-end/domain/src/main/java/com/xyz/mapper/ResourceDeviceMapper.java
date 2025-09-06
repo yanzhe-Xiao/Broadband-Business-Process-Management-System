@@ -38,6 +38,8 @@ public interface ResourceDeviceMapper extends BaseMapper<ResourceDevice> {
      */
     List<ResourceDevice> selectByModel(IPage<?> page, @Param("model") String model);
 
+
+
     /**
      * 查询价格小于或等于指定值的网络设备。
      *

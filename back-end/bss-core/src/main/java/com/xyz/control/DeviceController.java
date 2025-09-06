@@ -1,6 +1,7 @@
 package com.xyz.control;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.xyz.advice.SuccessAdvice;
 import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.DeviceDTO;
@@ -37,6 +38,6 @@ public class DeviceController {
     @PostMapping("add")
     public ResponseResult addDevice(@RequestBody @Valid List<DeviceDTO.@Valid DeviceAvaliableDTO> devices){
         Integer nums = resourceDeviceService.addDevices(devices);
-        return ResponseResult.success("成功插入"+nums+"行数据");
+        return ResponseResult.success(SuccessAdvice.insertSuccessMessage(nums));
     }
 }
