@@ -8,8 +8,6 @@
             <id property="id" column="ID" />
             <result property="orderId" column="ORDER_ID" />
             <result property="planCode" column="PLAN_CODE" />
-            <result property="startBillingAt" column="START_BILLING_AT" />
-            <result property="endBilling" column="END_BILLING" />
             <result property="qty" column="QTY" />
             <result property="price" column="PRICE" />
             <result property="createdAt" column="CREATED_AT" />
@@ -17,48 +15,11 @@
             <result property="status" column="STATUS" />
             <result property="username" column="USERNAME" />
             <result property="planType" column="PLAN_TYPE" />
+            <result property="period" column="PERIOD" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        ID,ORDER_ID,PLAN_CODE,START_BILLING_AT,END_BILLING,QTY,
-        PRICE,CREATED_AT,UPDATED_AT,STATUS,USERNAME,
-        PLAN_TYPE
+        ID,ORDER_ID,PLAN_CODE,QTY,PRICE,CREATED_AT,
+        UPDATED_AT,STATUS,USERNAME,PLAN_TYPE,PERIOD
     </sql>
-    <select id="selectAllByUsername" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from ORDER_ITEM
-        where
-        USERNAME = #{username,jdbcType=VARCHAR}
-    </select>
-    <select id="selectAllByStatus" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from ORDER_ITEM
-        where
-        STATUS = #{status,jdbcType=VARCHAR}
-    </select>
-    <select id="selectAllByPlanCode" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from ORDER_ITEM
-        where
-        PLAN_CODE = #{planCode,jdbcType=VARCHAR}
-    </select>
-    <update id="updateStatusByUsernameAndOrderId">
-        update ORDER_ITEM
-        set STATUS = #{status,jdbcType=VARCHAR}
-        where USERNAME = #{username,jdbcType=VARCHAR}
-          AND ORDER_ID = #{orderId,jdbcType=NUMERIC}
-    </update>
-    <select id="selectOneByPlanCodeAndPlanTypeAndUsernameAndStatus" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from ORDER_ITEM
-        where
-        PLAN_CODE = #{planCode,jdbcType=VARCHAR}
-        AND PLAN_TYPE = #{planType,jdbcType=VARCHAR}
-        AND USERNAME = #{username,jdbcType=VARCHAR}
-        AND STATUS = #{status,jdbcType=VARCHAR}
-    </select>
 </mapper>

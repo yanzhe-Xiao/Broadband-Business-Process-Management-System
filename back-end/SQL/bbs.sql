@@ -910,4 +910,31 @@ BEGIN
 END;
 /
 
+/**
+自动将超时30分钟的订单修改为在购物车中
+ */
+BEGIN
+    DBMS_SCHEDULER.CREATE_JOB (
+            job_name        => 'JOB_ORDER_ITEM_PENDING_TO_CART',
+            job_type        => 'PLSQL_BLOCK',
+            job_action      => q'[
+      BEGIN
+        UPDATE ORDER_ITEM
+           SET STATUS = '在购物车中',
+               UPDATED_AT = SYSTIMESTAMP,
+               STATUS_EXPIRE_AT = NULL
+         WHERE STATUS = '待支付'
+           AND STATUS_EXPIRE_AT IS NOT NULL
+           AND STATUS_EXPIRE_AT <= SYSTIMESTAMP;
+        COMMIT;
+      END;
+    ]',
+            start_date      => SYSTIMESTAMP,
+            repeat_interval => 'FREQ=MINUTELY;INTERVAL=1',  -- 每分钟跑一次
+            enabled         => TRUE,
+            comments        => '自动把超时未支付的订单项从“待支付”改回“在购物车中”'
+    );
+END;
+/
+
 

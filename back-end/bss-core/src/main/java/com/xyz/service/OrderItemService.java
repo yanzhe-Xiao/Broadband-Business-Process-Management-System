@@ -13,6 +13,10 @@ import java.util.List;
 */
 public interface OrderItemService extends IService<OrderItem> {
 
-    public int addOrderItem(List<OrderItemDTO.OrderItemAvailable> orderItemAvailable);
+    public int addOrderItem(List<OrderItemDTO.OrderItemAvaliable> orderItemAvailable);
+
+    public int updateTypeAndQty(OrderItemDTO.OrderItemUpdate update);
+
+    public int deleteOrderItem(List<Long> ids);
 
 }

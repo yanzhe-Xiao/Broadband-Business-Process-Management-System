@@ -6,10 +6,7 @@ import com.xyz.dto.OrderItemDTO;
 import com.xyz.service.OrderItemService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,8 +26,22 @@ public class OrderItemController {
     OrderItemService orderItemService;
 
     @PostMapping("/add")
-    public ResponseResult addOrderItem(@RequestBody @Valid List<OrderItemDTO.@Valid OrderItemAvailable> orderItemAvailable){
+    public ResponseResult addOrderItem(@RequestBody @Valid List<OrderItemDTO.@Valid OrderItemAvaliable> orderItemAvailable){
         int i = orderItemService.addOrderItem(orderItemAvailable);
         return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
     }
+
+    @PostMapping("/update")
+    public ResponseResult updateOrderItem(@RequestBody OrderItemDTO.OrderItemUpdate update){
+        int i = orderItemService.updateTypeAndQty(update);
+        return ResponseResult.success(SuccessAdvice.updateSuccessMessage(i));
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseResult deleteOrderItem(@RequestBody List<Long> ids){
+        int i = orderItemService.deleteOrderItem(ids);
+        return ResponseResult.success(SuccessAdvice.deleteSuccessMessage(i));
+    }
+
+    //todo 查找
 }

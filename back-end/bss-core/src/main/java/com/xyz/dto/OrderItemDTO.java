@@ -4,6 +4,8 @@ import com.xyz.constraints.OrderConstarint;
 import com.xyz.mapper.TariffPlanMapper;
 import com.xyz.orders.OrderItem;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +25,16 @@ import java.util.Date;
  */
 public class OrderItemDTO {
 
-    @Schema(name = "OrderItemAvailable", description = "订单明细可用传输对象")
-    public record OrderItemAvailable(
+    @Schema(name = "OrderItemAvaliable", description = "订单明细 DTO")
+    public record OrderItemAvaliable(
 
-//            @Schema(description = "订单ID，外键关联orders表", example = "1001")
-//            Long orderId,
-
-            @Schema(description = "套餐编码，外键关联tariff_plan表", example = "PLAN2025A")
+            @Schema(description = "套餐编码", example = "123")
+            @NotBlank(message = "套餐编码不能为空")
             String planCode,
 
-            @Schema(description = "生效的开始时间", example = "2025-09-06T12:00:00Z")
-            Date startBillingAt,
-
-            @Schema(description = "数量", example = "2")
+            @Schema(description = "数量", example = "1")
+            @NotNull(message = "数量不能为空")
             Integer qty,
-
-//            @Schema(description = "价格", example = "99.99")
-//            BigDecimal price,
 
             @Schema(description = "订单状态", example = "在购物车中 / 待支付 / 已支付")
             @Pattern(
@@ -48,49 +43,63 @@ public class OrderItemDTO {
             )
             String status,
 
-            @Schema(description = "用户名", example = "xiaoyanzhe")
+            @Schema(description = "用户名", example = "admin")
+            @NotBlank(message = "用户名不能为空")
             String username,
 
-            @Schema(description = "套餐类型，只能是 month / year / forever", example = "month")
+            @Schema(description = "套餐类型", example = "month / year / forever")
             @Pattern(
                     regexp = "^(month|year|forever)$",
                     message = "套餐类型只能是 month / year / forever"
             )
             String planType
     ) {
-        public static OrderItem toEntity(OrderItemAvailable dto,BigDecimal price) {
+        /**
+         * 转换成 OrderItem 实体
+         */
+        public OrderItem toEntity(BigDecimal price) {
             OrderItem entity = new OrderItem();
-//  entity.setOrderId(dto.orderId());
-            entity.setPlanCode(dto.planCode());
-            entity.setStartBillingAt(dto.startBillingAt());
-            entity.setQty(dto.qty());
-            entity.setPrice(price);
-            entity.setStatus(dto.status());
-            entity.setUsername(dto.username());
-            entity.setPlanType(dto.planType());
+//            entity.setOrderId(orderId);
+            entity.setPlanCode(this.planCode);
+            entity.setQty(this.qty);
+            entity.setStatus(this.status);
+            entity.setUsername(this.username);
+            entity.setPlanType(this.planType);
 
-            //  endBilling
-            entity.setEndBilling(calculateEndBilling(dto.startBillingAt(), dto.planType(), dto.qty()));
+            // period 计算
+            long period;
+            switch (this.planType) {
+                case "month" -> period = 30L * this.qty;
+                case "year" -> period = 365L * this.qty;
+                case "forever" -> period = Long.MAX_VALUE;
+                default -> throw new IllegalArgumentException("非法套餐类型: " + this.planType);
+            }
+            entity.setPeriod(period);
+            // 价格先空
+            entity.setPrice(price);
 
             return entity;
         }
-
     }
-    public static Date calculateEndBilling(Date startBillingAt, String planType, Integer qty) {
-        if (startBillingAt != null && planType != null && qty != null) {
-            if ("forever".equals(planType)) {
-                return OrderConstarint.FOREVER_DATE;
-            }
 
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(startBillingAt);
-            switch (planType) {
-                case "month" -> cal.add(Calendar.MONTH, qty);
-                case "year" -> cal.add(Calendar.YEAR, qty);
-                default -> throw new IllegalArgumentException("未知的套餐类型: " + planType);
-            }
-            return cal.getTime();
-        }
-        return null;
-    }
+
+    @Schema(name = "OrderItemUpdate", description = "订单项更新 DTO")
+    public record OrderItemUpdate(
+            @Schema(description = "订单项ID", example = "1")
+            @NotNull(message = "订单项ID不能为空")
+            Long id,
+
+            @Schema(description = "数量", example = "1")
+            @NotNull(message = "数量不能为空")
+            Integer qty,
+
+            @Schema(description = "套餐类型", example = "month")
+            @Pattern(
+                    regexp = "^(month|year|forever)$",
+                    message = "套餐类型只能是 month / year / forever"
+            )
+            String planType
+    ) { }
+
+
 }

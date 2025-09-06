@@ -13,4 +13,12 @@ public class SuccessAdvice {
     public static String insertSuccessMessage(int nums){
         return "已成功记录" + nums + "条信息";
     }
+
+    public static String updateSuccessMessage(int nums){
+        return "已成功修改" + nums + "条信息";
+    }
+
+    public static String deleteSuccessMessage(int nums){
+        return "已成功删除" + nums + "条信息";
+    }
 }

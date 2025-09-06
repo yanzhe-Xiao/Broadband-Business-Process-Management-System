@@ -16,6 +16,8 @@ import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem>
@@ -28,346 +30,323 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
     @Override
     @Transactional
-    public int addOrderItem(List<OrderItemDTO.OrderItemAvailable> dtos) {
+    public int addOrderItem(List<OrderItemDTO.OrderItemAvaliable> dtos) {
         if (dtos == null || dtos.isEmpty()) return 0;
 
-        final Date now = new Date();
-
-        // 1) 收集 planCode 批量查套餐，避免 N+1
-        Set<String> planCodes = new LinkedHashSet<>();
-        for (var dto : dtos) {
-            if (dto != null && dto.planCode() != null) planCodes.add(dto.planCode());
-        }
+        // 1) 收集 planCode，批量查套餐，避免 N+1
+        Set<String> planCodes = dtos.stream()
+                .map(OrderItemDTO.OrderItemAvaliable::planCode)
+                .collect(Collectors.toSet());
         if (planCodes.isEmpty()) return 0;
 
         List<TariffPlan> plans = tariffPlanMapper.selectList(
                 Wrappers.<TariffPlan>lambdaQuery().in(TariffPlan::getPlanCode, planCodes)
         );
-        Map<String, TariffPlan> planMap = new HashMap<>();
-        for (TariffPlan p : plans) planMap.put(p.getPlanCode(), p);
+        Map<String, TariffPlan> planMap = plans.stream()
+                .collect(Collectors.toMap(TariffPlan::getPlanCode, p -> p));
 
-        List<OrderItem> toInsert = new ArrayList<>();
-        List<OrderItem> toUpdate = new ArrayList<>();
-        List<Long> toDeleteIds = new ArrayList<>();
+        // 2) 先做“forever”存在性校验：只要 DB 已有 username+planCode + forever，则禁止新增
+        //    需要知道所有涉及到的 username+planCode 组合
+        record Key(String username, String planCode) {}
+        Set<Key> keys = dtos.stream()
+                .map(d -> new Key(d.username(), d.planCode()))
+                .collect(Collectors.toSet());
 
-        for (var dto : dtos) {
-            assertNoPaidOrPendingForeverTwoKey(dto.username(), dto.planCode());
-
-            if (dto == null) continue;
-
-            TariffPlan plan = planMap.get(dto.planCode());
-            if (plan == null) throw new IllegalArgumentException("套餐不存在: planCode=" + dto.planCode());
-
-            // 归一化请求参数
-            int reqQty = (dto.qty() == null || dto.qty() <= 0) ? 1 : dto.qty();
-            String reqType = dto.planType();
-            if (reqType == null) throw new IllegalArgumentException("planType 不能为空（month/year/forever）");
-
-            // 开始时间：空则默认 now；且不允许早于现在（你之前的规则）
-            Date reqStart = dto.startBillingAt() != null ? dto.startBillingAt() : now;
-            if (reqStart.before(now)) {
-                throw new IllegalArgumentException("开始时间不能早于当前时间");
-            }
-            Date reqEnd = OrderItemDTO.calculateEndBilling(reqStart, reqType, reqQty);
-
-            // ===== 先用四键精确查（planCode, planType, username, status）=====
-            OrderItem exact = orderItemMapper.selectOneByPlanCodeAndPlanTypeAndUsernameAndStatus(
-                    dto.planCode(), reqType, dto.username(), dto.status()
-            );
-
-            if (exact != null) {
-                // 四键命中：同类型合并
-                // 禁止“新开始时间晚于已有开始时间”
-                if (dto.startBillingAt() != null && exact.getStartBillingAt() != null
-                        && dto.startBillingAt().after(exact.getStartBillingAt())) {
-                    throw new IllegalStateException("开始计费时间不得晚于已存在记录的开始时间");
-                }
-
-                int newQty = (exact.getQty() == null ? 0 : exact.getQty()) + reqQty;
-
-                // 库存校验
-                if (plan.getQty() != null && newQty > plan.getQty()) {
-                    throw new IllegalStateException("库存不足，套餐剩余数量: " + plan.getQty() + ", 需要数量: " + newQty);
-                }
-
-                Date newStart = exact.getStartBillingAt() != null ? exact.getStartBillingAt() : now;
-                Date newEnd = OrderItemDTO.calculateEndBilling(newStart, exact.getPlanType(), newQty);
-
-                // 同三键（但排除自身）不得重叠
-                List<OrderItem> sameTrios = orderItemMapper.selectList(
-                        Wrappers.<OrderItem>lambdaQuery()
-                                .eq(OrderItem::getPlanCode, dto.planCode())
-                                .eq(OrderItem::getUsername, dto.username())
-                                .eq(OrderItem::getStatus, dto.status())
-                );
-                for (OrderItem oi : sameTrios) {
-                    if (oi.getId().equals(exact.getId())) continue;
-                    if (isOverlap(newStart, newEnd, oi.getStartBillingAt(), oi.getEndBilling())) {
-                        throw new IllegalStateException("时间段重叠，无法合并，请检查同组订单的生效区间");
-                    }
-                }
-
-                exact.setQty(newQty);
-                exact.setStartBillingAt(newStart);
-                exact.setEndBilling(newEnd);
-                exact.setPrice(calcDiscountedTotalPrice(plan, exact.getPlanType(), newQty));
-                exact.setUpdatedAt(now);
-                toUpdate.add(exact);
-                continue;
-            }
-
-            // ===== 四键没命中 -> 查三键（planCode, username, status）=====
-            List<OrderItem> sameTrios = orderItemMapper.selectList(
-                    Wrappers.<OrderItem>lambdaQuery()
-                            .eq(OrderItem::getPlanCode, dto.planCode())
-                            .eq(OrderItem::getUsername, dto.username())
-                            .eq(OrderItem::getStatus, dto.status())
-            );
-
-            if (!sameTrios.isEmpty()) {
-                boolean existsForever = sameTrios.stream().anyMatch(oi -> "forever".equals(oi.getPlanType()));
-
-                if ("forever".equals(reqType)) {
-                    // 三键命中 + 传入 forever
-                    if (existsForever) {
-                        throw new IllegalStateException("已存在 forever 类型的同组合订单，不能重复申请 forever");
-                    }
-                    // 升级一条为 forever（选最新创建），删除其他
-                    OrderItem target = sameTrios.stream()
-                            .max(Comparator.comparing(OrderItem::getCreatedAt, Comparator.nullsFirst(Date::compareTo)))
-                            .orElse(sameTrios.get(0));
-
-                    // 库存校验（用本次数量）
-                    if (plan.getQty() != null && reqQty > plan.getQty()) {
-                        throw new IllegalStateException("库存不足，套餐剩余数量: " + plan.getQty() + ", 需要数量: " + reqQty);
-                    }
-
-                    target.setPlanType("forever");
-                    target.setStartBillingAt(now);
-                    target.setEndBilling(OrderConstarint.FOREVER_DATE);
-                    target.setQty(reqQty);
-                    target.setPrice(calcDiscountedTotalPrice(plan, "forever", reqQty));
-                    target.setUpdatedAt(now);
-                    toUpdate.add(target);
-
-                    for (OrderItem oi : sameTrios) {
-                        if (!oi.getId().equals(target.getId())) {
-                            toDeleteIds.add(oi.getId());
-                        }
-                    }
-                    continue;
-                }
-
-                // 三键命中 + 传入 month/year
-                if (existsForever) {
-                    // 降级 forever -> month/year（修改这条 forever）
-                    OrderItem foreverItem = sameTrios.stream()
-                            .filter(oi -> "forever".equals(oi.getPlanType()))
-                            .findFirst().orElseThrow();
-
-                    // 库存校验（用本次数量）
-                    if (plan.getQty() != null && reqQty > plan.getQty()) {
-                        throw new IllegalStateException("库存不足，套餐剩余数量: " + plan.getQty() + ", 需要数量: " + reqQty);
-                    }
-
-                    Date newStart = reqStart; // 允许为 now（已归一化）
-                    Date newEnd = reqEnd;
-
-                    // 与其它三键记录（排除 forever 这条）不得重叠
-                    for (OrderItem oi : sameTrios) {
-                        if (oi.getId().equals(foreverItem.getId())) continue;
-                        if (isOverlap(newStart, newEnd, oi.getStartBillingAt(), oi.getEndBilling())) {
-                            throw new IllegalStateException("时间段重叠，无法从 forever 降级为 " + reqType);
-                        }
-                    }
-
-                    foreverItem.setPlanType(reqType);
-                    foreverItem.setStartBillingAt(newStart);
-                    foreverItem.setEndBilling(newEnd);
-                    foreverItem.setQty(reqQty);
-                    foreverItem.setPrice(calcDiscountedTotalPrice(plan, reqType, reqQty));
-                    foreverItem.setUpdatedAt(now);
-                    toUpdate.add(foreverItem);
-                    continue;
-                } else {
-                    // 三键存在但无 forever：新增 month/year，且要“尽可能早但不早于最早 start 且不重叠”
-                    Date earliestStart = sameTrios.stream()
-                            .map(OrderItem::getStartBillingAt)
-                            .filter(Objects::nonNull)
-                            .min(Date::compareTo)
-                            .orElse(now); // 兜底 now
-
-                    Date chosenStart = dto.startBillingAt();
-                    if (chosenStart == null) {
-                        chosenStart = findEarliestStartSlot(sameTrios, earliestStart, reqType, reqQty);
-                        if (chosenStart == null) {
-                            throw new IllegalStateException("没有可用的非重叠时间段用于插入新订单区间");
-                        }
-                    }
-                    Date chosenEnd = OrderItemDTO.calculateEndBilling(chosenStart, reqType, reqQty);
-
-                    // 最终保险：与三键现有记录再做一次不重叠校验
-                    for (OrderItem oi : sameTrios) {
-                        if (isOverlap(chosenStart, chosenEnd, oi.getStartBillingAt(), oi.getEndBilling())) {
-                            throw new IllegalStateException("时间段重叠（并发冲突），请重试");
-                        }
-                    }
-
-                    // 库存校验
-                    if (plan.getQty() != null && reqQty > plan.getQty()) {
-                        throw new IllegalStateException("库存不足，套餐剩余数量: " + plan.getQty() + ", 需要数量: " + reqQty);
-                    }
-
-                    BigDecimal price = calcDiscountedTotalPrice(plan, reqType, reqQty);
-                    OrderItem entity = OrderItemDTO.OrderItemAvailable.toEntity(
-                            new OrderItemDTO.OrderItemAvailable(
-                                    dto.planCode(), chosenStart, reqQty, dto.status(), dto.username(), reqType
-                            ),
-                            price
-                    );
-                    toInsert.add(entity);
-                    continue;
-                }
-            }
-
-            // ===== 三键没命中 -> 查二键（username, planCode）=====
-            // 仅对状态为「待支付/已支付」的历史施加边界：新开始必须晚于它们
-            Date chosenStart = reqStart;
-            chosenStart = enforceTwoKeyBoundaryOrThrow(dto.username(), dto.planCode(), chosenStart);
-
-            // 二键没有对三键的“不重叠”要求（因为三键已为空），可直接插入
-            // 库存校验
-            if (plan.getQty() != null && reqQty > plan.getQty()) {
-                throw new IllegalStateException("库存不足，套餐剩余数量: " + plan.getQty() + ", 需要数量: " + reqQty);
-            }
-
-            BigDecimal price = calcDiscountedTotalPrice(plan, reqType, reqQty);
-            OrderItem entity = OrderItemDTO.OrderItemAvailable.toEntity(
-                    new OrderItemDTO.OrderItemAvailable(
-                            dto.planCode(), chosenStart, reqQty, dto.status(), dto.username(), reqType
-                    ),
-                    price
-            );
-            toInsert.add(entity);
-        }
-
-        boolean ok = true;
-        if (!toInsert.isEmpty()) ok &= this.saveBatch(toInsert);
-        if (!toUpdate.isEmpty()) ok &= this.updateBatchById(toUpdate);
-        if (!toDeleteIds.isEmpty()) ok &= orderItemMapper.deleteBatchIds(toDeleteIds) == toDeleteIds.size();
-
-        return ok ? (toInsert.size() + toUpdate.size()) : 0;
-    }
-
-    /** 二键规则：同 (username, planCode) 下若有 已支付/待支付 订单，新的开始时间必须晚于它们的最大结束边界
-     *  - end=null 视为 +∞，存在则直接不允许再插 */
-    private Date enforceTwoKeyBoundaryOrThrow(String username, String planCode, Date requestedStartOrNow) {
-        List<OrderItem> paidOrPending = orderItemMapper.selectList(
+        // 查询库里是否存在任一 key 的 forever
+        List<OrderItem> existedForever = orderItemMapper.selectList(
                 Wrappers.<OrderItem>lambdaQuery()
-                        .eq(OrderItem::getUsername, username)
-                        .eq(OrderItem::getPlanCode, planCode)
-                        .in(OrderItem::getStatus, Arrays.asList("待支付", "已支付"))
-        );
-        if (paidOrPending == null || paidOrPending.isEmpty()) return requestedStartOrNow;
-
-        long maxBoundary = paidOrPending.stream()
-                .map(oi -> oi.getEndBilling() == null ? Long.MAX_VALUE : oi.getEndBilling().getTime())
-                .max(Long::compare).orElse(Long.MIN_VALUE);
-
-        if (maxBoundary == Long.MAX_VALUE) {
-            throw new IllegalStateException("该用户此套餐已存在未结束的订单，无法新增");
-        }
-
-        Date boundary = new Date(maxBoundary);
-        return requestedStartOrNow.before(boundary) ? boundary : requestedStartOrNow;
-    }
-
-    /** 判断时间段是否重叠，区间采用 [start, end)；end=null 代表 +∞ */
-    private static boolean isOverlap(Date aStart, Date aEnd, Date bStart, Date bEnd) {
-        long aS = aStart == null ? Long.MIN_VALUE : aStart.getTime();
-        long aE = aEnd   == null ? Long.MAX_VALUE : aEnd.getTime();
-        long bS = bStart == null ? Long.MIN_VALUE : bStart.getTime();
-        long bE = bEnd   == null ? Long.MAX_VALUE : bEnd.getTime();
-        return aS < bE && bS < aE;
-    }
-
-    /** 按折扣计算总价：fee(planType) * (discount/100) * qty，含空值校验 */
-    private static BigDecimal calcDiscountedTotalPrice(TariffPlan plan, String planType, int qty) {
-        if (planType == null) throw new IllegalArgumentException("planType 不能为空（month/year/forever）");
-        if (qty <= 0) qty = 1;
-
-        BigDecimal discount = plan.getDiscount() == null ? BigDecimal.valueOf(100) : plan.getDiscount();
-        BigDecimal factor = discount.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
-
-        return switch (planType) {
-            case "month" -> {
-                BigDecimal fee = plan.getMonthlyFee();
-                if (fee == null) throw new IllegalStateException("套餐月费为空");
-                yield fee.multiply(factor).multiply(BigDecimal.valueOf(qty));
-            }
-            case "year" -> {
-                BigDecimal fee = plan.getYearlyFee();
-                if (fee == null) throw new IllegalStateException("套餐年费为空");
-                yield fee.multiply(factor).multiply(BigDecimal.valueOf(qty));
-            }
-            case "forever" -> {
-                BigDecimal fee = plan.getForeverFee();
-                if (fee == null) throw new IllegalStateException("套餐永久费为空");
-                yield fee.multiply(factor).multiply(BigDecimal.valueOf(qty));
-            }
-            default -> throw new IllegalArgumentException("未知的套餐类型: " + planType);
-        };
-    }
-
-    /** 找到最早的不重叠开始时间：不早于 earliestAllowed；若无可用位置返回 null */
-    private static Date findEarliestStartSlot(List<OrderItem> sameTrios,
-                                              Date earliestAllowed,
-                                              String planType,
-                                              int qty) {
-        if (earliestAllowed == null) return null;
-
-        List<OrderItem> intervals = new ArrayList<>(sameTrios);
-        intervals.sort(Comparator.comparing(
-                OrderItem::getStartBillingAt,
-                Comparator.nullsFirst(Date::compareTo)
-        ));
-
-        Date cursor = earliestAllowed;
-
-        for (OrderItem it : intervals) {
-            Date iStart = it.getStartBillingAt();
-            Date iEnd   = it.getEndBilling();
-
-            long aS = cursor.getTime();
-            long iS = (iStart == null ? Long.MIN_VALUE : iStart.getTime());
-            long iE = (iEnd   == null ? Long.MAX_VALUE : iEnd.getTime());
-
-            Date candEnd = OrderItemDTO.calculateEndBilling(cursor, planType, qty); // forever -> null
-            long cE = (candEnd == null ? Long.MAX_VALUE : candEnd.getTime());
-
-            if (cE <= iS) {
-                return cursor;
-            }
-
-            if (iE == Long.MAX_VALUE) {
-                return null; // 无穷大占满
-            }
-            cursor = new Date(Math.max(aS, iE));
-        }
-        return cursor; // 放在最后一个区间之后
-    }
-    /** 二键硬阻断：同 (username, planCode) 下只要存在【待支付/已支付】且 planType=forever，就禁止再添加任何订单 */
-    private void assertNoPaidOrPendingForeverTwoKey(String username, String planCode) {
-        // 用 count 更高效
-        Long cnt = orderItemMapper.selectCount(
-                Wrappers.<OrderItem>lambdaQuery()
-                        .eq(OrderItem::getUsername, username)
-                        .eq(OrderItem::getPlanCode, planCode)
-                        .in(OrderItem::getStatus, Arrays.asList("待支付", "已支付"))
+                        .in(OrderItem::getUsername, keys.stream().map(Key::username).collect(Collectors.toSet()))
+                        .in(OrderItem::getPlanCode, keys.stream().map(Key::planCode).collect(Collectors.toSet()))
                         .eq(OrderItem::getPlanType, "forever")
         );
-        if (cnt != null && cnt > 0) {
-            throw new IllegalStateException("该用户此套餐已存在【待支付/已支付】的永久套餐，禁止再添加任何订单项");
+
+        if (!existedForever.isEmpty()) {
+            // 冲突 key 集合（用于提示）
+            Set<Key> conflict = existedForever.stream()
+                    .map(e -> new Key(e.getUsername(), e.getPlanCode()))
+                    .collect(Collectors.toSet());
+            // 任一 dto 命中冲突就失败
+            for (OrderItemDTO.OrderItemAvaliable dto : dtos) {
+                if (conflict.contains(new Key(dto.username(), dto.planCode()))) {
+                    throw new IllegalStateException("已存在 forever 套餐，禁止对 username=" +
+                            dto.username() + ", planCode=" + dto.planCode() + " 继续添加。");
+                }
+            }
+        }
+
+        int affected = 0;
+
+        // 3) 按 DTO 逐一处理（计算价格、合并/插入）
+        for (OrderItemDTO.OrderItemAvaliable dto : dtos) {
+            String planCode = dto.planCode();
+            TariffPlan plan = planMap.get(planCode);
+            if (plan == null) {
+                throw new IllegalArgumentException("未找到套餐 planCode=" + planCode);
+            }
+
+            // 计算单价与总价
+            BigDecimal unitPrice = computeUnitPriceByType(plan, dto.planType());
+            BigDecimal totalPrice;
+            if ("forever".equals(dto.planType())) {
+                // forever 价格与数量无关（你前面规则里购物车阶段把 qty 固定为 1）
+                totalPrice = unitPrice;
+            } else {
+                totalPrice = unitPrice.multiply(BigDecimal.valueOf(dto.qty()))
+                        .setScale(2, RoundingMode.HALF_UP);
+            }
+
+            String username = dto.username();
+            String status = dto.status(); // "在购物车中" / "待支付" / "已支付"
+            String incomingType = dto.planType(); // "month" / "year" / "forever"
+
+            // 购物车：允许合并
+            if ("在购物车中".equals(status)) {
+                // 找到同 username+planCode+status 的现有项
+                List<OrderItem> same3 = orderItemMapper.selectList(
+                        Wrappers.<OrderItem>lambdaQuery()
+                                .eq(OrderItem::getUsername, username)
+                                .eq(OrderItem::getPlanCode, planCode)
+                                .eq(OrderItem::getStatus, "在购物车中")
+                );
+
+                if ("forever".equals(incomingType)) {
+                    // 规则：三键相同 + 本次是 forever => 合并为一条 forever
+                    // 处理方式：若已有记录，统一“收敛”为一条 forever；保留第一条，删除其余
+                    if (same3.isEmpty()) {
+                        // 直接插入一条 forever（qty 固定 1，period=MAX，price=unitPrice）
+                        OrderItem one = dto.toEntity(unitPrice.setScale(2, RoundingMode.HALF_UP)); // 价格不乘 qty
+                        one.setQty(1);
+                        one.setPeriod(Long.MAX_VALUE);
+                        one.setPlanType("forever");
+                        // 建议：购物车阶段 orderId 可以为空
+                        one.setOrderId(null);
+                        affected += orderItemMapper.insert(one);
+                    } else {
+                        // 先删多余，再把第一条更新成 forever 的规范
+                        OrderItem keep = same3.get(0);
+                        List<Long> toDel = same3.stream().skip(1).map(OrderItem::getId).toList();
+                        if (!toDel.isEmpty()) {
+                            affected += orderItemMapper.deleteBatchIds(toDel);
+                        }
+                        keep.setPlanType("forever");
+                        keep.setQty(1);
+                        keep.setPeriod(Long.MAX_VALUE);
+                        keep.setPrice(unitPrice.setScale(2, RoundingMode.HALF_UP)); // forever 单价作为总价
+                        keep.setUpdatedAt(new Date());
+                        affected += orderItemMapper.updateById(keep);
+                    }
+                    continue;
+                }
+
+                // month/year 的情况
+                if (same3.isEmpty()) {
+                    // 无同三键，直接插入
+                    OrderItem entity = dto.toEntity(totalPrice);
+                    fillPeriod(entity, incomingType, dto.qty());
+                    entity.setOrderId(null);
+                    affected += orderItemMapper.insert(entity);
+                } else {
+                    // 有同三键
+                    // 先找是否有同类型
+                    List<OrderItem> sameType = same3.stream()
+                            .filter(o -> incomingType.equals(o.getPlanType()))
+                            .collect(Collectors.toList());
+                    if (!sameType.isEmpty()) {
+                        // 合并为一条：qty 累加，price 重算（单价*总 qty），period 重算
+                        int existedQty = sameType.stream().map(OrderItem::getQty).filter(Objects::nonNull)
+                                .mapToInt(Integer::intValue).sum();
+                        int newQty = existedQty + dto.qty();
+
+                        // 收敛为一条
+                        OrderItem keep = sameType.get(0);
+                        List<Long> delIds = sameType.stream()
+                                .skip(1)
+                                .map(OrderItem::getId)
+                                .toList(); // 仅同类型重复项
+                        if (!delIds.isEmpty()) affected += orderItemMapper.deleteBatchIds(delIds);
+
+                        keep.setQty(newQty);
+                        keep.setPrice(unitPrice.multiply(BigDecimal.valueOf(newQty)).setScale(2, RoundingMode.HALF_UP));
+                        fillPeriod(keep, incomingType, newQty);
+                        keep.setUpdatedAt(new Date());
+                        affected += orderItemMapper.updateById(keep);
+                    } else {
+                        // 没有同类型，且不是 forever（已在上面分支处理），插入新条目
+                        OrderItem entity = dto.toEntity(totalPrice);
+                        fillPeriod(entity, incomingType, dto.qty());
+                        entity.setOrderId(null);
+                        affected += orderItemMapper.insert(entity);
+                    }
+                }
+
+            } else {
+                // 非购物车（待支付/已支付）：两键相同也不合并，必须新插入
+                OrderItem entity = dto.toEntity(totalPrice);
+                fillPeriod(entity, incomingType, dto.qty());
+                // 如果是“待支付/已支付”，通常应当已经有 orderId（下单后生成），
+                // 这里若 DTO 没带，可以按你的业务在外层补齐。
+                affected += orderItemMapper.insert(entity);
+            }
+        }
+
+        return affected;
+    }
+
+    @Override
+    public int updateTypeAndQty(OrderItemDTO.OrderItemUpdate update) {
+        Objects.requireNonNull(update, "update 不能为空");
+
+        // 1) 查当前订单项
+        OrderItem item = orderItemMapper.selectById(update.id());
+        if (item == null) {
+            throw new IllegalArgumentException("订单项不存在 id=" + update.id());
+        }
+
+        // 2) 目标类型、数量
+        String targetType = update.planType();
+        Integer targetQty = update.qty();
+        if (targetType == null || targetQty == null) {
+            throw new IllegalArgumentException("planType 与 qty 均不能为空");
+        }
+        if (targetQty <= 0 && !"forever".equals(targetType)) {
+            throw new IllegalArgumentException("qty 必须为正整数（forever 不使用 qty）");
+        }
+
+        // 3) 一致性校验：确保 username + planCode + forever 的唯一性
+        //    a) 若将当前条改为 month/year，则库中不能存在其它 forever（同 user+planCode）
+        //    b) 若将当前条改为 forever，则库中不能存在其它 forever（同 user+planCode）
+        boolean toForever = "forever".equals(targetType);
+        boolean fromForever = "forever".equals(item.getPlanType());
+
+        List<OrderItem> foreverSiblings = orderItemMapper.selectList(
+                Wrappers.<OrderItem>lambdaQuery()
+                        .eq(OrderItem::getUsername, item.getUsername())
+                        .eq(OrderItem::getPlanCode, item.getPlanCode())
+                        .eq(OrderItem::getPlanType, "forever")
+                        .ne(OrderItem::getId, item.getId())
+        );
+        if (toForever || !toForever) { // 任何目标都需要保证唯一 forever 的约束
+            if (!foreverSiblings.isEmpty() && !toForever) {
+                // 目标为非 forever，但兄弟里已有 forever
+                throw new IllegalStateException("已存在 forever 套餐，禁止将该条改为 " + targetType);
+            }
+            if (!foreverSiblings.isEmpty() && toForever) {
+                // 目标为 forever，但兄弟里已有 forever
+                throw new IllegalStateException("已存在 forever 套餐，禁止重复设置 forever");
+            }
+        }
+
+        // 4) 查套餐，计算价格/周期
+        TariffPlan plan = tariffPlanMapper.selectOne(
+                Wrappers.<TariffPlan>lambdaQuery().eq(TariffPlan::getPlanCode, item.getPlanCode())
+        );
+        if (plan == null) {
+            throw new IllegalStateException("未找到套餐 planCode=" + item.getPlanCode());
+        }
+
+        // 5) 根据目标类型做规格化 & 价格/周期计算
+        BigDecimal unit = computeUnitPriceByType(plan, targetType); // 未乘 qty 的“单价”
+        if ("forever".equals(targetType)) {
+            // forever：qty=1、period=MAX、price=unit
+            item.setPlanType("forever");
+            item.setQty(1);
+            item.setPeriod(Long.MAX_VALUE);
+            item.setPrice(unit.setScale(2, RoundingMode.HALF_UP));
+        } else {
+            // month/year：period=30/365 * qty、price=unit * qty
+            item.setPlanType(targetType);
+            item.setQty(targetQty);
+            long periodDays = "month".equals(targetType) ? 30L * targetQty : 365L * targetQty;
+            item.setPeriod(periodDays);
+            item.setPrice(unit.multiply(BigDecimal.valueOf(targetQty)).setScale(2, RoundingMode.HALF_UP));
+        }
+
+
+        return orderItemMapper.updateById(item);
+    }
+
+    @Override
+    @Transactional
+    public int deleteOrderItem(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+
+        // 批量查询订单项
+        List<OrderItem> items = orderItemMapper.selectBatchIds(ids);
+
+        // 检查是否存在不存在的订单项
+        if (items.size() != ids.size()) {
+            Set<Long> existingIds = items.stream().map(OrderItem::getId).collect(Collectors.toSet());
+            Set<Long> missingIds = ids.stream()
+                    .filter(id -> !existingIds.contains(id))
+                    .collect(Collectors.toSet());
+            if (!missingIds.isEmpty()) {
+                throw new IllegalArgumentException("订单项不存在，id=" + missingIds);
+            }
+        }
+
+        // 检查是否包含已支付|待支付的订单项
+        List<Long> paidIds = items.stream()
+                .filter(item -> "已支付".equals(item.getStatus()) || "待支付".equals(item.getStatus()))
+                .map(OrderItem::getId)
+                .toList();
+
+        if (!paidIds.isEmpty()) {
+            throw new IllegalStateException("已支付/待支付的订单项不可删除，id=" + paidIds);
+        }
+
+        // 批量删除
+        return orderItemMapper.delete(Wrappers.<OrderItem>lambdaQuery().in(OrderItem::getId, ids));    }
+
+
+
+
+
+    /* ======= 辅助方法 ======= */
+
+    /**
+     * 按 planType 计算“单价”（未乘 qty）：
+     * - month    => monthlyFee
+     * - year     => yearlyFee
+     * - forever  => foreverFee
+     * 折扣规则：discount 为“百分数”，100 表示无折扣；最终价 = 基础价 * (discount / 100)
+     * 结果保留两位小数（HALF_UP），最低不小于 0。
+     */
+    private BigDecimal computeUnitPriceByType(TariffPlan plan, String planType) {
+        BigDecimal baseFee;
+        switch (planType) {
+            case "month" -> baseFee = plan.getMonthlyFee();
+            case "year" -> baseFee = plan.getYearlyFee();
+            case "forever" -> baseFee = plan.getForeverFee();
+            default -> throw new IllegalArgumentException("非法套餐类型: " + planType);
+        }
+        if (baseFee == null) {
+            throw new IllegalStateException("套餐基础价格为空，planCode=" + plan.getPlanCode() + ", type=" + planType);
+        }
+
+        // 折扣率：100=不打折；为 null 时按 100 处理
+        BigDecimal discountPercent = plan.getDiscount() == null ? BigDecimal.valueOf(100) : plan.getDiscount();
+
+        // 折扣系数 = discount / 100
+        BigDecimal factor = discountPercent
+                .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+
+        BigDecimal unit = baseFee.multiply(factor);
+        if (unit.signum() < 0) unit = BigDecimal.ZERO;
+
+        return unit.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /** 按类型设置 period（单位：天） */
+    private void fillPeriod(OrderItem item, String planType, int qty) {
+        switch (planType) {
+            case "month" -> item.setPeriod(30L * qty);
+            case "year" -> item.setPeriod(365L * qty);
+            case "forever" -> item.setPeriod(Long.MAX_VALUE);
+            default -> throw new IllegalArgumentException("非法套餐类型: " + planType);
         }
     }
+
+
 }
