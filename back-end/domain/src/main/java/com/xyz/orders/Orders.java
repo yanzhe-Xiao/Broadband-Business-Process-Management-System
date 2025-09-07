@@ -27,14 +27,16 @@ public class Orders {
     private Long userId;
 
     /**
-     * 订单状态：CREATED/RESERVED/ASSIGNED/ON_SITE/DONE/BILLED/CANCELED/TERMINATED
+     * 订单状态：'待支付',
+    '已支付',
+    '待派单',
+    '已分配工单',
+    '工单已完成',
+    '待评价',
+    '已完成',
+    '已取消'
      */
     private String status;
-
-    /**
-     * 装机地址
-     */
-    private String installAddress;
 
     /**
      * 软删除标识：0-未删除，1-已删除
@@ -66,6 +68,31 @@ public class Orders {
      */
     private BigDecimal installationFee;
 
+    /**
+     * 省/自治区/直辖市
+     */
+    private String province;
+
+    /**
+     * 地级市/自治州；直辖市可留空或与省相同
+     */
+    private String city;
+
+    /**
+     * 区/县
+     */
+    private String district;
+
+    /**
+     * 小区/写字楼/门牌号等
+     */
+    private String detailAddress;
+
+    /**
+     * 安装地址（主要用来展示）
+     */
+    private String installAddress;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -81,13 +108,17 @@ public class Orders {
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
             && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
             && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
-            && (this.getInstallAddress() == null ? other.getInstallAddress() == null : this.getInstallAddress().equals(other.getInstallAddress()))
             && (this.getDeleted() == null ? other.getDeleted() == null : this.getDeleted().equals(other.getDeleted()))
             && (this.getDeletedAt() == null ? other.getDeletedAt() == null : this.getDeletedAt().equals(other.getDeletedAt()))
             && (this.getVersion() == null ? other.getVersion() == null : this.getVersion().equals(other.getVersion()))
             && (this.getCreatedAt() == null ? other.getCreatedAt() == null : this.getCreatedAt().equals(other.getCreatedAt()))
             && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()))
-            && (this.getInstallationFee() == null ? other.getInstallationFee() == null : this.getInstallationFee().equals(other.getInstallationFee()));
+            && (this.getInstallationFee() == null ? other.getInstallationFee() == null : this.getInstallationFee().equals(other.getInstallationFee()))
+            && (this.getProvince() == null ? other.getProvince() == null : this.getProvince().equals(other.getProvince()))
+            && (this.getCity() == null ? other.getCity() == null : this.getCity().equals(other.getCity()))
+            && (this.getDistrict() == null ? other.getDistrict() == null : this.getDistrict().equals(other.getDistrict()))
+            && (this.getDetailAddress() == null ? other.getDetailAddress() == null : this.getDetailAddress().equals(other.getDetailAddress()))
+            && (this.getInstallAddress() == null ? other.getInstallAddress() == null : this.getInstallAddress().equals(other.getInstallAddress()));
     }
 
     @Override
@@ -97,13 +128,17 @@ public class Orders {
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
-        result = prime * result + ((getInstallAddress() == null) ? 0 : getInstallAddress().hashCode());
         result = prime * result + ((getDeleted() == null) ? 0 : getDeleted().hashCode());
         result = prime * result + ((getDeletedAt() == null) ? 0 : getDeletedAt().hashCode());
         result = prime * result + ((getVersion() == null) ? 0 : getVersion().hashCode());
         result = prime * result + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
         result = prime * result + ((getUpdatedAt() == null) ? 0 : getUpdatedAt().hashCode());
         result = prime * result + ((getInstallationFee() == null) ? 0 : getInstallationFee().hashCode());
+        result = prime * result + ((getProvince() == null) ? 0 : getProvince().hashCode());
+        result = prime * result + ((getCity() == null) ? 0 : getCity().hashCode());
+        result = prime * result + ((getDistrict() == null) ? 0 : getDistrict().hashCode());
+        result = prime * result + ((getDetailAddress() == null) ? 0 : getDetailAddress().hashCode());
+        result = prime * result + ((getInstallAddress() == null) ? 0 : getInstallAddress().hashCode());
         return result;
     }
 
@@ -116,13 +151,17 @@ public class Orders {
         sb.append(", id=").append(id);
         sb.append(", userId=").append(userId);
         sb.append(", status=").append(status);
-        sb.append(", installAddress=").append(installAddress);
         sb.append(", deleted=").append(deleted);
         sb.append(", deletedAt=").append(deletedAt);
         sb.append(", version=").append(version);
         sb.append(", createdAt=").append(createdAt);
         sb.append(", updatedAt=").append(updatedAt);
         sb.append(", installationFee=").append(installationFee);
+        sb.append(", province=").append(province);
+        sb.append(", city=").append(city);
+        sb.append(", district=").append(district);
+        sb.append(", detailAddress=").append(detailAddress);
+        sb.append(", installAddress=").append(installAddress);
         sb.append("]");
         return sb.toString();
     }

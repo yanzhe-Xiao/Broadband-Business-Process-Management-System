@@ -1,9 +1,12 @@
 package com.xyz.control;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xyz.advice.SuccessAdvice;
+import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.OrderItemDTO;
 import com.xyz.service.OrderItemService;
+import com.xyz.vo.orders.OrderItemVO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -44,4 +47,9 @@ public class OrderItemController {
     }
 
     //todo 查找
+    @GetMapping("/list")
+    public PageResult<OrderItemVO.Shopping> getOrerItemFull(String username,int current,int size){
+        IPage<OrderItemVO.Shopping> orderItemFull = orderItemService.getOrderItemFull(current, size, username);
+        return PageResult.of(orderItemFull);
+    }
 }

@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
 * @author X
 * @description 针对表【ORDERS(订单表，存储宽带新装/变更/销户等主订单)】的数据库操作Mapper
-* @createDate 2025-09-05 15:47:46
+* @createDate 2025-09-07 20:48:08
 * @Entity com.xyz.orders.Orders
 */
 @Mapper

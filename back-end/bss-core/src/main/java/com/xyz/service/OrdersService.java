@@ -1,5 +1,6 @@
 package com.xyz.service;
 
+import com.xyz.dto.OrderDTO;
 import com.xyz.orders.Orders;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -9,5 +10,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-09-04 14:45:21
 */
 public interface OrdersService extends IService<Orders> {
-
+    public int commitOrder(OrderDTO.OrderAvaliableDTO dto);
 }

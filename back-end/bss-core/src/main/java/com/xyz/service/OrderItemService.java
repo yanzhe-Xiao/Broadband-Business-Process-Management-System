@@ -1,8 +1,10 @@
 package com.xyz.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xyz.dto.OrderItemDTO;
 import com.xyz.orders.OrderItem;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xyz.vo.orders.OrderItemVO;
 
 import java.util.List;
 
@@ -18,5 +20,7 @@ public interface OrderItemService extends IService<OrderItem> {
     public int updateTypeAndQty(OrderItemDTO.OrderItemUpdate update);
 
     public int deleteOrderItem(List<Long> ids);
+
+    public IPage<OrderItemVO.Shopping> getOrderItemFull(int current,int size,String username);
 
 }

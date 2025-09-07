@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xyz.advice.ImageUrlSplicing;
 import com.xyz.constraints.OrderConstarint;
 import com.xyz.dto.TariffPlanDTO;
 import com.xyz.mapper.IpPoolMapper;
@@ -42,11 +43,6 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
     ResourceDeviceMapper resourceDeviceMapper;
     @Autowired
     ImageStorageService imageStorageService;
-    @Value("${app.server-ip}")
-    private String serverIp;
-    @Value("${server.port}")
-    private String serverPort;
-
 
 
     @Override
@@ -143,11 +139,7 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
             ResourceDevice device = null;
             String sn = plan.getDeviceSn();
             if (sn != null) device = deviceMap.get(sn);
-            String fullImageUrl = null;
-            if (plan.getImageUrl() != null) {
-                fullImageUrl = serverIp + ":" + serverPort + plan.getImageUrl(); // 拼接基地址
-            }
-
+            String fullImageUrl = ImageUrlSplicing.splicingURL(plan.getImageUrl());
             return TariffPlanVO.TariffPlanDetail.builder()
                     .planCode(plan.getPlanCode())
                     .name(plan.getName())

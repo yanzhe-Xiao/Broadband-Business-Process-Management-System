@@ -9,17 +9,69 @@
             <result property="orderId" column="ORDER_ID" />
             <result property="planCode" column="PLAN_CODE" />
             <result property="qty" column="QTY" />
-            <result property="price" column="PRICE" />
             <result property="createdAt" column="CREATED_AT" />
             <result property="updatedAt" column="UPDATED_AT" />
             <result property="status" column="STATUS" />
             <result property="username" column="USERNAME" />
             <result property="planType" column="PLAN_TYPE" />
             <result property="period" column="PERIOD" />
+            <result property="statusExpireAt" column="STATUS_EXPIRE_AT" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        ID,ORDER_ID,PLAN_CODE,QTY,PRICE,CREATED_AT,
-        UPDATED_AT,STATUS,USERNAME,PLAN_TYPE,PERIOD
+        ID,ORDER_ID,PLAN_CODE,QTY,CREATED_AT,UPDATED_AT,
+        STATUS,USERNAME,PLAN_TYPE,PERIOD,STATUS_EXPIRE_AT
     </sql>
+
+
+    <select id="selectPageByUserGroupedOrder" resultType="com.xyz.orders.OrderItem">
+        SELECT *
+        FROM (
+                 SELECT
+                     oi.*,
+                     /* 组内最大时间：若 UPDATED_AT 为空，用 CREATED_AT 兜底 */
+                     MAX(COALESCE(oi.UPDATED_AT, oi.CREATED_AT)) OVER (PARTITION BY oi.PLAN_CODE) AS GRP_LATEST
+                 FROM ORDER_ITEM oi
+                 WHERE oi.USERNAME = #{username}
+             ) t
+        /* 先按组时间倒序，使同 planCode 的记录相邻；再按记录自身时间/ID 细排 */
+        ORDER BY t.GRP_LATEST DESC, t.UPDATED_AT DESC NULLS LAST, t.CREATED_AT DESC NULLS LAST, t.ID DESC
+    </select>
+
+    <select id="selectAllByUsername" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from ORDER_ITEM
+        where
+        USERNAME = #{username,jdbcType=VARCHAR}
+    </select>
+    <update id="updateOrderIdById">
+        update ORDER_ITEM
+        set ORDER_ID = #{orderId,jdbcType=NUMERIC}
+        where ID = #{id,jdbcType=NUMERIC}
+    </update>
+    <update id="updateStatusById">
+        update ORDER_ITEM
+        set STATUS = #{status,jdbcType=VARCHAR}
+        where ID = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <update id="batchUpdateOrderIdById">
+        UPDATE order_item
+        SET order_id = #{orderId}
+        WHERE id IN
+        <foreach collection="orderItemIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateStatusAndExpireById">
+        UPDATE ORDER_ITEM
+        SET STATUS = #{status}
+        WHERE ID IN
+        <foreach collection="orderItemIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
 </mapper>

@@ -1,5 +1,15 @@
 package com.xyz.control;
 
+import com.xyz.advice.SuccessAdvice;
+import com.xyz.common.ResponseResult;
+import com.xyz.dto.OrderDTO;
+import com.xyz.service.OrdersService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 /**
  * <p>Package Name: com.xyz.control </p>
  * <p>Description:  </p>
@@ -9,5 +19,15 @@ package com.xyz.control;
  * @version 1.0
  * @since
  */
+@RestController
+@RequestMapping("/api/order")
 public class OrderController {
+    @Autowired
+    OrdersService ordersService;
+
+    @PostMapping("commit")
+    public ResponseResult commit(@RequestBody OrderDTO.OrderAvaliableDTO dto){
+        int i = ordersService.commitOrder(dto);
+        return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
+    }
 }

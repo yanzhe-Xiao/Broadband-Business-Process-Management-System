@@ -1,7 +1,11 @@
 package com.xyz.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xyz.advice.ImageUrlSplicing;
 import com.xyz.constraints.OrderConstarint;
 import com.xyz.dto.OrderItemDTO;
 import com.xyz.mapper.OrderItemMapper;
@@ -9,6 +13,7 @@ import com.xyz.mapper.TariffPlanMapper;
 import com.xyz.orders.OrderItem;
 import com.xyz.orders.TariffPlan;
 import com.xyz.service.OrderItemService;
+import com.xyz.vo.orders.OrderItemVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,7 +119,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                     // 处理方式：若已有记录，统一“收敛”为一条 forever；保留第一条，删除其余
                     if (same3.isEmpty()) {
                         // 直接插入一条 forever（qty 固定 1，period=MAX，price=unitPrice）
-                        OrderItem one = dto.toEntity(unitPrice.setScale(2, RoundingMode.HALF_UP)); // 价格不乘 qty
+                        OrderItem one = dto.toEntity(); // 价格不乘 qty
                         one.setQty(1);
                         one.setPeriod(Long.MAX_VALUE);
                         one.setPlanType("forever");
@@ -131,7 +136,6 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                         keep.setPlanType("forever");
                         keep.setQty(1);
                         keep.setPeriod(Long.MAX_VALUE);
-                        keep.setPrice(unitPrice.setScale(2, RoundingMode.HALF_UP)); // forever 单价作为总价
                         keep.setUpdatedAt(new Date());
                         affected += orderItemMapper.updateById(keep);
                     }
@@ -141,7 +145,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                 // month/year 的情况
                 if (same3.isEmpty()) {
                     // 无同三键，直接插入
-                    OrderItem entity = dto.toEntity(totalPrice);
+                    OrderItem entity = dto.toEntity();
                     fillPeriod(entity, incomingType, dto.qty());
                     entity.setOrderId(null);
                     affected += orderItemMapper.insert(entity);
@@ -166,13 +170,13 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                         if (!delIds.isEmpty()) affected += orderItemMapper.deleteBatchIds(delIds);
 
                         keep.setQty(newQty);
-                        keep.setPrice(unitPrice.multiply(BigDecimal.valueOf(newQty)).setScale(2, RoundingMode.HALF_UP));
+//                        keep.setPrice(unitPrice.multiply(BigDecimal.valueOf(newQty)).setScale(2, RoundingMode.HALF_UP));
                         fillPeriod(keep, incomingType, newQty);
                         keep.setUpdatedAt(new Date());
                         affected += orderItemMapper.updateById(keep);
                     } else {
                         // 没有同类型，且不是 forever（已在上面分支处理），插入新条目
-                        OrderItem entity = dto.toEntity(totalPrice);
+                        OrderItem entity = dto.toEntity();
                         fillPeriod(entity, incomingType, dto.qty());
                         entity.setOrderId(null);
                         affected += orderItemMapper.insert(entity);
@@ -181,7 +185,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
             } else {
                 // 非购物车（待支付/已支付）：两键相同也不合并，必须新插入
-                OrderItem entity = dto.toEntity(totalPrice);
+                OrderItem entity = dto.toEntity();
                 fillPeriod(entity, incomingType, dto.qty());
                 // 如果是“待支付/已支付”，通常应当已经有 orderId（下单后生成），
                 // 这里若 DTO 没带，可以按你的业务在外层补齐。
@@ -251,14 +255,14 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
             item.setPlanType("forever");
             item.setQty(1);
             item.setPeriod(Long.MAX_VALUE);
-            item.setPrice(unit.setScale(2, RoundingMode.HALF_UP));
+//            item.setPrice(unit.setScale(2, RoundingMode.HALF_UP));
         } else {
             // month/year：period=30/365 * qty、price=unit * qty
             item.setPlanType(targetType);
             item.setQty(targetQty);
             long periodDays = "month".equals(targetType) ? 30L * targetQty : 365L * targetQty;
             item.setPeriod(periodDays);
-            item.setPrice(unit.multiply(BigDecimal.valueOf(targetQty)).setScale(2, RoundingMode.HALF_UP));
+//            item.setPrice(unit.multiply(BigDecimal.valueOf(targetQty)).setScale(2, RoundingMode.HALF_UP));
         }
 
 
@@ -299,6 +303,56 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         // 批量删除
         return orderItemMapper.delete(Wrappers.<OrderItem>lambdaQuery().in(OrderItem::getId, ids));    }
 
+    @Override
+    public IPage<OrderItemVO.Shopping> getOrderItemFull(int current, int size, String username) {
+        int pageNo = Math.max(1, current);
+        int pageSize = size <= 0 ? 10 : size;
+
+        // 1) 分页查订单项（仅按用户名）
+        LambdaQueryWrapper<OrderItem> qw = Wrappers.<OrderItem>lambdaQuery()
+                .eq(OrderItem::getUsername, username);
+        IPage<OrderItem> page = new Page<>(pageNo, pageSize);
+        IPage<OrderItem> oiPage = orderItemMapper.selectPageByUserGroupedOrder(page, username);
+
+        List<OrderItem> items = oiPage.getRecords();
+        if (items == null || items.isEmpty()) {
+            return oiPage.convert(oi -> null);
+        }
+
+        // 2) 批量取套餐，避免 N+1
+        Set<String> planCodes = items.stream()
+                .map(OrderItem::getPlanCode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Map<String, TariffPlan> planMap = Collections.emptyMap();
+        if (!planCodes.isEmpty()) {
+            List<TariffPlan> plans = tariffPlanMapper.selectBatchIds(planCodes); // planCode 是 @TableId
+            if (plans != null && !plans.isEmpty()) {
+                planMap = plans.stream().collect(
+                        Collectors.toMap(TariffPlan::getPlanCode, p -> p, (a, b) -> a, LinkedHashMap::new));
+            }
+        }
+
+        // 3) 转 Shopping（名称/描述/图片来自套餐，其余来自订单项）
+        final Map<String, TariffPlan> finalPlanMap = planMap;
+        return oiPage.convert(oi -> {
+            TariffPlan tp = finalPlanMap.get(oi.getPlanCode());
+            return OrderItemVO.Shopping.builder()
+                    .id(oi.getId())
+                    .planCode(oi.getPlanCode())
+                    .name(tp != null ? tp.getName() : null)
+                    .qty(oi.getQty())
+                    .planType(oi.getPlanType())
+                    .status(oi.getStatus())
+                    .price(computeUnitPriceByType(tp, oi.getPlanType()))                // 直接使用订单项价格
+                    .period(oi.getPeriod())              // 直接使用订单项周期
+                    .description(tp != null ? tp.getDescription() : null)
+                    .imageUrl(tp != null ? ImageUrlSplicing.splicingURL(tp.getImageUrl()) : null)
+                    .build();
+        });
+    }
+
 
 
 
@@ -313,6 +367,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
      * 折扣规则：discount 为“百分数”，100 表示无折扣；最终价 = 基础价 * (discount / 100)
      * 结果保留两位小数（HALF_UP），最低不小于 0。
      */
+    //TODO 将OrderItem的价格项删掉，自行计算价格，查询的时候计算价格4
     private BigDecimal computeUnitPriceByType(TariffPlan plan, String planType) {
         BigDecimal baseFee;
         switch (planType) {

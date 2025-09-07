@@ -1,19 +1,22 @@
 package com.xyz.mapper;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xyz.user.AppUser;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * <p>Package Name: com.xyz.mapper </p>
- * <p>Description: 用户实体（AppUser）的数据访问层接口。该接口继承自MyBatis-Plus的BaseMapper，自动获得了对AppUser表的CRUD（增删改查）等基本数据库操作能力，无需编写对应的XML文件。</p>
- * <p>Create Time: 2025/9/2 </p>
- *
- * @author <a href="https://github.com/yanzhe-xiao">YANZHE XIAO</a>
- * @version 1.0
- * @since
- */
+* @author X
+* @description 针对表【APP_USER】的数据库操作Mapper
+* @createDate 2025-09-07 22:56:35
+* @Entity com.xyz.user.AppUser
+*/
 @Mapper
 public interface AppUserMapper extends BaseMapper<AppUser> {
-
+    Long selectIdByUsername(@Param("username") String username);
 }
+
+
+
+

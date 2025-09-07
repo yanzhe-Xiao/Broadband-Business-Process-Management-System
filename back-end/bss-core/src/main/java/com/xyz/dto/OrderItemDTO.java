@@ -57,7 +57,7 @@ public class OrderItemDTO {
         /**
          * 转换成 OrderItem 实体
          */
-        public OrderItem toEntity(BigDecimal price) {
+        public OrderItem toEntity() {
             OrderItem entity = new OrderItem();
 //            entity.setOrderId(orderId);
             entity.setPlanCode(this.planCode);
@@ -75,8 +75,7 @@ public class OrderItemDTO {
                 default -> throw new IllegalArgumentException("非法套餐类型: " + this.planType);
             }
             entity.setPeriod(period);
-            // 价格先空
-            entity.setPrice(price);
+
 
             return entity;
         }
