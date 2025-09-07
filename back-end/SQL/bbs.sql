@@ -350,9 +350,12 @@ CREATE TABLE orders (
                         created_at         TIMESTAMP(6) DEFAULT SYSTIMESTAMP NOT NULL,
                         updated_at         TIMESTAMP(6)
 );
-ALTER TABLE orders
-    ADD CONSTRAINT fk_orders_customer
-        FOREIGN KEY (user_id) REFERENCES app_user(id);
+-- 重新创建带ON DELETE CASCADE的外键约束
+ALTER TABLE ORDERS
+    ADD CONSTRAINT FK_ORDER_CUSTOMER
+        FOREIGN KEY (USER_ID)  -- 替换为实际的外键列名
+            REFERENCES APP_USER (ID)  -- 替换为实际的主键表和列
+            ON DELETE CASCADE;
 
 
 
@@ -395,7 +398,8 @@ CREATE TABLE order_item (
 );
 ALTER TABLE order_item
     ADD CONSTRAINT fk_order_item_order
-        FOREIGN KEY (order_id) REFERENCES orders(id);
+        FOREIGN KEY (order_id) REFERENCES orders(id)
+            ON DELETE CASCADE;
 
 ALTER TABLE order_item
     ADD CONSTRAINT fk_orders_plan

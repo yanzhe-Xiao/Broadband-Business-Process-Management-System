@@ -277,7 +277,7 @@ public class GlobalExceptionHandler {
     public ResponseResult<Void> handleRuntime(RuntimeException e, HttpServletRequest req) {
         String rid = UUID.randomUUID().toString();
         log.error("[500] RuntimeException rid={} uri={} msg={}", rid, req.getRequestURI(), e.getMessage(), e);
-        return ResponseResult.fail(HttpStatusEnum.ERROR.getCode(), "系统内部错误（RID=" + rid + "）");
+        return ResponseResult.fail(HttpStatusEnum.ERROR.getCode(), "系统内部错误（RID=" + rid + "）" + e.getMessage());
     }
 
     /** 所有异常最终兜底 */

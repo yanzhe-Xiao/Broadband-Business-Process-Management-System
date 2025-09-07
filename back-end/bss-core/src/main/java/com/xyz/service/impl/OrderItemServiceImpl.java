@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem>
@@ -34,7 +33,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
     OrderItemMapper orderItemMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int addOrderItem(List<OrderItemDTO.OrderItemAvaliable> dtos) {
         if (dtos == null || dtos.isEmpty()) return 0;
 
@@ -62,7 +61,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                 Wrappers.<OrderItem>lambdaQuery()
                         .in(OrderItem::getUsername, keys.stream().map(Key::username).collect(Collectors.toSet()))
                         .in(OrderItem::getPlanCode, keys.stream().map(Key::planCode).collect(Collectors.toSet()))
-                        .eq(OrderItem::getPlanType, "forever")
+                        .eq(OrderItem::getPlanType, OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER)
         );
 
         if (!existedForever.isEmpty()) {
@@ -73,7 +72,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
             // 任一 dto 命中冲突就失败
             for (OrderItemDTO.OrderItemAvaliable dto : dtos) {
                 if (conflict.contains(new Key(dto.username(), dto.planCode()))) {
-                    throw new IllegalStateException("已存在 forever 套餐，禁止对 username=" +
+                    throw new IllegalStateException("已存在"+OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER+" 套餐，禁止对 username=" +
                             dto.username() + ", planCode=" + dto.planCode() + " 继续添加。");
                 }
             }
@@ -92,7 +91,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
             // 计算单价与总价
             BigDecimal unitPrice = computeUnitPriceByType(plan, dto.planType());
             BigDecimal totalPrice;
-            if ("forever".equals(dto.planType())) {
+            if (OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(dto.planType())) {
                 // forever 价格与数量无关（你前面规则里购物车阶段把 qty 固定为 1）
                 totalPrice = unitPrice;
             } else {
@@ -101,20 +100,25 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
             }
 
             String username = dto.username();
-            String status = dto.status(); // "在购物车中" / "待支付" / "已支付"
-            String incomingType = dto.planType(); // "month" / "year" / "forever"
+            String status = dto.status(); // OrderConstarint.ORDER_ITEM_STATUS_IN_CART / OrderConstarint.ORDER_ITEM_STATUS_PENDING_PAYMENT / OrderConstarint.ORDER_ITEM_STATUS_PAID
+            String incomingType = dto.planType(); // OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH / OrderConstarint.ORDER_ITEM_PLAN_TYPE_YEAR / OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER
 
             // 购物车：允许合并
-            if ("在购物车中".equals(status)) {
+            if (OrderConstarint.ORDER_ITEM_STATUS_IN_CART.equals(status)) {
                 // 找到同 username+planCode+status 的现有项
                 List<OrderItem> same3 = orderItemMapper.selectList(
                         Wrappers.<OrderItem>lambdaQuery()
                                 .eq(OrderItem::getUsername, username)
                                 .eq(OrderItem::getPlanCode, planCode)
-                                .eq(OrderItem::getStatus, "在购物车中")
+                                .eq(OrderItem::getStatus, OrderConstarint.ORDER_ITEM_STATUS_IN_CART)
                 );
 
-                if ("forever".equals(incomingType)) {
+                if (OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(incomingType)) {
+                    // forever 固定 1 单位
+                    assertUserCartStockEnough(plan, username, planCode,
+                            OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER,
+                            1,
+                            null);
                     // 规则：三键相同 + 本次是 forever => 合并为一条 forever
                     // 处理方式：若已有记录，统一“收敛”为一条 forever；保留第一条，删除其余
                     if (same3.isEmpty()) {
@@ -122,7 +126,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                         OrderItem one = dto.toEntity(); // 价格不乘 qty
                         one.setQty(1);
                         one.setPeriod(Long.MAX_VALUE);
-                        one.setPlanType("forever");
+                        one.setPlanType(OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER);
                         // 建议：购物车阶段 orderId 可以为空
                         one.setOrderId(null);
                         affected += orderItemMapper.insert(one);
@@ -133,7 +137,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                         if (!toDel.isEmpty()) {
                             affected += orderItemMapper.deleteBatchIds(toDel);
                         }
-                        keep.setPlanType("forever");
+                        keep.setPlanType(OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER);
                         keep.setQty(1);
                         keep.setPeriod(Long.MAX_VALUE);
                         keep.setUpdatedAt(new Date());
@@ -144,6 +148,8 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
                 // month/year 的情况
                 if (same3.isEmpty()) {
+                    // 库存校验
+                    assertUserCartStockEnough(plan, username, planCode, incomingType, dto.qty(), null);
                     // 无同三键，直接插入
                     OrderItem entity = dto.toEntity();
                     fillPeriod(entity, incomingType, dto.qty());
@@ -160,9 +166,12 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                         int existedQty = sameType.stream().map(OrderItem::getQty).filter(Objects::nonNull)
                                 .mapToInt(Integer::intValue).sum();
                         int newQty = existedQty + dto.qty();
+                        // 排除 keep 自身再校验（避免把 keep 旧 qty 重复算进去）
+                        OrderItem keep = sameType.get(0);
+                        assertUserCartStockEnough(plan, username, planCode, incomingType, newQty, keep.getId());
 
                         // 收敛为一条
-                        OrderItem keep = sameType.get(0);
+//                        OrderItem keep = sameType.get(0);
                         List<Long> delIds = sameType.stream()
                                 .skip(1)
                                 .map(OrderItem::getId)
@@ -176,6 +185,8 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                         affected += orderItemMapper.updateById(keep);
                     } else {
                         // 没有同类型，且不是 forever（已在上面分支处理），插入新条目
+                        assertUserCartStockEnough(plan, username, planCode, incomingType, dto.qty(), null);
+
                         OrderItem entity = dto.toEntity();
                         fillPeriod(entity, incomingType, dto.qty());
                         entity.setOrderId(null);
@@ -184,6 +195,9 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
                 }
 
             } else {
+                // 库存校验（新条目的 qty）
+                int desired = OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(incomingType) ? 1 : dto.qty();
+                assertUserCartStockEnough(plan, username, planCode, incomingType, desired, null);
                 // 非购物车（待支付/已支付）：两键相同也不合并，必须新插入
                 OrderItem entity = dto.toEntity();
                 fillPeriod(entity, incomingType, dto.qty());
@@ -212,31 +226,31 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         if (targetType == null || targetQty == null) {
             throw new IllegalArgumentException("planType 与 qty 均不能为空");
         }
-        if (targetQty <= 0 && !"forever".equals(targetType)) {
+        if (targetQty <= 0 && !OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(targetType)) {
             throw new IllegalArgumentException("qty 必须为正整数（forever 不使用 qty）");
         }
 
         // 3) 一致性校验：确保 username + planCode + forever 的唯一性
         //    a) 若将当前条改为 month/year，则库中不能存在其它 forever（同 user+planCode）
         //    b) 若将当前条改为 forever，则库中不能存在其它 forever（同 user+planCode）
-        boolean toForever = "forever".equals(targetType);
-        boolean fromForever = "forever".equals(item.getPlanType());
+        boolean toForever = OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(targetType);
+        boolean fromForever = OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(item.getPlanType());
 
         List<OrderItem> foreverSiblings = orderItemMapper.selectList(
                 Wrappers.<OrderItem>lambdaQuery()
                         .eq(OrderItem::getUsername, item.getUsername())
                         .eq(OrderItem::getPlanCode, item.getPlanCode())
-                        .eq(OrderItem::getPlanType, "forever")
+                        .eq(OrderItem::getPlanType, OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER)
                         .ne(OrderItem::getId, item.getId())
         );
         if (toForever || !toForever) { // 任何目标都需要保证唯一 forever 的约束
             if (!foreverSiblings.isEmpty() && !toForever) {
                 // 目标为非 forever，但兄弟里已有 forever
-                throw new IllegalStateException("已存在 forever 套餐，禁止将该条改为 " + targetType);
+                throw new IllegalStateException("已存在"+OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER+"套餐，禁止将该条改为 " + targetType);
             }
             if (!foreverSiblings.isEmpty() && toForever) {
                 // 目标为 forever，但兄弟里已有 forever
-                throw new IllegalStateException("已存在 forever 套餐，禁止重复设置 forever");
+                throw new IllegalStateException("已存在 "+OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER+" 套餐，禁止重复设置 forever");
             }
         }
 
@@ -250,9 +264,9 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
         // 5) 根据目标类型做规格化 & 价格/周期计算
         BigDecimal unit = computeUnitPriceByType(plan, targetType); // 未乘 qty 的“单价”
-        if ("forever".equals(targetType)) {
+        if (OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(targetType)) {
             // forever：qty=1、period=MAX、price=unit
-            item.setPlanType("forever");
+            item.setPlanType(OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER);
             item.setQty(1);
             item.setPeriod(Long.MAX_VALUE);
 //            item.setPrice(unit.setScale(2, RoundingMode.HALF_UP));
@@ -260,7 +274,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
             // month/year：period=30/365 * qty、price=unit * qty
             item.setPlanType(targetType);
             item.setQty(targetQty);
-            long periodDays = "month".equals(targetType) ? 30L * targetQty : 365L * targetQty;
+            long periodDays = OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH.equals(targetType) ? 30L * targetQty : 365L * targetQty;
             item.setPeriod(periodDays);
 //            item.setPrice(unit.multiply(BigDecimal.valueOf(targetQty)).setScale(2, RoundingMode.HALF_UP));
         }
@@ -292,7 +306,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
         // 检查是否包含已支付|待支付的订单项
         List<Long> paidIds = items.stream()
-                .filter(item -> "已支付".equals(item.getStatus()) || "待支付".equals(item.getStatus()))
+                .filter(item -> OrderConstarint.ORDER_ITEM_STATUS_PAID.equals(item.getStatus()) || OrderConstarint.ORDER_ITEM_STATUS_PENDING_PAYMENT.equals(item.getStatus()))
                 .map(OrderItem::getId)
                 .toList();
 
@@ -367,13 +381,13 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
      * 折扣规则：discount 为“百分数”，100 表示无折扣；最终价 = 基础价 * (discount / 100)
      * 结果保留两位小数（HALF_UP），最低不小于 0。
      */
-    //TODO 将OrderItem的价格项删掉，自行计算价格，查询的时候计算价格4
+    //TODO 将OrderItem的价格项删掉，自行计算价格，查询的时候计算价格 √
     private BigDecimal computeUnitPriceByType(TariffPlan plan, String planType) {
         BigDecimal baseFee;
         switch (planType) {
-            case "month" -> baseFee = plan.getMonthlyFee();
-            case "year" -> baseFee = plan.getYearlyFee();
-            case "forever" -> baseFee = plan.getForeverFee();
+            case OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH -> baseFee = plan.getMonthlyFee();
+            case OrderConstarint.ORDER_ITEM_PLAN_TYPE_YEAR -> baseFee = plan.getYearlyFee();
+            case OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER -> baseFee = plan.getForeverFee();
             default -> throw new IllegalArgumentException("非法套餐类型: " + planType);
         }
         if (baseFee == null) {
@@ -396,12 +410,67 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
     /** 按类型设置 period（单位：天） */
     private void fillPeriod(OrderItem item, String planType, int qty) {
         switch (planType) {
-            case "month" -> item.setPeriod(30L * qty);
-            case "year" -> item.setPeriod(365L * qty);
-            case "forever" -> item.setPeriod(Long.MAX_VALUE);
+            case OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH -> item.setPeriod(30L * qty);
+            case OrderConstarint.ORDER_ITEM_PLAN_TYPE_YEAR -> item.setPeriod(365L * qty);
+            case OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER -> item.setPeriod(Long.MAX_VALUE);
             default -> throw new IllegalArgumentException("非法套餐类型: " + planType);
         }
     }
+
+    /**
+     * 校验：同一用户 + 同一 planCode 在“在购物车中”的总数量（含本次变动）必须严格小于库存
+     * 计数规则：
+     *   - forever 视作 1 个单位
+     *   - month/year 视作各自的 qty 单位
+     * @param plan       套餐（含库存 qty）
+     * @param username   用户名
+     * @param planCode   套餐编码
+     * @param incomingType 本次新增/更新的类型：month/year/forever
+     * @param incomingQty  本次新增/更新的数量；forever 传入任意值都会按 1 处理
+     * @param excludeId  参与合并时，可排除正在被“保留更新”的那条记录（避免重复统计）
+     */
+    private void assertUserCartStockEnough(TariffPlan plan,
+                                           String username,
+                                           String planCode,
+                                           String incomingType,
+                                           int incomingQty,
+                                           Long excludeId) {
+        Integer stock = plan.getQty();
+        if (stock == null) {
+            throw new IllegalStateException("套餐未配置库存 qty，planCode=" + plan.getPlanCode());
+        }
+
+        // 查该用户+planCode，在购物车中的所有条目（可排除某条）
+        List<OrderItem> cartItems = orderItemMapper.selectList(
+                Wrappers.<OrderItem>lambdaQuery()
+                        .eq(OrderItem::getUsername, username)
+                        .eq(OrderItem::getPlanCode, planCode)
+                        .eq(OrderItem::getStatus, OrderConstarint.ORDER_ITEM_STATUS_IN_CART)
+                        .ne(excludeId != null, OrderItem::getId, excludeId)
+        );
+
+        // 已存在单位数（forever=1，其它=qty）
+        int existingUnits = cartItems.stream().mapToInt(oi -> {
+            if (OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(oi.getPlanType())) return 1;
+            Integer q = oi.getQty();
+            return (q == null || q < 0) ? 0 : q;
+        }).sum();
+
+        // 本次变动的单位数
+        int incomingUnits = OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER.equals(incomingType) ? 1 : Math.max(0, incomingQty);
+
+        int totalUnits = existingUnits + incomingUnits;
+
+        // 严格小于库存
+        if (totalUnits >= stock) {
+            throw new IllegalStateException(
+                    "库存不足：planCode=" + plan.getPlanCode()
+                            + "，库存=" + stock
+                            + "，用户在购物车中的合计（含本次）=" + totalUnits
+                            + "（要求：合计 < 库存）");
+        }
+    }
+
 
 
 }

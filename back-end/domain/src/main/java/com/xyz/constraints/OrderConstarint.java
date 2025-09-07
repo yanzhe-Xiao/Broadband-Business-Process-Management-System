@@ -17,6 +17,50 @@ public class OrderConstarint {
 
     public static final Date FOREVER_DATE = createFarFutureDate();
 
+    /** 待支付 */
+    public static final String ORDER_STATUS_PENDING_PAYMENT = "待支付";
+
+    /** 已支付 */
+    public static final String ORDER_STATUS_PAID = "已支付";
+
+    /** 待派单 */
+    public static final String ORDER_STATUS_PENDING_ASSIGNMENT = "待派单";
+
+    /** 已分配工单 */
+    public static final String ORDER_STATUS_ASSIGNED_WORK_ORDER = "已分配工单";
+
+    /** 工单已完成 */
+    public static final String ORDER_STATUS_WORK_ORDER_COMPLETED = "工单已完成";
+
+    /** 待评价 */
+    public static final String ORDER_STATUS_PENDING_REVIEW = "待评价";
+
+    /** 已完成 */
+    public static final String ORDER_STATUS_COMPLETED = "已完成";
+
+    /** 已取消 */
+    public static final String ORDER_STATUS_CANCELED = "已取消";
+
+    //——————————————-------------------------
+    // ORDER_ITEM
+    /** 在购物车中 */
+    public static final String ORDER_ITEM_STATUS_IN_CART = "在购物车中";
+
+    /** 待支付 */
+    public static final String ORDER_ITEM_STATUS_PENDING_PAYMENT = "待支付";
+
+    /** 已支付 */
+    public static final String ORDER_ITEM_STATUS_PAID = "已支付";
+
+    /** 月套餐 */
+    public static final String ORDER_ITEM_PLAN_TYPE_MONTH = "month";
+
+    /** 年套餐 */
+    public static final String ORDER_ITEM_PLAN_TYPE_YEAR = "year";
+
+    /** 永久套餐 */
+    public static final String ORDER_ITEM_PLAN_TYPE_FOREVER = "forever";
+
     private static Date createFarFutureDate() {
         Calendar cal = Calendar.getInstance();
         cal.set(2199, Calendar.JANUARY, 1, 0, 0, 0);

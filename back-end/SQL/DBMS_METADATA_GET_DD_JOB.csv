@@ -1,0 +1,78 @@
+"
+  
+BEGIN 
+dbms_scheduler.create_job('""JOB_ORDER_ITEM_PENDING_TO_CART""',
+job_type=>'PLSQL_BLOCK', job_action=>
+'
+
+DECLARE
+
+BEGIN
+
+  -- 1) 先把超时“待支付”的 ORDER_ITEM 取消
+
+  UPDATE ORDER_ITEM oi
+
+     SET oi.STATUS = ''已取消'',
+
+         oi.UPDATED_AT = SYSTIMESTAMP,
+
+         oi.STATUS_EXPIRE_AT = NULL
+
+   WHERE oi.STATUS = ''待支付''
+
+     AND oi.STATUS_EXPIRE_AT IS NOT NULL
+
+     AND oi.STATUS_EXPIRE_AT <= SYSTIMESTAMP;
+
+
+
+  -- 2) 再把关联的 ORDERS 置为“已取消”
+
+  UPDATE ORDERS o
+
+     SET o.STATUS = ''已取消'',
+
+         o.UPDATED_AT = SYSTIMESTAMP
+
+   WHERE EXISTS (
+
+           SELECT 1
+
+             FROM ORDER_ITEM oi
+
+            WHERE oi.ORDER_ID = o.ID
+
+              AND oi.STATUS = ''已取消''
+
+         );
+
+
+
+  COMMIT;
+
+EXCEPTION
+
+  WHEN OTHERS THEN
+
+    -- 让错误可见：回滚并抛出，以便在 USER_SCHEDULER_JOB_RUN_DETAILS 里看到 ORA 错误
+
+    ROLLBACK;
+
+    RAISE;
+
+END;
+
+    '
+, number_of_arguments=>0,
+start_date=>TO_TIMESTAMP_TZ('08-SEP-2025 02.21.13.329044000 AM +08:00','DD-MON-RRRR HH.MI.SSXFF AM TZR','NLS_DATE_LANGUAGE=english'), repeat_interval=> 
+'FREQ=MINUTELY;INTERVAL=1'
+, end_date=>NULL,
+job_class=>'""DEFAULT_JOB_CLASS""', enabled=>FALSE, auto_drop=>TRUE,comments=>
+'超时未支付：ORDER_ITEM->已取消，并同步 ORDERS->已取消'
+);
+sys.dbms_scheduler.set_attribute('""JOB_ORDER_ITEM_PENDING_TO_CART""','NLS_ENV','NLS_LANGUAGE=''SIMPLIFIED CHINESE'' NLS_TERRITORY=''CHINA'' NLS_CURRENCY=''￥'' NLS_ISO_CURRENCY=''CHINA'' NLS_NUMERIC_CHARACTERS=''.,'' NLS_CALENDAR=''GREGORIAN'' NLS_DATE_FORMAT=''DD-MON-RR'' NLS_DATE_LANGUAGE=''SIMPLIFIED CHINESE'' NLS_SORT=''BINARY'' NLS_TIME_FORMAT=''HH.MI.SSXFF AM'' NLS_TIMESTAMP_FORMAT=''DD-MON-RR HH.MI.SSXFF AM'' NLS_TIME_TZ_FORMAT=''HH.MI.SSXFF AM TZR'' NLS_TIMESTAMP_TZ_FORMAT=''DD-MON-RR HH.MI.SSXFF AM TZR'' NLS_DUAL_CURRENCY=''￥'' NLS_COMP=''BINARY'' NLS_LENGTH_SEMANTICS=''BYTE'' NLS_NCHAR_CONV_EXCP=''FALSE''');
+dbms_scheduler.enable('""JOB_ORDER_ITEM_PENDING_TO_CART""');
+COMMIT; 
+END; 
+"

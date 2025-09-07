@@ -1,9 +1,11 @@
 package com.xyz.dto;
 
+import com.xyz.constraints.OrderConstarint;
 import com.xyz.orders.Orders;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -25,15 +27,15 @@ public class OrderDTO {
             @Schema(description = "订单项ID")
             List<Long> orderItemId,
 
-            @Schema(description = "订单状态",
-                    allowableValues = {
-                            "待支付", "已支付", "待派单",
-                            "已分配工单", "工单已完成",
-                            "待评价", "已完成", "已取消"
-                    })
-            @Pattern(regexp = "待支付|已支付|待派单|已分配工单|工单已完成|待评价|已完成|已取消",
-                    message = "订单状态必须是固定值之一")
-            String status,
+//            @Schema(description = "订单状态",
+//                    allowableValues = {
+//                            "待支付", "已支付", "待派单",
+//                            "已分配工单", "工单已完成",
+//                            "待评价", "已完成", "已取消"
+//                    })
+//            @Pattern(regexp = "待支付|已支付|待派单|已分配工单|工单已完成|待评价|已完成|已取消",
+//                    message = "订单状态必须是固定值之一")
+//            String status,
 
             @Schema(description = "省/自治区/直辖市")
             String province,
@@ -53,11 +55,12 @@ public class OrderDTO {
         public static Orders toEntity(OrderAvaliableDTO dto,Long userId) {
             Orders entity = new Orders();
             entity.setUserId(userId);
-            entity.setStatus(dto.status());
+//            entity.setStatus(dto.status());
             entity.setProvince(dto.province());
             entity.setCity(dto.city());
             entity.setDistrict(dto.district());
             entity.setDetailAddress(dto.detailAddress());
+            entity.setInstallationFee(BigDecimal.valueOf(OrderConstarint.INSTALLATION_FEE));
             return entity;
         }
     }

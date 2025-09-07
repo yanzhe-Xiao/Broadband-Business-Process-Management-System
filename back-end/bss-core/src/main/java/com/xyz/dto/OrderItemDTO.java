@@ -36,9 +36,15 @@ public class OrderItemDTO {
             @NotNull(message = "数量不能为空")
             Integer qty,
 
-            @Schema(description = "订单状态", example = "在购物车中 / 待支付 / 已支付")
+            @Schema(description = "订单状态",
+                    example = OrderConstarint.ORDER_ITEM_STATUS_IN_CART + " / "
+                            + OrderConstarint.ORDER_ITEM_STATUS_PENDING_PAYMENT + " / "
+                            + OrderConstarint.ORDER_ITEM_STATUS_PAID)
             @Pattern(
-                    regexp = "^(在购物车中|待支付|已支付)$",
+                    regexp = "^("
+                            + OrderConstarint.ORDER_ITEM_STATUS_IN_CART + "|"
+                            + OrderConstarint.ORDER_ITEM_STATUS_PENDING_PAYMENT + "|"
+                            + OrderConstarint.ORDER_ITEM_STATUS_PAID + ")$",
                     message = "订单状态只能是 在购物车中 / 待支付 / 已支付"
             )
             String status,
@@ -47,9 +53,15 @@ public class OrderItemDTO {
             @NotBlank(message = "用户名不能为空")
             String username,
 
-            @Schema(description = "套餐类型", example = "month / year / forever")
+            @Schema(description = "套餐类型",
+                    example = OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH + " / "
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_YEAR + " / "
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER)
             @Pattern(
-                    regexp = "^(month|year|forever)$",
+                    regexp = "^("
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH + "|"
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_YEAR + "|"
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER + ")$",
                     message = "套餐类型只能是 month / year / forever"
             )
             String planType
@@ -92,9 +104,15 @@ public class OrderItemDTO {
             @NotNull(message = "数量不能为空")
             Integer qty,
 
-            @Schema(description = "套餐类型", example = "month")
+            @Schema(description = "套餐类型",
+                    example = OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH + " / "
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_YEAR + " / "
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER)
             @Pattern(
-                    regexp = "^(month|year|forever)$",
+                    regexp = "^("
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_MONTH + "|"
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_YEAR + "|"
+                            + OrderConstarint.ORDER_ITEM_PLAN_TYPE_FOREVER + ")$",
                     message = "套餐类型只能是 month / year / forever"
             )
             String planType

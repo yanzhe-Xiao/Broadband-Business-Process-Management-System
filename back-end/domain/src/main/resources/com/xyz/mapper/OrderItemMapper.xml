@@ -73,5 +73,12 @@
             #{id}
         </foreach>
     </update>
+    <select id="selectStatusByIds" resultType="string">
+        SELECT status FROM ORDER_ITEM WHERE id IN
+        <foreach item="id" collection="orderItemIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 
 </mapper>

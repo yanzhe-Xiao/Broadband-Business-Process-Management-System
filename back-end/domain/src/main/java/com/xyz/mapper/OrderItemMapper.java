@@ -7,6 +7,7 @@ import com.xyz.orders.OrderItem;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 /**
 * @author X
@@ -43,6 +44,26 @@ public interface OrderItemMapper extends BaseMapper<OrderItem> {
     int batchUpdateStatusAndExpireById(
             @Param("status") String status,
             @Param("orderItemIds") List<Long> orderItemIds);
+
+    /**
+     * 根据订单项ID列表查询对应的用户ID列表
+     * @param orderItemIds 订单项ID列表
+     * @return 用户ID列表
+     */
+    @Select("<script>" +
+            "SELECT username FROM ORDER_ITEM WHERE id IN " +
+            "<foreach item='id' collection='orderItemIds' open='(' separator=',' close=')'>" +
+            "#{id}" +
+            "</foreach>" +
+            "</script>")
+    List<String> selectUsernamesByIds(@Param("orderItemIds") List<Long> orderItemIds);
+
+    /**
+     * 根据订单项ID列表查询对应的状态列表
+     * @param orderItemIds 订单项ID列表
+     * @return 状态列表
+     */
+    List<String> selectStatusByIds(@Param("orderItemIds") List<Long> orderItemIds);
 
 
 }

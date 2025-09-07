@@ -26,4 +26,19 @@
         CREATED_AT,UPDATED_AT,INSTALLATION_FEE,PROVINCE,CITY,
         DISTRICT,DETAIL_ADDRESS,INSTALL_ADDRESS
     </sql>
+    <select id="selectAllByUserId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from ORDERS
+        where
+        USER_ID = #{userId,jdbcType=NUMERIC}
+    </select>
+    <select id="selectAllByUserIdAndStatus" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from ORDERS
+        where
+        USER_ID = #{userId,jdbcType=NUMERIC}
+        AND STATUS = #{status,jdbcType=VARCHAR}
+    </select>
 </mapper>

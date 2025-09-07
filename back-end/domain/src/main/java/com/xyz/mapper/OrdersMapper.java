@@ -1,4 +1,6 @@
 package com.xyz.mapper;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 import com.xyz.orders.Orders;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -12,7 +14,9 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface OrdersMapper extends BaseMapper<Orders> {
+    List<Orders> selectAllByUserId(@Param("userId") Long userId);
 
+    List<Orders> selectAllByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 }
 
 
