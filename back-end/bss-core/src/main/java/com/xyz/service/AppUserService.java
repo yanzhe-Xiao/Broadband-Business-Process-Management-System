@@ -9,5 +9,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-09-07 22:56:35
 */
 public interface AppUserService extends IService<AppUser> {
-
+    public int addEngineer()
 }

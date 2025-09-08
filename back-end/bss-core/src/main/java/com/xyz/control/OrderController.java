@@ -5,6 +5,7 @@ import com.xyz.advice.SuccessAdvice;
 import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.OrderDTO;
+import com.xyz.service.OrderOrchestrationService;
 import com.xyz.service.OrdersService;
 import com.xyz.vo.orders.OrderVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ import java.util.List;
 public class OrderController {
     @Autowired
     OrdersService ordersService;
+    @Autowired
+    OrderOrchestrationService orderOrchestrationService;
 
     @PostMapping("/commit")
     public ResponseResult commit(@RequestBody OrderDTO.OrderAvaliableDTO dto){
@@ -36,6 +39,9 @@ public class OrderController {
     @PostMapping("/pay")
     public ResponseResult pay(@RequestBody OrderDTO.OrderPaymentDTO dto){
         int i = ordersService.payOrder(dto);
+        if(i >= 1){
+            orderOrchestrationService.onOrderPaid(dto.orderId());
+        }
         return ResponseResult.success(SuccessAdvice.updateSuccessMessage(i));
     }
 

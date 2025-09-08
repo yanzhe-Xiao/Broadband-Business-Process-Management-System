@@ -4,12 +4,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xyz.mapper.TicketMapper">
 
-    <resultMap id="BaseResultMap" type="com.xyz.workflow.Ticket">
+    <resultMap id="BaseResultMap" type="com.xyz.ticket.Ticket">
             <id property="id" column="ID" />
             <result property="orderId" column="ORDER_ID" />
             <result property="status" column="STATUS" />
-            <result property="assignee" column="ASSIGNEE" />
+            <result property="assigneeId" column="ASSIGNEE_ID" />
             <result property="note" column="NOTE" />
+            <result property="dispatchedAt" column="DISPATCHED_AT" />
+            <result property="completedAt" column="COMPLETED_AT" />
             <result property="deleted" column="DELETED" />
             <result property="deletedAt" column="DELETED_AT" />
             <result property="createdAt" column="CREATED_AT" />
@@ -17,7 +19,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        ID,ORDER_ID,STATUS,ASSIGNEE,NOTE,DELETED,
-        DELETED_AT,CREATED_AT,UPDATED_AT
+        ID,ORDER_ID,STATUS,ASSIGNEE_ID,NOTE,DISPATCHED_AT,
+        COMPLETED_AT,DELETED,DELETED_AT,CREATED_AT,UPDATED_AT
     </sql>
 </mapper>
