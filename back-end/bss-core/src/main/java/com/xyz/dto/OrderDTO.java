@@ -65,5 +65,25 @@ public class OrderDTO {
         }
     }
 
+    @Schema(name = "OrderPaymentDTO", description = "订单支付信息传输对象")
+    public record OrderPaymentDTO(
+            @Schema(description = "用户名")
+            String username,
+
+            @Schema(description = "订单ID")
+            Long orderId
+    ) {
+    }
+
+    @Schema(name = "OrderDeleteDTO",description = "删除订单的DTO")
+    public record OrderDeleteDTO(
+            @Schema(description = "用户名")
+            String username,
+
+            @Schema(description = "订单ID")
+            List<Long> orderId
+    ){}
+
+
 
 }

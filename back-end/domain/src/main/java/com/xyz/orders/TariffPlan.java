@@ -72,16 +72,6 @@ public class TariffPlan {
     private Integer isIp;
 
     /**
-     * 
-     */
-    private Long ipId;
-
-    /**
-     * 
-     */
-    private String deviceSn;
-
-    /**
      * 套餐的带宽
      */
     private Integer bandwith;
@@ -111,6 +101,11 @@ public class TariffPlan {
      */
     private BigDecimal rating;
 
+    /**
+     * 
+     */
+    private String deviceSn;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -134,14 +129,13 @@ public class TariffPlan {
             && (this.getCreatedAt() == null ? other.getCreatedAt() == null : this.getCreatedAt().equals(other.getCreatedAt()))
             && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()))
             && (this.getIsIp() == null ? other.getIsIp() == null : this.getIsIp().equals(other.getIsIp()))
-            && (this.getIpId() == null ? other.getIpId() == null : this.getIpId().equals(other.getIpId()))
-            && (this.getDeviceSn() == null ? other.getDeviceSn() == null : this.getDeviceSn().equals(other.getDeviceSn()))
             && (this.getBandwith() == null ? other.getBandwith() == null : this.getBandwith().equals(other.getBandwith()))
             && (this.getDescription() == null ? other.getDescription() == null : this.getDescription().equals(other.getDescription()))
             && (this.getDeviceQty() == null ? other.getDeviceQty() == null : this.getDeviceQty().equals(other.getDeviceQty()))
             && (this.getQty() == null ? other.getQty() == null : this.getQty().equals(other.getQty()))
             && (this.getImageUrl() == null ? other.getImageUrl() == null : this.getImageUrl().equals(other.getImageUrl()))
-            && (this.getRating() == null ? other.getRating() == null : this.getRating().equals(other.getRating()));
+            && (this.getRating() == null ? other.getRating() == null : this.getRating().equals(other.getRating()))
+            && (this.getDeviceSn() == null ? other.getDeviceSn() == null : this.getDeviceSn().equals(other.getDeviceSn()));
     }
 
     @Override
@@ -159,14 +153,13 @@ public class TariffPlan {
         result = prime * result + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
         result = prime * result + ((getUpdatedAt() == null) ? 0 : getUpdatedAt().hashCode());
         result = prime * result + ((getIsIp() == null) ? 0 : getIsIp().hashCode());
-        result = prime * result + ((getIpId() == null) ? 0 : getIpId().hashCode());
-        result = prime * result + ((getDeviceSn() == null) ? 0 : getDeviceSn().hashCode());
         result = prime * result + ((getBandwith() == null) ? 0 : getBandwith().hashCode());
         result = prime * result + ((getDescription() == null) ? 0 : getDescription().hashCode());
         result = prime * result + ((getDeviceQty() == null) ? 0 : getDeviceQty().hashCode());
         result = prime * result + ((getQty() == null) ? 0 : getQty().hashCode());
         result = prime * result + ((getImageUrl() == null) ? 0 : getImageUrl().hashCode());
         result = prime * result + ((getRating() == null) ? 0 : getRating().hashCode());
+        result = prime * result + ((getDeviceSn() == null) ? 0 : getDeviceSn().hashCode());
         return result;
     }
 
@@ -187,14 +180,13 @@ public class TariffPlan {
         sb.append(", createdAt=").append(createdAt);
         sb.append(", updatedAt=").append(updatedAt);
         sb.append(", isIp=").append(isIp);
-        sb.append(", ipId=").append(ipId);
-        sb.append(", deviceSn=").append(deviceSn);
         sb.append(", bandwith=").append(bandwith);
         sb.append(", description=").append(description);
         sb.append(", deviceQty=").append(deviceQty);
         sb.append(", qty=").append(qty);
         sb.append(", imageUrl=").append(imageUrl);
         sb.append(", rating=").append(rating);
+        sb.append(", deviceSn=").append(deviceSn);
         sb.append("]");
         return sb.toString();
     }

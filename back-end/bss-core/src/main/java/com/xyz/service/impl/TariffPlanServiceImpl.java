@@ -45,6 +45,7 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
     ImageStorageService imageStorageService;
 
 
+
     @Override
     @Transactional(readOnly = true)
     public IPage<TariffPlanVO.TariffPlanDetail> getTariffPlanDetail(TariffPlanDTO.TariffPlanSearchCriteria criteria) {
@@ -171,7 +172,7 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Integer addTariffPlanService(List<TariffPlanDTO.TariffPlanAvaliable> tariffPlanAvaliables) {
         List<TariffPlan> plans = tariffPlanAvaliables.stream()
                 .map(
@@ -189,6 +190,20 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
                                     // 如果符合要求，继续处理逻辑
                                 } catch (DataAccessException e) {
                                     throw new RuntimeException("检查IP带宽资源时发生错误: " + e.getMessage(), e);
+                                }
+                            }
+                            String sn = tariffPlanAvaliable.deviceSN();
+                            if((sn != null) && !sn.equals("")){
+                                ResourceDevice inventoryResource = resourceDeviceMapper.selectBySn(sn);
+                                try {
+                                    if (tariffPlanAvaliable.qty() > inventoryResource.getQty()) {
+                                        throw new IllegalArgumentException(
+                                                String.format("设备资源中最大可用资源个数(%d)小于套餐所需资源(%d)",
+                                                        inventoryResource.getQty(),tariffPlanAvaliable.qty())
+                                        );
+                                    }
+                                } catch (Exception e) {
+                                    throw new RuntimeException("检查设备资源时发生错误: " + e.getMessage(), e);
                                 }
                             }
                             return TariffPlanDTO.TariffPlanAvaliable.toEntity(tariffPlanAvaliable,imageStorageService::saveBase64Image);

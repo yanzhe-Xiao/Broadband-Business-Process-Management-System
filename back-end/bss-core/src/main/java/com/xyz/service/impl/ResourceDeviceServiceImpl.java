@@ -33,7 +33,7 @@ public class ResourceDeviceServiceImpl extends ServiceImpl<ResourceDeviceMapper,
     public IPage<DeviceAvaliableVO> getAvaliableDevice(int current, int size) {
         IPage<ResourceDevice> page = new Page<>(current,size);
         IPage<ResourceDevice> resourceDevices =
-                resourceDeviceMapper.selectAllByStatus(page,DeviceConstarint.DEVICE_STOCK);
+                resourceDeviceMapper.selectAllByStatus(page,DeviceConstarint.DEVICE_STATUS_STOCK);
         return resourceDevices.convert(resourceDevice -> DeviceAvaliableVO.builder()
                 .qty(resourceDevice.getQty())
                 .sn(resourceDevice.getSn())

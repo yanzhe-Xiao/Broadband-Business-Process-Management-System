@@ -19,20 +19,14 @@
             <result property="district" column="DISTRICT" />
             <result property="detailAddress" column="DETAIL_ADDRESS" />
             <result property="installAddress" column="INSTALL_ADDRESS" />
+            <result property="endTime" column="END_TIME" />
     </resultMap>
 
     <sql id="Base_Column_List">
         ID,USER_ID,STATUS,DELETED,DELETED_AT,VERSION,
         CREATED_AT,UPDATED_AT,INSTALLATION_FEE,PROVINCE,CITY,
-        DISTRICT,DETAIL_ADDRESS,INSTALL_ADDRESS
+        DISTRICT,DETAIL_ADDRESS,INSTALL_ADDRESS,END_TIME
     </sql>
-    <select id="selectAllByUserId" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from ORDERS
-        where
-        USER_ID = #{userId,jdbcType=NUMERIC}
-    </select>
     <select id="selectAllByUserIdAndStatus" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

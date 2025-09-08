@@ -37,9 +37,6 @@ public class TariffPlanDTO {
             @Schema(description = "永久费")
             BigDecimal foreverFee,
 
-            @Schema(description = "套餐有效期（月）")
-            Integer planPeriod,
-
             @Schema(description = "折扣率（100表示无折扣）")
             BigDecimal discount,
 
@@ -60,14 +57,11 @@ public class TariffPlanDTO {
             )
             Integer isIp,
 
-            @Schema(description = "评分")
-            BigDecimal rating,
+            @Schema(description = "套餐带宽（MB）")
+            Integer bandwidth,
 
             @Schema(description = "设备资源sn")
             String deviceSN,
-
-            @Schema(description = "套餐带宽（MB）")
-            Integer bandwidth,
 
             @Schema(description = "套餐描述")
             String description,
@@ -89,16 +83,13 @@ public class TariffPlanDTO {
             entity.setMonthlyFee(dto.monthlyFee());
             entity.setYearlyFee(dto.yearlyFee());
             entity.setForeverFee(dto.foreverFee());
-            entity.setPlanPeriod(dto.planPeriod());
             entity.setDiscount(dto.discount());
             entity.setStatus(dto.status());
             entity.setQty(dto.qty());
             entity.setIsIp(dto.isIp());
-            entity.setDeviceSn(dto.deviceSN());
             entity.setBandwith(dto.bandwidth());
             entity.setDescription(dto.description());
             entity.setDeviceQty(dto.deviceQty());
-            entity.setRating(dto.rating());
             // ⭐ 将 base64 存盘并得到可访问 URL，落到 entity.imageUrl
             if (dto.imageBase64() != null && !dto.imageBase64().isBlank()) {
                 String url = saveBase64Fn.apply(dto.imageBase64());

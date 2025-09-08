@@ -13,16 +13,16 @@ public class DeviceConstarint {
     /**
      * 设备库存状态
      */
-    public static final String DEVICE_STOCK = "STOCK";
+    public static final String DEVICE_STATUS_STOCK = "STOCK";
 
     /**
      * 设备分配状态
      */
-    public static final String DEVICE_ASSIGNED = "ASSIGNED";
+    public static final String DEVICE_STATUS_ASSIGNED = "ASSIGNED";
 
     /**
      * 设备退役状态
      */
-    public static final String DEVICE_RETIRED = "RETIRED";
+    public static final String DEVICE_STATUS_RETIRED = "RETIRED";
 
 }

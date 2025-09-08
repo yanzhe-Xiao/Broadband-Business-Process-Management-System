@@ -16,11 +16,14 @@
             <result property="planType" column="PLAN_TYPE" />
             <result property="period" column="PERIOD" />
             <result property="statusExpireAt" column="STATUS_EXPIRE_AT" />
+            <result property="endTime" column="END_TIME" />
+            <result property="ip" column="IP" />
+            <result property="deviceSn" column="DEVICE_SN" />
     </resultMap>
 
     <sql id="Base_Column_List">
         ID,ORDER_ID,PLAN_CODE,QTY,CREATED_AT,UPDATED_AT,
-        STATUS,USERNAME,PLAN_TYPE,PERIOD,STATUS_EXPIRE_AT
+        STATUS,USERNAME,PLAN_TYPE,PERIOD,STATUS_EXPIRE_AT,END_TIME,IP,DEVICE_SN
     </sql>
 
 

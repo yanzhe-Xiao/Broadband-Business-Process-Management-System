@@ -1,9 +1,7 @@
 package com.xyz.orders;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
@@ -41,6 +39,7 @@ public class Orders {
     /**
      * 软删除标识：0-未删除，1-已删除
      */
+    @TableLogic
     private Integer deleted;
 
     /**
@@ -51,6 +50,7 @@ public class Orders {
     /**
      * 乐观锁版本号
      */
+    @Version
     private Integer version;
 
     /**
@@ -93,6 +93,12 @@ public class Orders {
      */
     private String installAddress;
 
+    /**
+     * 因为订单是有月度 年度 永久，当过期时会进行删掉并释放资源
+     * 已废弃
+     */
+    private Date endTime;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -118,7 +124,8 @@ public class Orders {
             && (this.getCity() == null ? other.getCity() == null : this.getCity().equals(other.getCity()))
             && (this.getDistrict() == null ? other.getDistrict() == null : this.getDistrict().equals(other.getDistrict()))
             && (this.getDetailAddress() == null ? other.getDetailAddress() == null : this.getDetailAddress().equals(other.getDetailAddress()))
-            && (this.getInstallAddress() == null ? other.getInstallAddress() == null : this.getInstallAddress().equals(other.getInstallAddress()));
+            && (this.getInstallAddress() == null ? other.getInstallAddress() == null : this.getInstallAddress().equals(other.getInstallAddress()))
+            && (this.getEndTime() == null ? other.getEndTime() == null : this.getEndTime().equals(other.getEndTime()));
     }
 
     @Override
@@ -139,6 +146,7 @@ public class Orders {
         result = prime * result + ((getDistrict() == null) ? 0 : getDistrict().hashCode());
         result = prime * result + ((getDetailAddress() == null) ? 0 : getDetailAddress().hashCode());
         result = prime * result + ((getInstallAddress() == null) ? 0 : getInstallAddress().hashCode());
+        result = prime * result + ((getEndTime() == null) ? 0 : getEndTime().hashCode());
         return result;
     }
 
@@ -162,6 +170,7 @@ public class Orders {
         sb.append(", district=").append(district);
         sb.append(", detailAddress=").append(detailAddress);
         sb.append(", installAddress=").append(installAddress);
+        sb.append(", endTime=").append(endTime);
         sb.append("]");
         return sb.toString();
     }

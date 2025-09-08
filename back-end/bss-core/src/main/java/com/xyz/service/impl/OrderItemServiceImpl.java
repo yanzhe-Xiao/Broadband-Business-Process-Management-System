@@ -211,6 +211,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int updateTypeAndQty(OrderItemDTO.OrderItemUpdate update) {
         Objects.requireNonNull(update, "update 不能为空");
 
@@ -284,7 +285,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int deleteOrderItem(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return 0;

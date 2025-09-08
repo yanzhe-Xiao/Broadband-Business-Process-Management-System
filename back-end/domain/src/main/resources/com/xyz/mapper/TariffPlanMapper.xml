@@ -16,27 +16,19 @@
             <result property="createdAt" column="CREATED_AT" />
             <result property="updatedAt" column="UPDATED_AT" />
             <result property="isIp" column="IS_IP" />
-            <result property="ipId" column="IP_ID" />
-            <result property="deviceSn" column="DEVICE_SN" />
             <result property="bandwith" column="BANDWITH" />
             <result property="description" column="DESCRIPTION" />
             <result property="deviceQty" column="DEVICE_QTY" />
             <result property="qty" column="QTY" />
             <result property="imageUrl" column="IMAGE_URL" />
             <result property="rating" column="RATING" />
+            <result property="deviceSn" column="DEVICE_SN" />
     </resultMap>
 
     <sql id="Base_Column_List">
         PLAN_CODE,NAME,MONTHLY_FEE,YEARLY_FEE,FOREVER_FEE,PLAN_PERIOD,
         DISCOUNT,STATUS,CREATED_AT,UPDATED_AT,IS_IP,
-        IP_ID,DEVICE_SN,BANDWITH,DESCRIPTION,DEVICE_QTY,
-        QTY,IMAGE_URL,RATING
+        BANDWITH,DESCRIPTION,DEVICE_QTY,QTY,IMAGE_URL,
+        RATING,DEVICE_SN
     </sql>
-    <select id="selectOneByPlanCode" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from TARIFF_PLAN
-        where
-        PLAN_CODE = #{planCode,jdbcType=VARCHAR}
-    </select>
 </mapper>

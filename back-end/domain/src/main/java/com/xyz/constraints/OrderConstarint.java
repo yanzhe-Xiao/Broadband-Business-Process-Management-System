@@ -41,6 +41,9 @@ public class OrderConstarint {
     /** 已取消 */
     public static final String ORDER_STATUS_CANCELED = "已取消";
 
+    /** orderStatus的示例汇总 */
+    public static final String ORDER_STATUS_EXAMPLE = generateOrderExample("ORDER_STATUS_");
+
     //——————————————-------------------------
     // ORDER_ITEM
     /** 在购物车中 */
@@ -52,6 +55,12 @@ public class OrderConstarint {
     /** 已支付 */
     public static final String ORDER_ITEM_STATUS_PAID = "已支付";
 
+    /** 已取消 */
+    public static final String ORDER_ITEM_STATUS_CANCELED = "已取消";
+
+    /** orderItemStatus的示例汇总 */
+    public static final String ORDER_ITEM_STATUS_EXAMLE = generateOrderExample("ORDER_ITEM_STATUS");
+
     /** 月套餐 */
     public static final String ORDER_ITEM_PLAN_TYPE_MONTH = "month";
 
@@ -61,10 +70,44 @@ public class OrderConstarint {
     /** 永久套餐 */
     public static final String ORDER_ITEM_PLAN_TYPE_FOREVER = "forever";
 
+    /** orderItemPlanType的示例汇总 */
+    public static final String ORDER_ITEM_PLAN_TYPE_EXAMLE = generateOrderExample("ORDER_ITEM_PLAN_TYPE_");
+
+
     private static Date createFarFutureDate() {
         Calendar cal = Calendar.getInstance();
         cal.set(2199, Calendar.JANUARY, 1, 0, 0, 0);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
+
+    /**
+     * 自动生成示例
+     * 会自动收集 OrderConstarint 类中所有以 prefix 开头的常量值
+     * @return 字符串
+     */
+    private static String generateOrderExample(String prefix) {
+        java.lang.reflect.Field[] fields = OrderConstarint.class.getFields();
+
+        StringBuilder regexBuilder = new StringBuilder();
+        boolean first = true;
+
+        for (java.lang.reflect.Field field : fields) {
+            if (field.getName().startsWith(prefix)) {
+                try {
+                    if (!first) {
+                        regexBuilder.append(",");
+                    }
+                    regexBuilder.append(field.get(null));
+                    first = false;
+                } catch (IllegalAccessException e) {
+                    // 忽略无法访问的字段
+                }
+            }
+        }
+
+        return regexBuilder.toString();
+    }
+
+
 }

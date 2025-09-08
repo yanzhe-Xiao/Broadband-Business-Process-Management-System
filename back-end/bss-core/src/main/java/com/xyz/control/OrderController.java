@@ -1,14 +1,16 @@
 package com.xyz.control;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xyz.advice.SuccessAdvice;
+import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.OrderDTO;
 import com.xyz.service.OrdersService;
+import com.xyz.vo.orders.OrderVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>Package Name: com.xyz.control </p>
@@ -25,9 +27,27 @@ public class OrderController {
     @Autowired
     OrdersService ordersService;
 
-    @PostMapping("commit")
+    @PostMapping("/commit")
     public ResponseResult commit(@RequestBody OrderDTO.OrderAvaliableDTO dto){
         int i = ordersService.commitOrder(dto);
         return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
+    }
+
+    @PostMapping("/pay")
+    public ResponseResult pay(@RequestBody OrderDTO.OrderPaymentDTO dto){
+        int i = ordersService.payOrder(dto);
+        return ResponseResult.success(SuccessAdvice.updateSuccessMessage(i));
+    }
+
+    @PostMapping("/get")
+    public PageResult<OrderVO.OrderLookVO> get(int current, int size, String username){
+        IPage<OrderVO.OrderLookVO> order = ordersService.getOrder(current, size, username);
+        return PageResult.of(order);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseResult delete(@RequestBody OrderDTO.OrderDeleteDTO deleteDTO){
+        int i = ordersService.deleteOrder(deleteDTO);
+        return ResponseResult.success(SuccessAdvice.deleteSuccessMessage(i));
     }
 }

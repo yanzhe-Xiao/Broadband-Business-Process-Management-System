@@ -70,6 +70,15 @@ public class OrderItem {
      */
     private Date statusExpireAt;
 
+    /**
+     * 订单项的服务结束时间
+     */
+    private Date endTime;
+
+    private String ip;
+
+    private String deviceSn;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {

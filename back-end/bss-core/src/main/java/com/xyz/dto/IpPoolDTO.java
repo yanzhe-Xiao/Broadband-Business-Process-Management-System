@@ -1,5 +1,7 @@
 package com.xyz.dto;
 
+import com.xyz.annotation.ValidByPrefix;
+import com.xyz.constraints.IpConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
@@ -22,6 +24,7 @@ public class IpPoolDTO {
             String ip,
 
             @NotBlank
+            @ValidByPrefix(prefix = "IP_STATUS_", sources = {IpConstraint.class})
             String status,
 
             Integer ipBandwidth,

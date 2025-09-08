@@ -1,5 +1,6 @@
 package com.xyz.dto;
 
+import com.xyz.annotation.ValidByPrefix;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 
@@ -29,10 +30,7 @@ public class DeviceDTO {
             Double price,
 
             @Schema(description = "设备状态", example = "STOCK/ASSIGNED/RETIRED")
-            @Pattern(
-                    regexp = "^(STOCK|ASSIGNED|RETIRED)$",
-                    message = "设备状态只能是 STOCK, ASSIGNED, RETIRED 中的一个"
-            )
+            @ValidByPrefix(prefix = "DEVICE_STATUS_", sources = com.xyz.constraints.DeviceConstarint.class)
             String status
     ) {}
 }

@@ -29,7 +29,7 @@ public class IpPoolServiceImpl extends ServiceImpl<IpPoolMapper, IpPool>
     @Override
     public IPage<IpPool> getAvaliableIp(int current, int size) {
         IPage<IpPool> ipPools = new Page<>(current, size);
-        return ipPoolMapper.selectAllByStatus(ipPools,IpConstraint.IP_AVALIABLE_STATUS);
+        return ipPoolMapper.selectAllByStatus(ipPools,IpConstraint.IP_STATUS_AVALIABLE);
     }
 
 
