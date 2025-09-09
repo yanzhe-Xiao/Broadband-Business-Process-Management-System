@@ -30,6 +30,7 @@ public class GatewaySecurityConfig {
                         // 预检请求必须放行
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/auth/**", "/actuator/health").permitAll()
+                        .pathMatchers("/images/**").permitAll()
                         .anyExchange().authenticated()
                 )
 

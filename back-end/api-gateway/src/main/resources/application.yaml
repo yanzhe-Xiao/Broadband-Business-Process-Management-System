@@ -10,7 +10,7 @@ spring:
         - id: bss-core
           uri: http://localhost:8081         # 先写死地址，未来换 lb://bss-core
           predicates:
-            - Path=/api/**                   # 业务接口都转到 bss-core
+            - Path=/api/**,/images/**                   # 业务接口都转到 bss-core
         - id: auth-service
           uri: http://localhost:8082
           predicates:
