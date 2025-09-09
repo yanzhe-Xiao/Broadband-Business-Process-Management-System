@@ -456,6 +456,30 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
 
         return affected;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getPlanCodesByOrderId(Long orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("orderId 不能为空");
+        }
+
+        // 查询订单项
+        List<OrderItem> items = orderItemMapper.selectList(
+                Wrappers.<OrderItem>lambdaQuery()
+                        .eq(OrderItem::getOrderId, orderId)
+                        .select(OrderItem::getPlanCode)
+        );
+
+        // 用 Set 去重
+        Set<String> planCodeSet = items.stream()
+                .map(OrderItem::getPlanCode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // 转 List 返回
+        return new ArrayList<>(planCodeSet);
+    }
 }
 
 

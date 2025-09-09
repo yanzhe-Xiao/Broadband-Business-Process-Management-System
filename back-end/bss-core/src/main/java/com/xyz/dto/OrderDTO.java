@@ -63,6 +63,17 @@ public class OrderDTO {
             entity.setInstallationFee(BigDecimal.valueOf(OrderConstarint.INSTALLATION_FEE));
             return entity;
         }
+
+        public static OrderAvaliableDTO withUsername(OrderControllerDTO old, String username) {
+            return new OrderAvaliableDTO(
+                    username,
+                    old.orderItemId(),
+                    old.province(),
+                    old.city(),
+                    old.district(),
+                    old.detailAddress()
+            );
+        }
     }
 
     @Schema(name = "OrderPaymentDTO", description = "订单支付信息传输对象")
@@ -73,6 +84,12 @@ public class OrderDTO {
             @Schema(description = "订单ID")
             Long orderId
     ) {
+        public static OrderPaymentDTO withUsername(OrderPaymentDTO old, String username) {
+            return new OrderPaymentDTO(
+                    username,
+                    old.orderId()
+            );
+        }
     }
 
     @Schema(name = "OrderDeleteDTO",description = "删除订单的DTO")
@@ -82,8 +99,45 @@ public class OrderDTO {
 
             @Schema(description = "订单ID")
             List<Long> orderId
-    ){}
+    ){
+        public static OrderDeleteDTO withUsername(OrderDeleteDTO old, String username) {
+            return new OrderDeleteDTO(
+                    username,
+                    old.orderId()
+            );
+        }
+    }
 
+    @Schema(name = "OrderControllerDTO", description = "订单可用信息传输对象")
+    public record OrderControllerDTO(
+//            @Schema(description = "用户name")
+//            String username,
+
+            @Schema(description = "订单项ID")
+            List<Long> orderItemId,
+
+//            @Schema(description = "订单状态",
+//                    allowableValues = {
+//                            "待支付", "已支付", "待派单",
+//                            "已分配工单", "工单已完成",
+//                            "待评价", "已完成", "已取消"
+//                    })
+//            @Pattern(regexp = "待支付|已支付|待派单|已分配工单|工单已完成|待评价|已完成|已取消",
+//                    message = "订单状态必须是固定值之一")
+//            String status,
+
+            @Schema(description = "省/自治区/直辖市")
+            String province,
+
+            @Schema(description = "地级市/自治州；直辖市可留空或与省相同")
+            String city,
+
+            @Schema(description = "区/县")
+            String district,
+
+            @Schema(description = "小区/写字楼/门牌号等")
+            String detailAddress
+    ){}
 
 
 }

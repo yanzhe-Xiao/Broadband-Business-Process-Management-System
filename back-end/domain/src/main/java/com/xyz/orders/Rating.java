@@ -21,9 +21,9 @@ public class Rating {
     private Long id;
 
     /**
-     * 关联的订单项ID
+     * 套餐code
      */
-    private Long orderItemId;
+    private String planCode;
 
     /**
      * 评价用户ID
@@ -45,6 +45,11 @@ public class Rating {
      */
     private Date createdAt;
 
+    /**
+     * 
+     */
+    private Long orderId;
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -58,11 +63,12 @@ public class Rating {
         }
         Rating other = (Rating) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getOrderItemId() == null ? other.getOrderItemId() == null : this.getOrderItemId().equals(other.getOrderItemId()))
+            && (this.getPlanCode() == null ? other.getPlanCode() == null : this.getPlanCode().equals(other.getPlanCode()))
             && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
             && (this.getScore() == null ? other.getScore() == null : this.getScore().equals(other.getScore()))
             && (this.getRatComment() == null ? other.getRatComment() == null : this.getRatComment().equals(other.getRatComment()))
-            && (this.getCreatedAt() == null ? other.getCreatedAt() == null : this.getCreatedAt().equals(other.getCreatedAt()));
+            && (this.getCreatedAt() == null ? other.getCreatedAt() == null : this.getCreatedAt().equals(other.getCreatedAt()))
+            && (this.getOrderId() == null ? other.getOrderId() == null : this.getOrderId().equals(other.getOrderId()));
     }
 
     @Override
@@ -70,11 +76,12 @@ public class Rating {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
-        result = prime * result + ((getOrderItemId() == null) ? 0 : getOrderItemId().hashCode());
+        result = prime * result + ((getPlanCode() == null) ? 0 : getPlanCode().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getScore() == null) ? 0 : getScore().hashCode());
         result = prime * result + ((getRatComment() == null) ? 0 : getRatComment().hashCode());
         result = prime * result + ((getCreatedAt() == null) ? 0 : getCreatedAt().hashCode());
+        result = prime * result + ((getOrderId() == null) ? 0 : getOrderId().hashCode());
         return result;
     }
 
@@ -85,11 +92,12 @@ public class Rating {
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
-        sb.append(", orderItemId=").append(orderItemId);
+        sb.append(", planCode=").append(planCode);
         sb.append(", userId=").append(userId);
         sb.append(", score=").append(score);
         sb.append(", ratComment=").append(ratComment);
         sb.append(", createdAt=").append(createdAt);
+        sb.append(", orderId=").append(orderId);
         sb.append("]");
         return sb.toString();
     }

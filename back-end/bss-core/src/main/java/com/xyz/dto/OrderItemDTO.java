@@ -44,6 +44,17 @@ public class OrderItemDTO {
             @ValidByPrefix(prefix = "ORDER_ITEM_PLAN_TYPE_")
             String planType
     ) {
+
+        public static OrderItemAvaliable withUsername(OrderItemController old, String username) {
+            return new OrderItemAvaliable(
+                    old.planCode(),
+                    old.qty(),
+                    old.status(),
+                    username,
+                    old.planType()
+            );
+        }
+
         /**
          * 转换成 OrderItem 实体
          */
@@ -90,5 +101,28 @@ public class OrderItemDTO {
             String planType
     ) { }
 
+    @Schema(name = "OrderItemController", description = "订单明细 DTO")
+    public record OrderItemController(
+
+            @Schema(description = "套餐编码", example = "123")
+            @NotBlank(message = "套餐编码不能为空")
+            String planCode,
+
+            @Schema(description = "数量", example = "1")
+            @NotNull(message = "数量不能为空")
+            Integer qty,
+
+            @Schema(description = "订单状态")
+            @ValidByPrefix(prefix = "ORDER_ITEM_STATUS_")
+            String status,
+
+//            @Schema(description = "用户名", example = "admin")
+//            @NotBlank(message = "用户名不能为空")
+//            String username,
+
+            @Schema(description = "套餐类型")
+            @ValidByPrefix(prefix = "ORDER_ITEM_PLAN_TYPE_")
+            String planType
+    ){}
 
 }

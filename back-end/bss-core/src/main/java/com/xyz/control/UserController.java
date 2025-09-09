@@ -1,8 +1,10 @@
 package com.xyz.control;
 
+import com.xyz.advice.SuccessAdvice;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.UserDTO;
 import com.xyz.service.AppUserService;
+import com.xyz.utils.UserAuth;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class UserController {
     @PostMapping
     public ResponseResult create(@Valid @RequestBody UserDTO.UpsertUserDTO dto) {
         int i = userService.createUser(dto);
-        return ResponseResult.success("created: " + i);
+        return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
     }
 
     @PutMapping
@@ -47,5 +49,11 @@ public class UserController {
     public ResponseResult resetPwd(@Valid @RequestBody UserDTO.ResetPasswordDTO dto) {
         int i = userService.resetPassword(dto.username(), dto.newPassword());
         return ResponseResult.success("password-reset: " + i);
+    }
+
+    @GetMapping("/me")
+    public ResponseResult<String> testGetUsername(){
+        String currentUsername = UserAuth.getCurrentUsername();
+        return ResponseResult.success(currentUsername);
     }
 }

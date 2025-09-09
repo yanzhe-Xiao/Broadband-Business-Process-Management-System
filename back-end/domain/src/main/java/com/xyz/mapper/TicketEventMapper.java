@@ -1,4 +1,6 @@
 package com.xyz.mapper;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 import com.xyz.ticket.TicketEvent;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -12,7 +14,7 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface TicketEventMapper extends BaseMapper<TicketEvent> {
-
+    List<TicketEvent> selectAllByTicketId(@Param("ticketId") Long ticketId);
 }
 
 

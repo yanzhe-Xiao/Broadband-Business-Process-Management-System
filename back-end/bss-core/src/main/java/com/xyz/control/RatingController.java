@@ -3,6 +3,7 @@ package com.xyz.control;
 import com.xyz.common.ResponseResult;
 import com.xyz.service.AppUserService;
 import com.xyz.service.RatingService;
+import com.xyz.utils.UserAuth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,12 +26,12 @@ public class RatingController {
     @Autowired
     AppUserService appUserService;
 
-    public record RatingReq(Long orderItemId,String username, int score, String comment){}
+    public record RatingReq(Long orderId,String planCode, int score, String comment){}
 
     @PostMapping()
     public ResponseResult raing(@RequestBody RatingReq ratingReq){
-        Long l = appUserService.usernameToUserId(ratingReq.username());
-        ratingService.submitRating(ratingReq.orderItemId(),l,ratingReq.score(), ratingReq.comment());
+        Long l = appUserService.usernameToUserId(UserAuth.getCurrentUsername());
+        ratingService.submitRating(ratingReq.orderId(),ratingReq.planCode(),l,ratingReq.score(), ratingReq.comment());
         return ResponseResult.success();
     }
 }

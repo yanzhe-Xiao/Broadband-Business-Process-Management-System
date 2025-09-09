@@ -15,4 +15,12 @@
     <sql id="Base_Column_List">
         ID,TICKET_ID,EVENT_CODE,NOTE,HAPPENED_AT
     </sql>
+    <select id="selectAllByTicketId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from TICKET_EVENT
+        where
+        TICKET_ID = #{ticketId,jdbcType=NUMERIC}
+        order by HAPPENED_AT desc
+    </select>
 </mapper>

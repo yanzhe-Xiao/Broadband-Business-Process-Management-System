@@ -7,10 +7,12 @@ import com.xyz.common.ResponseResult;
 import com.xyz.dto.OrderDTO;
 import com.xyz.service.OrderOrchestrationService;
 import com.xyz.service.OrdersService;
+import com.xyz.utils.UserAuth;
 import com.xyz.vo.orders.OrderVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,14 +33,17 @@ public class OrderController {
     OrderOrchestrationService orderOrchestrationService;
 
     @PostMapping("/commit")
-    public ResponseResult commit(@RequestBody OrderDTO.OrderAvaliableDTO dto){
-        int i = ordersService.commitOrder(dto);
+    public ResponseResult commit(@RequestBody OrderDTO.OrderControllerDTO dto){
+        OrderDTO.OrderAvaliableDTO newDto = OrderDTO.OrderAvaliableDTO.withUsername(dto,UserAuth
+                .getCurrentUsername());
+        int i = ordersService.commitOrder(newDto);
         return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
     }
 
     @PostMapping("/pay")
     public ResponseResult pay(@RequestBody OrderDTO.OrderPaymentDTO dto){
-        int i = ordersService.payOrder(dto);
+        OrderDTO.OrderPaymentDTO newDto = OrderDTO.OrderPaymentDTO.withUsername(dto,UserAuth.getCurrentUsername());
+        int i = ordersService.payOrder(newDto);
         if(i >= 1){
             orderOrchestrationService.onOrderPaid(dto.orderId());
         }
@@ -46,14 +51,22 @@ public class OrderController {
     }
 
     @PostMapping("/get")
-    public PageResult<OrderVO.OrderLookVO> get(int current, int size, String username){
+    public PageResult<OrderVO.OrderLookVO> get(int current, int size){
+        String username = UserAuth.getCurrentUsername();
         IPage<OrderVO.OrderLookVO> order = ordersService.getOrder(current, size, username);
         return PageResult.of(order);
     }
 
     @DeleteMapping("/delete")
     public ResponseResult delete(@RequestBody OrderDTO.OrderDeleteDTO deleteDTO){
-        int i = ordersService.deleteOrder(deleteDTO);
+        OrderDTO.OrderDeleteDTO updatedDto = OrderDTO.OrderDeleteDTO.withUsername(deleteDTO, UserAuth.getCurrentUsername());
+        int i = ordersService.deleteOrder(updatedDto);
         return ResponseResult.success(SuccessAdvice.deleteSuccessMessage(i));
+    }
+
+    @GetMapping("/{orderId}/plan-codes")
+    public ResponseResult<List<String>> getPlanCodes(@PathVariable Long orderId) {
+        List<String> planCodes = ordersService.getPlanCodesByOrderId(orderId);
+        return ResponseResult.success(planCodes);
     }
 }

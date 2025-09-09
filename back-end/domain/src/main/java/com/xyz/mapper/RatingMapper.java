@@ -10,12 +10,13 @@ import java.math.BigDecimal;
 /**
 * @author X
 * @description 针对表【RATING(评价表（每个订单项一条评价，便于逐套餐评分）)】的数据库操作Mapper
-* @createDate 2025-09-08 20:36:17
+* @createDate 2025-09-09 23:40:47
 * @Entity com.xyz.orders.Rating
 */
 @Mapper
 public interface RatingMapper extends BaseMapper<Rating> {
     BigDecimal selectAvgScoreByPlanCode(@Param("planCode") String planCode);
+
 }
 
 

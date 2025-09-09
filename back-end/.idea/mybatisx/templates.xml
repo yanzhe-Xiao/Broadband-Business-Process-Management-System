@@ -64,13 +64,13 @@
             <option name="needToStringHashcodeEquals" value="true" />
             <option name="needsComment" value="true" />
             <option name="needsModel" value="true" />
-            <option name="relativePackage" value="user" />
+            <option name="relativePackage" value="orders" />
             <option name="superClass" value="" />
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="Role" />
-                  <option name="tableName" value="ROLE" />
+                  <option name="className" value="Rating" />
+                  <option name="tableName" value="RATING" />
                 </TableUIInfo>
               </list>
             </option>

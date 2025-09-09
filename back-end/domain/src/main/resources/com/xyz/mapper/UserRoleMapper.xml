@@ -13,4 +13,9 @@
     <sql id="Base_Column_List">
         ID,USER_ID,ROLE_ID
     </sql>
+    <select id="selectRoleIdByUserId" resultMap="BaseResultMap">
+        select ROLE_ID
+        from USER_ROLE
+        where USER_ID = #{userId,jdbcType=NUMERIC}
+    </select>
 </mapper>

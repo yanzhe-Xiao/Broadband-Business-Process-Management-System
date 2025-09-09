@@ -21,4 +21,11 @@ public interface OrdersService extends IService<Orders> {
     public IPage<OrderVO.OrderLookVO> getOrder(int current,int size,String username);
 
     public int deleteOrder(OrderDTO.OrderDeleteDTO deleteDTOS);
+
+    /**
+     * 根据订单ID获取去重后的套餐编码
+     * @param orderId 订单ID
+     * @return 套餐编码列表（无重复）
+     */
+    List<String> getPlanCodesByOrderId(Long orderId);
 }

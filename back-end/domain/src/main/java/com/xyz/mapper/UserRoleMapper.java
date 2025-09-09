@@ -1,4 +1,6 @@
 package com.xyz.mapper;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 import com.xyz.user.UserRole;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -12,7 +14,7 @@ import org.apache.ibatis.annotations.Mapper;
 */
 @Mapper
 public interface UserRoleMapper extends BaseMapper<UserRole> {
-
+    List<UserRole> selectRoleIdByUserId(@Param("userId") Long userId);
 }
 
 

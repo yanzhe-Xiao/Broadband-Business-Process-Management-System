@@ -5,6 +5,7 @@ import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.TariffPlanDTO;
 import com.xyz.service.TariffPlanService;
+import com.xyz.utils.UserAuth;
 import com.xyz.vo.orders.TariffPlanVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +28,10 @@ public class TariffPlanController {
     TariffPlanService tariffPlanService;
 
     @PostMapping("/customer/menu")
-    public PageResult<TariffPlanVO.TariffPlanDetail> getTariffPlanService(@RequestBody TariffPlanDTO.TariffPlanSearchCriteria searchCriteria){
-        return PageResult.of(tariffPlanService.getTariffPlanDetail(searchCriteria));
+    public PageResult<TariffPlanVO.TariffPlanDetail> getTariffPlanService(@RequestBody TariffPlanDTO.TariffPlanSearchCriteriaController searchCriteria){
+        TariffPlanDTO.TariffPlanSearchCriteria newDto =
+                TariffPlanDTO.TariffPlanSearchCriteria.withUsername(searchCriteria, UserAuth.getCurrentUsername());
+        return PageResult.of(tariffPlanService.getTariffPlanDetail(newDto));
     }
 
     @PostMapping("/tariffplan/add")

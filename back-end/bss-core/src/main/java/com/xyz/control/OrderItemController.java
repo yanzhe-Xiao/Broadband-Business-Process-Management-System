@@ -6,12 +6,14 @@ import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.OrderItemDTO;
 import com.xyz.service.OrderItemService;
+import com.xyz.utils.UserAuth;
 import com.xyz.vo.orders.OrderItemVO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>Package Name: com.xyz.control </p>
@@ -29,8 +31,11 @@ public class OrderItemController {
     OrderItemService orderItemService;
 
     @PostMapping("/add")
-    public ResponseResult addOrderItem(@RequestBody @Valid List<OrderItemDTO.@Valid OrderItemAvaliable> orderItemAvailable){
-        int i = orderItemService.addOrderItem(orderItemAvailable);
+    public ResponseResult addOrderItem(@RequestBody @Valid List<OrderItemDTO.@Valid OrderItemController> orderItemControllers){
+        List<OrderItemDTO.OrderItemAvaliable> orderItemAvaliables = orderItemControllers.stream().map(orderItemController -> {
+            return OrderItemDTO.OrderItemAvaliable.withUsername(orderItemController, UserAuth.getCurrentUsername());
+        }).collect(Collectors.toList());
+        int i = orderItemService.addOrderItem(orderItemAvaliables);
         return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
     }
 
@@ -46,9 +51,9 @@ public class OrderItemController {
         return ResponseResult.success(SuccessAdvice.deleteSuccessMessage(i));
     }
 
-    //todo 查找
     @GetMapping("/list")
-    public PageResult<OrderItemVO.Shopping> getOrerItemFull(String username,int current,int size){
+    public PageResult<OrderItemVO.Shopping> getOrerItemFull(int current,int size){
+        String username = UserAuth.getCurrentUsername();
         IPage<OrderItemVO.Shopping> orderItemFull = orderItemService.getOrderItemFull(current, size, username);
         return PageResult.of(orderItemFull);
     }

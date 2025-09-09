@@ -5,6 +5,7 @@ import com.xyz.mapper.AppUserMapper;
 import com.xyz.mapper.RoleMapper;
 import com.xyz.user.AppUser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ import java.util.List;
  */
 @Transactional
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -114,7 +116,11 @@ public class AuthService {
      * @param roleName 要确保用户拥有的角色名称。
      */
     public void ensureRole(Long userId, String roleName) {
-        // 调用RoleMapper向user_role表中插入关联记录
-        roleMapper.insertUserAndRoleByUserIdAndRoleName(userId, roleName);
+        int rows = roleMapper.insertUserAndRoleByUserIdAndRoleName(userId, roleName);
+        if (rows > 0) {
+            log.info("用户 {} 成功分配角色 {}", userId, roleName);
+        } else {
+            log.info("用户 {} 已经拥有角色 {}", userId, roleName);
+        }
     }
 }

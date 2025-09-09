@@ -6,22 +6,22 @@
 
     <resultMap id="BaseResultMap" type="com.xyz.orders.Rating">
             <id property="id" column="ID" />
-            <result property="orderItemId" column="ORDER_ITEM_ID" />
+            <result property="planCode" column="PLAN_CODE" />
             <result property="userId" column="USER_ID" />
             <result property="score" column="SCORE" />
             <result property="ratComment" column="RAT_COMMENT" />
             <result property="createdAt" column="CREATED_AT" />
+            <result property="orderId" column="ORDER_ID" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        ID,ORDER_ITEM_ID,USER_ID,SCORE,RAT_COMMENT,CREATED_AT
+        ID,PLAN_CODE,USER_ID,SCORE,RAT_COMMENT,CREATED_AT,
+        ORDER_ID
     </sql>
 
     <select id="selectAvgScoreByPlanCode" resultType="java.math.BigDecimal">
-        SELECT ROUND(AVG(r.score), 1)
-        FROM rating r
-                 JOIN order_item oi ON oi.id = r.order_item_id
-        WHERE oi.plan_code = #{planCode}
+        SELECT NVL(AVG(score), 0)
+        FROM RATING
+        WHERE plan_code = #{planCode}
     </select>
-
 </mapper>

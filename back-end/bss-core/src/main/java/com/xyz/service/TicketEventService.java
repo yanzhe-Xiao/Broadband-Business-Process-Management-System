@@ -2,6 +2,9 @@ package com.xyz.service;
 
 import com.xyz.ticket.TicketEvent;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xyz.vo.TicketEventDetailVO;
+
+import java.util.List;
 
 /**
 * @author X
@@ -9,5 +12,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-09-08 20:35:32
 */
 public interface TicketEventService extends IService<TicketEvent> {
+    public String getByNewestStatus(Long id);
 
+    /**
+     * 按 ticketId + eventCode 查询唯一事件，返回 note + imageUrls + happenedAt
+     */
+    TicketEventDetailVO queryEventDetail(Long ticketId, String eventCode);
 }
