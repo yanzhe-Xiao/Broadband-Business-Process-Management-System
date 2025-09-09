@@ -28,7 +28,7 @@ public interface AppUserMapper extends BaseMapper<AppUser> {
         JOIN user_role ur ON ur.user_id = u.id
         JOIN role r ON r.id = ur.role_id
         JOIN engineer_status es ON es.user_id = u.id
-        WHERE r.role_name = 'ENGINEER'
+        WHERE r.role_name = '装维工程师'
           AND u.status = 'ACTIVE'
           AND es.is_idle = 1
         ORDER BY es.active_ticket_cnt ASC, es.updated_at ASC
@@ -47,7 +47,7 @@ public interface AppUserMapper extends BaseMapper<AppUser> {
         JOIN user_role ur ON ur.user_id = u.id
         JOIN role r ON r.id = ur.role_id
         JOIN engineer_status es ON es.user_id = u.id
-        WHERE r.role_name = 'ENGINEER'
+        WHERE r.role_name = '装维工程师'
           AND u.status = 'ACTIVE'
         ORDER BY es.active_ticket_cnt ASC, es.updated_at ASC
         FETCH FIRST 1 ROWS ONLY

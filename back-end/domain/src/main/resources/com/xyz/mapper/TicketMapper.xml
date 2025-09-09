@@ -22,4 +22,67 @@
         ID,ORDER_ID,STATUS,ASSIGNEE_ID,NOTE,DISPATCHED_AT,
         COMPLETED_AT,DELETED,DELETED_AT,CREATED_AT,UPDATED_AT
     </sql>
+
+    <sql id="ticketSelectCols">
+        t.id              AS id,
+        t.order_id        AS orderId,
+        t.status          AS status,
+        t.assignee_id     AS assigneeId,
+        t.note            AS note,
+        t.dispatched_at   AS dispatchedAt,
+        t.completed_at    AS completedAt,
+        t.created_at      AS createdAt,
+        t.updated_at      AS updatedAt,
+
+        -- Orders
+        o.install_address AS installAddress,
+
+        -- Engineer (app_user)
+        u.username        AS engineerUsername,
+        u.full_name       AS engineerFullName,
+        u.phone           AS engineerPhone,
+        u.email           AS engineerEmail
+    </sql>
+
+    <select id="selectTicketPage" resultType="com.xyz.vo.TicketPageVO">
+        SELECT
+        <include refid="ticketSelectCols"/>
+        FROM ticket t
+        LEFT JOIN orders    o ON o.id     = t.order_id
+        LEFT JOIN app_user  u ON u.id     = t.assignee_id
+        <where>
+            <if test="status != null and status != ''">
+                AND t.status = #{status}
+            </if>
+            <if test="engineer != null and engineer != ''">
+                AND (u.username LIKE CONCAT('%', #{engineer}, '%')
+                OR  u.full_name LIKE CONCAT('%', #{engineer}, '%'))
+            </if>
+            <if test="addressKw != null and addressKw != ''">
+                AND o.install_address LIKE CONCAT('%', #{addressKw}, '%')
+            </if>
+        </where>
+        ORDER BY t.id DESC
+    </select>
+
+    <select id="exportTicketList" resultType="com.xyz.vo.TicketPageVO">
+        SELECT
+        <include refid="ticketSelectCols"/>
+        FROM ticket t
+        LEFT JOIN orders    o ON o.id     = t.order_id
+        LEFT JOIN app_user  u ON u.id     = t.assignee_id
+        <where>
+            <if test="status != null and status != ''">
+                AND t.status = #{status}
+            </if>
+            <if test="engineer != null and engineer != ''">
+                AND (u.username LIKE CONCAT('%', #{engineer}, '%')
+                OR  u.full_name LIKE CONCAT('%', #{engineer}, '%'))
+            </if>
+            <if test="addressKw != null and addressKw != ''">
+                AND o.install_address LIKE CONCAT('%', #{addressKw}, '%')
+            </if>
+        </where>
+        ORDER BY t.id DESC
+    </select>
 </mapper>

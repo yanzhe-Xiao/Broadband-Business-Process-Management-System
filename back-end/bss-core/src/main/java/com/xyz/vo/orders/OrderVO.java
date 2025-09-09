@@ -38,7 +38,18 @@ public class OrderVO {
             BigDecimal price,
 
             @Schema(description = "订单项明细")
-            List<OrderItemDetailVO> items
+            List<OrderItemDetailVO> items,
+
+            // 工程师信息
+        @Schema(description = "工程师姓名")
+                    String engineerFullName,
+
+            @Schema(description = "工程师电话")
+            String engineerPhone,
+
+            @Schema(description = "工程师邮箱")
+            String engineerEmail
+
     ) {}
 
     @Schema(name = "OrderItemDetailVO", description = "订单项明细")

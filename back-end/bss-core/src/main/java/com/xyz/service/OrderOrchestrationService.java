@@ -8,6 +8,8 @@ import com.xyz.orders.Orders;
 import com.xyz.ticket.Ticket;
 import com.xyz.user.EngineerStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderOrchestrationService {
 
     private final TaskScheduler taskScheduler;
@@ -31,14 +34,22 @@ public class OrderOrchestrationService {
     private final RoleMapper roleMapper;
 
     // === 在 payOrder() 成功后调用这个方法 ===
+
     public void onOrderPaid(Long orderId) {
-        // T+1分钟：置为“待派单”
+        log.info("订单支付完成，开始调度任务，订单ID: {}", orderId);
+
+        // T+1分钟：置为"待派单"
         taskScheduler.schedule(() -> safeSetOrderPendingDispatch(orderId),
+                Date.from(Instant.now().plus(1, ChronoUnit.MINUTES)));
+        log.info("已调度订单状态更新任务，订单ID: {}，预计执行时间: {}", orderId,
                 Date.from(Instant.now().plus(1, ChronoUnit.MINUTES)));
 
         // 随机 10~60 分钟后：进行派单
-        int delay = 1 + new Random().nextInt(2); // [10,60]
+//        int delay = 10 + new Random().nextInt(51); // [10,60]
+        int delay = 2 ;
         taskScheduler.schedule(() -> safeDispatch(orderId),
+                Date.from(Instant.now().plus(delay, ChronoUnit.MINUTES)));
+        log.info("已调度订单派发任务，订单ID: {}，预计执行时间: {}", orderId,
                 Date.from(Instant.now().plus(delay, ChronoUnit.MINUTES)));
     }
 
@@ -47,8 +58,7 @@ public class OrderOrchestrationService {
             ordersMapper.update(null, Wrappers.<Orders>update()
                     .eq("id", orderId)
                     .eq("status", OrderStatuses.PAID)
-                    .set("status", OrderStatuses.PENDING_DISPATCH)
-                    .set("updated_at", new Date()));
+                    .set("status", OrderStatuses.PENDING_DISPATCH));
         } catch (Exception e) {
             // 可打日志并重试/入队
         }
@@ -56,6 +66,7 @@ public class OrderOrchestrationService {
 
     private void safeDispatch(Long orderId) {
         try {
+            log.info("开始执行派单");
             dispatchOneOrder(orderId);
         } catch (Exception e) {
             throw new IllegalArgumentException("更新失败");
@@ -87,21 +98,20 @@ public class OrderOrchestrationService {
         ticket.setStatus(TicketStatuses.ASSIGNED);
         ticket.setAssigneeId(engineerId);
         ticket.setDispatchedAt(new Date());
-        ticket.setCreatedAt(new Date());
         ticketMapper.insert(ticket);
 
         // 更新订单为“已分配工单”
         ordersMapper.update(null, Wrappers.<Orders>update()
                 .eq("id", orderId)
                 .set("status", OrderStatuses.DISPATCHED)
-                .set("updated_at", new Date()));
+                );
 
         // 工程师活跃工单数+1（并保持 is_idle=1 或自行策略改为忙碌）
         engineerStatusService.update(
                 Wrappers.<EngineerStatus>update()
                         .eq("user_id", engineerId)
                         .setSql("active_ticket_cnt = active_ticket_cnt + 1")
-                        .set("updated_at", new Date()));
+                        );
     }
 
     // 精确选择“闲时工程师”

@@ -15,6 +15,7 @@ import com.xyz.orders.TariffPlan;
 import com.xyz.resources.IpPool;
 import com.xyz.resources.ResourceDevice;
 import com.xyz.service.OrdersService;
+import com.xyz.ticket.Ticket;
 import com.xyz.user.AppUser;
 import com.xyz.vo.orders.OrderVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
     IpPoolMapper ipPoolMapper;
     @Autowired
     ResourceDeviceMapper resourceDeviceMapper;
+    @Autowired
+    TicketMapper ticketMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -285,11 +288,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         // 0) username -> userId
         Long userId = appUserMapper.selectIdByUsername(username);
         if (userId == null) {
-            // 返回空页
             return new Page<>(pageNo, pageSize, 0);
         }
 
-        // 1) 按订单维度分页
+        // 1) 分页查订单
         Page<Orders> orderPage = new Page<>(pageNo, pageSize);
         IPage<Orders> oPage = ordersMapper.selectPage(
                 orderPage,
@@ -297,14 +299,14 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
                         .eq(Orders::getUserId, userId)
                         .orderByDesc(Orders::getId)
         );
-
         List<Orders> orders = oPage.getRecords();
         if (orders == null || orders.isEmpty()) {
             return new Page<>(pageNo, pageSize, oPage.getTotal());
         }
 
-        // 2) 批量查订单项
         List<Long> orderIds = orders.stream().map(Orders::getId).toList();
+
+        // 2) 查订单项
         List<OrderItem> allItems = orderItemMapper.selectList(
                 Wrappers.<OrderItem>lambdaQuery()
                         .in(OrderItem::getOrderId, orderIds)
@@ -313,7 +315,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         Map<Long, List<OrderItem>> itemsByOrder = allItems.stream()
                 .collect(Collectors.groupingBy(OrderItem::getOrderId));
 
-        // 3) 批量查套餐
+        // 3) 查套餐
         Set<String> planCodes = allItems.stream()
                 .map(OrderItem::getPlanCode)
                 .filter(Objects::nonNull)
@@ -323,18 +325,33 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
                 : tariffPlanMapper.selectBatchIds(planCodes).stream()
                 .collect(Collectors.toMap(TariffPlan::getPlanCode, p -> p));
 
-        // 4) 组装 VO（builder）
+        // 4) 查工单
+        List<Ticket> tickets = ticketMapper.selectList(
+                Wrappers.<Ticket>lambdaQuery().in(Ticket::getOrderId, orderIds)
+        );
+        Map<Long, Ticket> ticketByOrder = tickets.stream()
+                .collect(Collectors.toMap(Ticket::getOrderId, t -> t, (a, b) -> a));
+
+        // 5) 查工程师
+        Set<Long> assigneeIds = tickets.stream()
+                .map(Ticket::getAssigneeId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, AppUser> engineerMap = assigneeIds.isEmpty()
+                ? Collections.emptyMap()
+                : appUserMapper.selectBatchIds(assigneeIds).stream()
+                .collect(Collectors.toMap(AppUser::getId, u -> u));
+
+        // 6) 组装 VO
         List<OrderVO.OrderLookVO> voList = new ArrayList<>(orders.size());
         for (Orders o : orders) {
             List<OrderItem> group = itemsByOrder.getOrDefault(o.getId(), Collections.emptyList());
-
             BigDecimal totalPrice = BigDecimal.ZERO;
             List<OrderVO.OrderItemDetailVO> itemVOs = new ArrayList<>(group.size());
 
             for (OrderItem item : group) {
                 TariffPlan p = planMap.get(item.getPlanCode());
 
-                // 计算单价：按 planType 选择套餐价格
                 BigDecimal unit = BigDecimal.ZERO;
                 if (p != null && item.getPlanType() != null) {
                     switch (item.getPlanType()) {
@@ -371,22 +388,30 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
                         .build());
             }
 
+            // 工单 & 工程师
+            Ticket t = ticketByOrder.get(o.getId());
+            AppUser engineer = (t != null && t.getAssigneeId() != null)
+                    ? engineerMap.get(t.getAssigneeId())
+                    : null;
+
             voList.add(OrderVO.OrderLookVO.builder()
                     .id(o.getId())
                     .status(o.getStatus())
                     .createdAt(o.getCreatedAt())
                     .installAddress(o.getInstallAddress())
-//                    .endTime(o.getEndTime())
                     .price(totalPrice)
                     .items(itemVOs)
+                    .engineerFullName(engineer != null ? engineer.getFullName() : null)
+                    .engineerPhone(engineer != null ? engineer.getPhone() : null)
+                    .engineerEmail(engineer != null ? engineer.getEmail() : null)
                     .build());
         }
 
-        // 5) 返回分页结果（与订单分页对齐）
         Page<OrderVO.OrderLookVO> voPage = new Page<>(pageNo, pageSize, oPage.getTotal());
         voPage.setRecords(voList);
         return voPage;
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)

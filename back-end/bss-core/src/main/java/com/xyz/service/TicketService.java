@@ -1,7 +1,9 @@
 package com.xyz.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xyz.ticket.Ticket;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xyz.vo.TicketPageVO;
 
 /**
 * @author X
@@ -9,5 +11,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-09-08 20:35:59
 */
 public interface TicketService extends IService<Ticket> {
-
+    IPage<TicketPageVO> pageTicketVO(int current, int size,
+                                     String status,
+                                     String engineer,
+                                     String addressKw);
 }

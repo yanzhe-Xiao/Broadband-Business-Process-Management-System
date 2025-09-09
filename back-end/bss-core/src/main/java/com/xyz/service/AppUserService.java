@@ -1,5 +1,6 @@
 package com.xyz.service;
 
+import com.xyz.dto.UserDTO;
 import com.xyz.user.AppUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -9,5 +10,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-09-07 22:56:35
 */
 public interface AppUserService extends IService<AppUser> {
-    public int addEngineer()
+    int createUser(UserDTO.UpsertUserDTO dto);
+    int updateUser(UserDTO.UpsertUserDTO dto);
+    int deleteUser(String username);
+    int resetPassword(String username, String newPassword);
+    public Long usernameToUserId(String username);
 }

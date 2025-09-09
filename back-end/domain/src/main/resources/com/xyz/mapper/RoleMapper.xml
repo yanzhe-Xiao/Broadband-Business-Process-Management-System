@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.mapper.RoleMapper">
+
+    <resultMap id="BaseResultMap" type="com.xyz.user.Role">
+            <id property="id" column="ID" />
+            <result property="roleCode" column="ROLE_CODE" />
+            <result property="roleName" column="ROLE_NAME" />
+            <result property="status" column="STATUS" />
+            <result property="dataScope" column="DATA_SCOPE" />
+            <result property="deleted" column="DELETED" />
+            <result property="deletedAt" column="DELETED_AT" />
+            <result property="version" column="VERSION" />
+            <result property="createdAt" column="CREATED_AT" />
+            <result property="updatedAt" column="UPDATED_AT" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,ROLE_CODE,ROLE_NAME,STATUS,DATA_SCOPE,DELETED,
+        DELETED_AT,VERSION,CREATED_AT,UPDATED_AT
+    </sql>
+</mapper>
