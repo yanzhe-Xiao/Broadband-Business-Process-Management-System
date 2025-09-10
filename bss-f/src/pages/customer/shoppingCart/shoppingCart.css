@@ -1,0 +1,150 @@
+:root {
+    --indigo: #5557ef;
+    --teal: #14b8a6;
+}
+
+.cart-card {
+    border-radius: 16px !important;
+    background: linear-gradient(180deg, #ffffff, #f7fafc) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .06), 0 4px 12px rgba(0, 0, 0, .04);
+}
+
+.cart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.cart-header .badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(59, 130, 246, .25);
+    font-size: 22px;
+}
+
+.cart-header .title-wrap {
+    flex: 1;
+}
+
+.cart-header .title-wrap h3 {
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+.cart-header .title-wrap p {
+    margin: 0;
+    color: rgba(2, 6, 23, .62);
+}
+
+.cart-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cart-product-meta .title {
+    font-weight: 600;
+}
+
+.cart-product-meta .sub {
+    color: rgba(2, 6, 23, .62);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.cart-product-meta .plan-code {
+    color: rgba(2, 6, 23, .55);
+}
+
+.cart-product-meta .sep {
+    opacity: .35;
+}
+
+.cart-product-meta .light {
+    opacity: .7;
+}
+
+.cart-table .ant-table-thead>tr>th {
+    background: rgba(99, 102, 241, .06) !important;
+}
+
+.cart-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 4px;
+}
+
+.cart-footer .sum {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.gradient-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    box-shadow: 0 8px 16px rgba(20, 184, 166, .25) !important;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.qty-compact {
+    /* 确保高度紧凑、视觉统一 */
+    line-height: 1;
+}
+
+/* 左侧“数量至”前缀片：做成与输入框、按钮连在一起的胶囊块 */
+.qty-chip {
+    padding: 2px 0px 2px 20px;
+    border: 1px solid #5557ef;
+    border-right: 0;
+    border-radius: 999px 0 0 999px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, .06), rgba(20, 184, 166, .06));
+    font-size: 12px;
+    color: rgba(2, 6, 23, .75);
+    display: flex;
+    align-items: center;
+}
+
+/* 中间 InputNumber：去掉左右圆角，与左右片无缝衔接 */
+.qty-input .ant-input-number {
+    border: 1px solid #5557ef !important;
+    border-radius: 0;
+    border-left: 0;
+    /* 由左侧 chip 承担边框 */
+    border-right: 0;
+    /* 与按钮无缝 */
+    width: 100px;
+}
+
+/* 右侧按钮：右端做大圆角，和整体融为一体 */
+.qty-update-btn {
+    border-radius: 0 999px 999px 0 !important;
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    border: none !important;
+    box-shadow: 0 6px 14px rgba(20, 184, 166, .22) !important;
+    height: 30px;
+    /* 与 InputNumber 高度统一 */
+    padding: 0 12px;
+}
+
+/* 禁用时的视觉弱化（跟随 antd 的 disabled，但保证整体不跳边框） */
+.ant-input-number-disabled,
+.qty-update-btn[disabled] {
+    opacity: .6;
+    cursor: not-allowed;
+}

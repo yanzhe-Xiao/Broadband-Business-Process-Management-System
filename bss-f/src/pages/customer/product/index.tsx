@@ -3,6 +3,8 @@ import { Button, message, Modal, Descriptions, Tag } from 'antd'
 import './Product.css'
 import { getProducts, type ProductItem, type SortType } from '../../../api/customer'
 import { useAuthStore } from '../../../store/auth'
+// 顶部引入
+import { addToCartApi, getCart } from '../../../api/cart'
 
 export type ShowItem = {
     id: string
@@ -26,6 +28,16 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
     // ======= 状态 =======
     const { roleName, username } = useAuthStore()
 
+    //小红点
+    const [, setCartCount] = useState(0)
+    const fetchCartCount = async () => {
+        try {
+            const resp = await getCart({ username, current: 1, size: 1 }) // 不需要全量
+            setCartCount(resp.total) // 后端 total 即购物车总数
+        } catch (e) {
+            console.error(e)
+        }
+    }
     // 查询条件
     const [query, setQuery] = useState('')
     const [sortKey, setSortKey] = useState<SortType>('pop')
@@ -43,7 +55,6 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
     // 详情弹窗
     const [detailOpen, setDetailOpen] = useState(false)
     const [detail, setDetail] = useState<ProductItem | null>(null)
-
     // 拉取数据
     const fetchData = async (page = current, pageSize = size) => {
         setLoading(true)
@@ -78,6 +89,12 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
         fetchData(1, size)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query, sortKey, onlyInStock, minPrice, maxPrice])
+
+
+    useEffect(() => {
+        if (username) fetchCartCount()
+    }, [username])
+
 
     // 方便通过 id(planCode) 找到原始记录
     const recordMap = useMemo(
@@ -119,7 +136,6 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
 
     const handleAdd = (item: ShowItem, e?: React.MouseEvent) => {
         e?.stopPropagation?.()
-        console.log(item);
 
         if (item.stock === 0) return message.info('到货后将第一时间通知你')
 
@@ -127,11 +143,6 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
         if (opts.length === 0) {
             return message.warning('当前商品未设置计费价格，无法加入购物车')
         }
-        // if (opts.length === 1) {
-        //     // 只有一种计费方式，直接加入
-        //     onAddToCart?.({ ...item, price: opts[0].price })
-        //     return message.success(`已加入购物车（${opts[0].label}）`)
-        // }
         // 多种计费方式 -> 弹窗选择
         setChooseItem(item)
         setChooseSelected(opts[0].type) // 默认选第一项
@@ -168,7 +179,14 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
         return opts
     }
 
+    // 选择弹窗相关状态旁边新增一个 loading
+    const [adding, setAdding] = useState(false)
+    // 计费类型映射小工具（放在组件内，handleAdd 之前）
+    const mapBillingToPlanType = (t: 'monthly' | 'yearly' | 'lifetime'): 'month' | 'year' | 'forever' =>
+        t === 'monthly' ? 'month' : t === 'yearly' ? 'year' : 'forever'
 
+
+    const [messageApi, contextHolder] = message.useMessage();
     return (
         <div className="products-page">
             {/* 顶部展示区 */}
@@ -178,7 +196,11 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                     <h2 style={{ fontSize: '24px', fontWeight: 600 }}>精选网络设备</h2>
                     <p style={{ height: '30px' }}>为高带宽与稳定连接而生，挑一款最适合你的设备。</p>
                 </div>
-
+                label: (
+                {/* <Badge count={cartCount} size="small" offset={[6, -2]}> */}
+                <span>购物车</span>
+                {/* </Badge> */}
+                ),
             </div>
 
             {/* 工具条 */}
@@ -356,7 +378,7 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                                             title: detail.name,
                                             price: Number(detail.price),
                                             rating: 4.5,
-                                            stock: detail.availableBandwidth ?? 0,
+                                            stock: detail.qty ?? 0,
                                             cover: detail.picture || 'https://picsum.photos/seed/fallback/600/400',
                                             monthlyFree: (detail as any).monthlyFree,
                                             yearlyFree: (detail as any).yearlyFree,
@@ -375,46 +397,120 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
             </Modal >
             <Modal
                 open={chooseOpen}
-                title="选择计费方式"
-                onCancel={() => { setChooseOpen(false); setChooseItem(null) }}
-                onOk={() => {
+                title={null}
+                onCancel={() => {
+                    if (!adding) {
+                        setChooseOpen(false);
+                        setChooseItem(null)
+                    }
+                }}
+                onOk={async () => {
                     if (!chooseItem || !chooseSelected) return
                     const opts = getBillingOptions(chooseItem)
                     const picked = opts.find(o => o.type === chooseSelected)
                     if (!picked) return message.warning('请选择计费方式')
 
-                    onAddToCart?.({ ...chooseItem, price: picked.price })
-                    message.success(`已加入购物车（${picked.label}）`)
-                    setChooseOpen(false)
-                    setChooseItem(null)
+                    try {
+                        setAdding(true)
+                        console.log(chooseItem);
+
+                        await addToCartApi({
+                            planCode: chooseItem.id,      // 你的 id 即 planCode
+                            qty: 1,
+                            status: '在购物车中',
+                            username,                     // 来自 useAuthStore
+                            planType: mapBillingToPlanType(chooseSelected),
+                        })
+
+                        // 通知父级（如果父级要更新徽标等）
+                        onAddToCart?.({ ...chooseItem, price: picked.price })
+                        messageApi.open({
+                            type: 'success',
+                            content: `已加入购物车(${picked.label})`,
+                            duration: 1,
+                            onClose: () => {
+                                setChooseOpen(false)
+                                setChooseItem(null)
+                            }
+                        })
+                        setChooseOpen(false)
+                        setChooseItem(null)
+                    } catch (err: any) {
+                        messageApi.open({
+                            type: 'error',
+                            content: err?.response?.data?.message || err?.message || '加入购物车失败',
+                            duration: 1,
+                            onClose: () => {
+                                setChooseOpen(false)
+                                setChooseItem(null)
+                            }
+                        })
+                    } finally {
+                        setAdding(false)
+                    }
                 }}
                 okText="确定"
                 cancelText="取消"
                 destroyOnClose
+                className="billing-modal"
+                okButtonProps={{ className: 'gradient-btn' as any, disabled: !chooseSelected }}
             >
+                {contextHolder}
                 {chooseItem ? (
-                    <div style={{ display: 'grid', gap: 12 }}>
-                        <div style={{ fontWeight: 600 }}>{chooseItem.title}</div>
-                        <div>
-                            {/* 单选列表 */}
-                            <div className="billing-radio-group">
-                                {getBillingOptions(chooseItem).map(opt => (
-                                    <label key={opt.type} className={`billing-radio ${chooseSelected === opt.type ? 'active' : ''}`}>
+                    <div className="billing-wrap">
+                        <div className="billing-head">
+                            <div className="billing-head-badge">PAY</div>
+                            <div className="billing-head-text">
+                                <h3>{chooseItem.title}</h3>
+                                <p>请选择计费方式并确认加入购物车</p>
+                            </div>
+                        </div>
+
+                        <div className="billing-choices">
+                            {getBillingOptions(chooseItem).map(opt => {
+                                const active = chooseSelected === opt.type
+                                return (
+                                    <label
+                                        key={opt.type}
+                                        className={`billing-card ${active ? 'active' : ''}`}
+                                        onClick={() => setChooseSelected(opt.type)}
+                                    >
                                         <input
                                             type="radio"
                                             name="billing"
                                             value={opt.type}
-                                            checked={chooseSelected === opt.type}
+                                            checked={active}
                                             onChange={() => setChooseSelected(opt.type)}
                                         />
-                                        <span>{opt.label}</span>
+                                        <div className="billing-card-title">
+                                            {opt.type === 'monthly' && '月费'}
+                                            {opt.type === 'yearly' && '年费'}
+                                            {opt.type === 'lifetime' && '永久'}
+                                        </div>
+                                        <div className="billing-card-price">
+                                            <span className="yen">¥</span>
+                                            <span className="num">{opt.price.toFixed(2)}</span>
+                                            <span className="unit">
+                                                {opt.type === 'monthly' ? '/月' : opt.type === 'yearly' ? '/年' : ''}
+                                            </span>
+                                        </div>
+                                        <div className="billing-card-tip">
+                                            {opt.type === 'monthly' && '按月灵活续订'}
+                                            {opt.type === 'yearly' && '按年更划算'}
+                                            {opt.type === 'lifetime' && '一次买断长期可用'}
+                                        </div>
                                     </label>
-                                ))}
-                            </div>
+                                )
+                            })}
+                        </div>
+
+                        <div className="billing-note">
+                            如需变更计费方式，可在提交订单前再次调整。
                         </div>
                     </div>
                 ) : null}
             </Modal>
+
 
         </div >
     )

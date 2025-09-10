@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { RequireAuth, RequireRole } from './router/guard'
 import { LazyLoading } from '../components'
 import Admin from './pages/admin'
+import Engineer from './pages/engineer'
 
 const Login = lazy(() => import('./pages/auth/login/Login'))
 const CustomerHome = lazy(() => import('./pages/customer/index'))
@@ -59,7 +60,19 @@ const router = createBrowserRouter([
             </Suspense>
         ),
     },
-
+    // 管理员占位（同样仅验证守卫）
+    {
+        path: '/engineer',
+        element: (
+            <Suspense fallback={<LazyLoading />}>
+                <RequireAuth>
+                    <RequireRole roleName='装维工程师'>
+                        <Engineer />
+                    </RequireRole>
+                </RequireAuth>
+            </Suspense>
+        ),
+    },
 
     { path: '*', element: <Navigate to="/login" replace /> },
 ])

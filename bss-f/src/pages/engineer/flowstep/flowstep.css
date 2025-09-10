@@ -1,0 +1,121 @@
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.eng-card {
+    border-radius: 16px !important;
+    background: linear-gradient(180deg, #fff, #f7fafc) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .06), 0 4px 12px rgba(0, 0, 0, .04);
+}
+
+.eng-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.eng-head .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.eng-head .badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(59, 130, 246, .25);
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.eng-head .title-wrap h3 {
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+.eng-head .title-wrap p {
+    margin: 0;
+    color: rgba(2, 6, 23, .62);
+}
+
+.eng-filters {
+    margin-bottom: 12px;
+}
+
+.eng-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+}
+
+.eng-card-item {
+    border: 1px solid rgba(15, 23, 42, .06);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.row1 .left .no {
+    font-weight: 700;
+}
+
+.row1 .left .meta {
+    color: rgba(15, 23, 42, .8);
+}
+
+.row1 .left .meta .light {
+    color: rgba(15, 23, 42, .55);
+}
+
+.row1 .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.row1 .right .ts {
+    color: rgba(2, 6, 23, .5);
+    font-size: 12px;
+}
+
+.eng-steps {
+    margin: 6px 0 8px;
+}
+
+.row2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.row2 .plan {
+    color: rgba(2, 6, 23, .75);
+}
+
+.eng-pager {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.gradient-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    box-shadow: 0 8px 16px rgba(20, 184, 166, .25) !important;
+    border: none !important;
+    border-radius: 10px !important;
+}

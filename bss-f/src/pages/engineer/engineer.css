@@ -1,0 +1,106 @@
+/* 让配色与登录/注册保持一致：靛青(#6366f1) → 青绿(#14b8a6) 渐变 */
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.customer-root {
+    min-height: 100vh;
+}
+
+/* 侧边栏：使用深色+渐变顶部条 */
+.customer-sider {
+    /* 深色基底，贴合暗色菜单 */
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.customer-logo {
+    height: 34px;
+    margin: 16px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    color: #edf4ee;
+    font-weight: 800;
+    letter-spacing: .9px;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(20, 184, 166, .22);
+}
+
+.customer-menu .ant-menu-item-selected {
+    background: linear-gradient(135deg, rgba(99, 102, 241, .25), rgba(20, 184, 166, .25));
+}
+
+.customer-menu .ant-menu-item-selected .anticon,
+.customer-menu .ant-menu-item-selected .ant-menu-title-content {
+    color: #fff !important;
+}
+
+/* Header 固定 + 渐变边线阴影，与登录注册卡片的圆角/阴影风格相近 */
+.customer-header {
+    left: 0;
+    top: 0;
+    height: 64px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* padding-inline: 12px 24px; */
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.12);
+    border-bottom: 1px solid rgba(99, 102, 241, .12);
+    transition: padding-left .2s ease;
+    padding: 0;
+}
+
+
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.header-icon {
+    font-size: 20px;
+    margin-right: 16px;
+    cursor: pointer;
+}
+
+.user-chip {
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-right: 60px;
+}
+
+.user-name {
+    display: inline-block;
+    max-width: 10em;
+}
+
+/* 主体内容：留出 Header 高度 + 统一卡片感 */
+.customer-main {
+    margin-left: 0;
+}
+
+.customer-content {
+    margin: 24px 16px 0;
+    padding: 24px;
+    min-height: calc(100vh - 112px);
+    border-radius: 16px;
+}
+
+/* 内部占位内容的“卡片感”区域 */
+.card-like {
+    border: 1px solid rgba(15, 23, 42, .06);
+    border-radius: 14px;
+    padding: 20px;
+    background: linear-gradient(180deg, #ffffff, #f7fafc);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .06), 0 4px 12px rgba(0, 0, 0, .04);
+}
+
+/* 响应式：收缩时内容自适应 */
+@media (max-width: 880px) {
+    .customer-header {
+        padding-left: 80px;
+    }
+}

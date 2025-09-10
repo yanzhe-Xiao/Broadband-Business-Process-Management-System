@@ -6,16 +6,14 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     LogoutOutlined,
-    ProfileOutlined,
 } from '@ant-design/icons'
 import { Button, Layout, Menu, theme, Dropdown, Avatar, Space, Badge, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import './customer.css'
-import Product from './product'
+import './engineer.css'
 import { LazyLoading } from '../../../components'
 import { useAuthStore } from '../../store/auth'
-import ShoppingCart from './shoppingCart'
-import ProfilePage from './home'
+import EngineerDashboard from './workorder'
+import ProfilePage from './profile'
 const { Header, Sider, Content } = Layout
 
 // 模拟当前用户信息
@@ -29,11 +27,11 @@ const currentUser = {
 const unreadOrders = 3
 
 // 定义菜单项类型
-type MenuKey = 'products' | 'profile' | 'orders' | 'shoppingCart'
+type MenuKey = 'workorders' | 'flowstep' | 'profile'
 
-const Customer: React.FC = () => {
+const Engineer: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false)
-    const [selectedKey, setSelectedKey] = useState<MenuKey>('products')
+    const [selectedKey, setSelectedKey] = useState<MenuKey>('profile')
     const [messageApi, contextHolder] = message.useMessage()
     const name = useAuthStore(s => s.username)
     const nav = useNavigate()
@@ -44,29 +42,15 @@ const Customer: React.FC = () => {
     const logout = useAuthStore(s => s.logout)
     const menuItems = [
         {
-            key: 'products',
+            key: 'workorders',
             icon: <AppstoreOutlined />,
-            label: '商品展示',
+            label: '工单管理',
         },
         {
             key: 'profile',
             icon: <UserOutlined />,
-            label: '用户信息',
-        },
-        {
-            key: 'shoppingCart',
-            icon: <ShoppingCartOutlined />,
-            label: '购物车'
-        },
-        {
-            key: 'orders',
-            icon: <ProfileOutlined />,
-            label: (
-                <>
-                    我的订单
-                </>
-            ),
-        },
+            label: '基本信息',
+        }
     ]
 
     const userMenu = (
@@ -103,26 +87,16 @@ const Customer: React.FC = () => {
 
     const renderContent = () => {
         switch (selectedKey) {
-            case 'products':
-                return (
-                    <Suspense fallback={<LazyLoading />}>
-                        <Product />
-                    </Suspense>)
             case 'profile':
                 return (
                     <Suspense fallback={<LazyLoading />}>
                         <ProfilePage />
                     </Suspense>)
-            case 'orders':
-                return (
-                    <div className="card-like">这里是我的订单页面的内容... 有 {unreadOrders} 个待处理订单。</div>
-                )
-            case 'shoppingCart':
+            case 'workorders':
                 return (
                     <Suspense fallback={<LazyLoading />}>
-                        <ShoppingCart />
-                    </Suspense>
-                )
+                        <EngineerDashboard />
+                    </Suspense>)
             default:
                 return <div className="card-like">加载中...</div>
         }
@@ -187,4 +161,4 @@ const Customer: React.FC = () => {
     )
 }
 
-export default Customer
+export default Engineer

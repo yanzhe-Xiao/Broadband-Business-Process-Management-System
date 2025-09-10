@@ -1,0 +1,90 @@
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.wo-card {
+    border-radius: 16px !important;
+    background: linear-gradient(180deg, #fff, #f7fafc) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .06), 0 4px 12px rgba(0, 0, 0, .04);
+}
+
+.wo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.wo-header .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wo-header .badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(59, 130, 246, .25);
+    font-size: 18px;
+}
+
+.wo-header .title-wrap h3 {
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+.wo-header .title-wrap p {
+    margin: 0;
+    color: rgba(2, 6, 23, .62);
+}
+
+.wo-filters {
+    margin-bottom: 12px;
+}
+
+.gradient-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    box-shadow: 0 8px 16px rgba(20, 184, 166, .25) !important;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+.wo-id .no {
+    font-weight: 700;
+}
+
+.wo-id .cus {
+    color: rgba(15, 23, 42, .8);
+}
+
+.wo-id .cus .light {
+    color: rgba(15, 23, 42, .55);
+}
+
+.sla {
+    color: rgba(2, 6, 23, .6);
+}
+
+.wo-detail .kv {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.wo-detail .block {
+    margin-top: 16px;
+}
+
+.proofs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}

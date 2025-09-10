@@ -7,12 +7,16 @@ import {
     MenuUnfoldOutlined,
     LogoutOutlined,
 } from '@ant-design/icons'
-import { Button, Layout, Menu, theme, Dropdown, Avatar, Space, Badge, message } from 'antd'
+import { Button, Layout, Menu, theme, Dropdown, Avatar, Space, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import './admin.css'
 import { LazyLoading } from '../../../components'
 import Product from './product'
 import { useAuthStore } from '../../store/auth'
+import WorkOrders from './workorders'
+import ProfilePage from './home'
+import AdminUsers from './user'
+import EngineerDashboard from './workorder'
 const { Header, Sider, Content } = Layout
 
 // 模拟当前用户信息
@@ -22,11 +26,9 @@ const currentUser = {
         'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
 }
 
-// 模拟未读订单数量
-const unreadOrders = 3
 
 // 定义菜单项类型
-type MenuKey = 'products' | 'profile' | 'orders' | 'users'
+type MenuKey = 'products' | 'profile' | 'orders' | 'users' | 'workorders'
 
 const Admin: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false)
@@ -56,11 +58,13 @@ const Admin: React.FC = () => {
             label: (
                 <>
                     订单管理
-                    {unreadOrders > 0 && (
-                        <Badge count={unreadOrders} size="small" style={{ marginInlineStart: 6 }} />
-                    )}
                 </>
             ),
+        },
+        {
+            key: 'workorders',
+            icon: <UserOutlined />,
+            label: '工单管理'
         },
         {
             key: 'profile',
@@ -100,7 +104,7 @@ const Admin: React.FC = () => {
             ]}
         />
     )
-
+    // AdminUsers
     const renderContent = () => {
         switch (selectedKey) {
             case 'products':
@@ -111,11 +115,26 @@ const Admin: React.FC = () => {
             case 'profile':
                 return (
                     <Suspense fallback={<LazyLoading />}>
-                        <div>222</div>
+                        <ProfilePage />
                     </Suspense>)
             case 'orders':
                 return (
-                    <div className="card-like">这里是我的订单页面的内容... 有 {unreadOrders} 个待处理订单。</div>
+                    <Suspense fallback={<LazyLoading />}>
+                        <WorkOrders />
+                    </Suspense>)
+
+            case 'workorders':
+                return (
+                    <Suspense fallback={<LazyLoading />}>
+                        <EngineerDashboard />
+                    </Suspense>
+                )
+
+            case 'users':
+                return (
+                    <Suspense fallback={<LazyLoading />}>
+                        <AdminUsers />
+                    </Suspense>
                 )
             default:
                 return <div className="card-like">加载中...</div>
@@ -160,9 +179,9 @@ const Admin: React.FC = () => {
                     />
 
                     <div className="header-actions">
-                        <Badge count={unreadOrders} offset={[10, 0]} size='small' style={{ zIndex: 1000 }}>
-                            <ShoppingCartOutlined className="header-icon" />
-                        </Badge>
+                        {/* <Badge count={unreadOrders} offset={[10, 0]} size='small' style={{ zIndex: 1000 }}> */}
+                        <ShoppingCartOutlined className="header-icon" />
+                        {/* </Badge> */}
 
                         <Dropdown overlay={userMenu} placement="bottomRight">
                             <Space className="user-chip">

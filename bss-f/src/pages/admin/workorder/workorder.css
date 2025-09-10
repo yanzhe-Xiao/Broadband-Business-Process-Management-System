@@ -1,0 +1,570 @@
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.eng-card {
+    border-radius: 16px !important;
+    background: linear-gradient(180deg, #fff, #f7fafc) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .06), 0 4px 12px rgba(0, 0, 0, .04);
+}
+
+.eng-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.eng-head .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.eng-head .badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(59, 130, 246, .25);
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.eng-head .title-wrap h3 {
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+.eng-head .title-wrap p {
+    margin: 0;
+    color: rgba(2, 6, 23, .62);
+}
+
+.eng-filters {
+    margin-bottom: 12px;
+}
+
+.eng-grid {
+    display: grid;
+    gap: 24px;
+}
+
+.eng-card-item {
+    border: 1px solid rgba(15, 23, 42, .06);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.row1 .left .no {
+    font-weight: 700;
+}
+
+.row1 .left .meta {
+    color: rgba(15, 23, 42, .8);
+}
+
+.row1 .left .meta .light {
+    color: rgba(15, 23, 42, .55);
+}
+
+.row1 .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.row1 .right .ts {
+    color: rgba(2, 6, 23, .5);
+    font-size: 12px;
+}
+
+.eng-steps {
+    margin: 6px 0 8px;
+}
+
+.row2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.row2 .plan {
+    color: rgba(2, 6, 23, .75);
+}
+
+.eng-pager {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.gradient-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    box-shadow: 0 8px 16px rgba(20, 184, 166, .25) !important;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+
+
+/* Flow Drawer */
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.flow-panel {
+    padding: 16px 16px 20px;
+}
+
+.flow-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.flow-panel-head .badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(59, 130, 246, .25);
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.flow-panel-head h3 {
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+.flow-panel-head p {
+    margin: 0;
+    color: rgba(2, 6, 23, .62);
+}
+
+.flow-panel-steps {
+    margin: 6px 0 10px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.section-title .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.field {
+    margin: 12px 0;
+}
+
+.field .label {
+    font-size: 13px;
+    color: rgba(2, 6, 23, .65);
+    margin-bottom: 6px;
+}
+
+.uploader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.proofs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.proof-img {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(15, 23, 42, .06);
+}
+
+.flow-panel-actions {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gradient-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    box-shadow: 0 8px 16px rgba(20, 184, 166, .25) !important;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+
+/* ========================= */
+.flow-accordion-wrap .ant-collapse {
+    background: transparent;
+}
+
+.flow-acc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flow-acc-header .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e1;
+}
+
+.flow-acc-header .dot.doing {
+    background: #6366f1;
+}
+
+.flow-acc-header .dot.ok {
+    background: #22c55e;
+}
+
+.flow-acc-header .dot.err {
+    background: #ef4444;
+}
+
+.flow-acc-header .title {
+    font-weight: 600;
+}
+
+.flow-acc-header .summary {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.flow-acc-header .summary .muted {
+    color: rgba(2, 6, 23, .45)
+}
+
+.flow-panel-body.readonly .readonly-box {
+    min-height: 40px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px dashed rgba(15, 23, 42, .12);
+    background: #fafafa;
+}
+
+.meta-line {
+    margin-top: 8px;
+    color: rgba(2, 6, 23, .55);
+    display: flex;
+    gap: 16px;
+}
+
+/* ===== 字体与色板（统一全站风格） ===== */
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #eef2f7;
+    --card: #ffffff;
+    --canvas: #f6f8fb;
+    --accent: linear-gradient(135deg, var(--indigo), var(--teal));
+    --radius: 14px;
+    --shadow: 0 8px 24px rgba(2, 6, 23, .06);
+}
+
+.flowx-root {
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, "HarmonyOS Sans SC",
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Inter, Roboto, Arial, sans-serif;
+    color: var(--ink);
+}
+
+/* 头部 */
+.flowx-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--card);
+}
+
+.flowx-head-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.flowx-chip {
+    background: var(--accent);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    box-shadow: 0 6px 18px rgba(20, 184, 166, .25);
+}
+
+.flowx-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+
+.flowx-sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.flowx-ghost {
+    border-color: var(--indigo);
+    color: var(--indigo);
+}
+
+/* 主体 */
+.flowx-body {
+    padding: 16px 20px;
+}
+
+/* 步骤标题 */
+.flowx-step-title {
+    font-weight: 600;
+}
+
+/* Steps 竖直样式微调（保持竖直，不改变方向） */
+.flowx-steps .ant-steps-item-description {
+    margin-top: 8px;
+}
+
+/* 卡片 */
+.flowx-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid #e5e7eb;
+    border-radius: var(--radius);
+    padding: 14px 14px 12px;
+    box-shadow: var(--shadow);
+}
+
+.flowx-card+.flowx-card {
+    margin-top: 10px;
+}
+
+.flowx-card.is-current {
+    border-left-color: var(--indigo);
+    background: #f5f7ff;
+}
+
+.flowx-card.is-done {
+    border-left-color: #22c55e;
+    background: #f6ffed;
+}
+
+.flowx-card.is-todo {
+    border-left-color: #e5e7eb;
+    background: #fafafa;
+}
+
+/* 字段块 */
+.flowx-field {
+    margin-bottom: 12px;
+}
+
+.flowx-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.flowx-input .ant-input,
+.flowx-input .ant-input-textarea {
+    font-size: 14px;
+}
+
+/* 上传 */
+.flowx-upload-btn {
+    width: 96px;
+    height: 96px;
+    border: 1px dashed #d0d7e2;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    color: #607089;
+    background: #fbfcfe;
+}
+
+.flowx-proof-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 88px);
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.flowx-proof {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #e6ebf2;
+}
+
+/* 已完成、待开始 */
+.flowx-done .flowx-badge-done {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: 12px;
+    border-radius: 999px;
+    color: #0a6e2f;
+    background: #eafff2;
+    border: 1px solid #b9f5cd;
+    /* margin-bottom: 8px; */
+}
+
+.flowx-read {
+    margin-top: 8px;
+}
+
+.flowx-read-label {
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 4px;
+}
+
+.flowx-read-text {
+    line-height: 1.6;
+}
+
+.flowx-todo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flowx-tag {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.flowx-hint {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* 步骤内动作条 */
+.flowx-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+/* 底部吸底动作条 */
+.flowx-footer {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--line);
+    background: var(--card);
+}
+
+.flowx-footer-left>* {
+    margin-right: 8px;
+}
+
+/* 折叠 */
+/* 已完成行头：点击折叠/展开 */
+.flowx-done {
+    background: #f6ffed;
+    border-radius: 12px;
+    border: 1px solid #d9f7be;
+}
+
+.flowx-done-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.flowx-done-title {
+    font-weight: 600;
+    color: #245c2b;
+    flex: 1;
+}
+
+.flowx-toggle {
+    width: 18px;
+    height: 18px;
+    background: none;
+    border: 0;
+    position: relative;
+}
+
+.flowx-toggle::before,
+.flowx-toggle::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 10px;
+    height: 2px;
+    background: #245c2b;
+    border-radius: 2px;
+    transition: transform .2s ease;
+}
+
+.flowx-toggle::after {
+    transform: rotate(90deg);
+}
+
+.flowx-toggle.open::after {
+    transform: rotate(0deg);
+}
+
+/* 展开时“+”变“-” */
+
+.flowx-done-content {
+    padding: 0 12px 12px;
+}

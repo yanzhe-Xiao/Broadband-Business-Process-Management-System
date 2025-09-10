@@ -1,0 +1,181 @@
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+    --slate: #0b1220;
+}
+
+.users-card {
+    border-radius: 16px;
+}
+
+/* 顶部工具条 */
+.users-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 4px 12px;
+    border-bottom: 1px solid rgba(15, 23, 42, .06);
+    margin-bottom: 12px;
+}
+
+.users-toolbar .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.users-toolbar .badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: .5px;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(20, 184, 166, .22);
+}
+
+.users-toolbar .title-wrap h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.users-toolbar .title-wrap p {
+    margin: 2px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.users-filters {
+    padding: 12px 0 4px;
+    gap: 8px;
+}
+
+/* 表格单元：用户 */
+.user-cell {
+    display: flex;
+    gap: 12px;
+    align-items: center
+}
+
+.user-meta {
+    min-width: 0
+}
+
+.user-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.user-name .uname {
+    color: #94a3b8;
+    font-weight: 400;
+    margin-left: 8px
+}
+
+.user-sub {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap
+}
+
+/* 联系方式 */
+.contact .line {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    color: #475569
+}
+
+.contact .line+.line {
+    margin-top: 6px
+}
+
+.contact .k {
+    width: 46px;
+    color: #94a3b8
+}
+
+/* 查看 Drawer */
+.user-view {
+    background: linear-gradient(180deg, #fff, #f8fafc);
+    height: 100%;
+    display: flex;
+    flex-direction: column
+}
+
+.uv-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, .06)
+}
+
+.uv-badge {
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+}
+
+.uv-title {
+    font-weight: 700;
+    font-size: 16px
+}
+
+.uv-body {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 16px
+}
+
+.uv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px
+}
+
+.uv-item {
+    display: flex;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, .06);
+    border-radius: 10px;
+    padding: 10px 12px
+}
+
+.uv-item .k {
+    width: 64px;
+    color: #94a3b8
+}
+
+.uv-item .v {
+    color: #0f172a
+}
+
+.uv-actions {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(15, 23, 42, .06);
+    display: flex;
+    justify-content: flex-end
+}
+
+/* 通用渐变按钮（与你登录/注册风格统一） */
+.gradient-btn {
+    background: linear-gradient(135deg, var(--indigo), var(--teal)) !important;
+    border: none !important;
+    box-shadow: 0 8px 16px rgba(20, 184, 166, .25);
+}
+
+.gradient-btn:hover {
+    filter: brightness(1.03);
+}

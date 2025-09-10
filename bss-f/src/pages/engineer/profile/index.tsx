@@ -8,7 +8,7 @@ import {
     UserOutlined, MailOutlined, PhoneOutlined, SafetyCertificateOutlined,
     EditOutlined, LockOutlined, CameraOutlined
 } from '@ant-design/icons'
-import './home.css'
+import './profile.css'
 import { getProfile, changePassword, type Profile, updateAllProfile, calcStrength } from '../../../api/user'
 
 const { Title, Text } = Typography

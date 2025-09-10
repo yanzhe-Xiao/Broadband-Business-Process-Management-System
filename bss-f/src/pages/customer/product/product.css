@@ -387,3 +387,134 @@
 .billing-radio input {
     accent-color: #6366f1;
 }
+
+:root {
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+}
+
+.billing-modal .ant-modal-body {
+    padding: 18px 18px 20px;
+}
+
+/* 顶部标题区 */
+.billing-wrap {
+    display: grid;
+    gap: 14px;
+}
+
+.billing-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.billing-head-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: .5px;
+    background: linear-gradient(135deg, var(--indigo), var(--teal));
+    box-shadow: 0 10px 20px rgba(20, 184, 166, .22);
+}
+
+.billing-head-text h3 {
+    margin: 0 0 2px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.billing-head-text p {
+    margin: 0;
+    color: rgba(2, 6, 23, .6);
+}
+
+/* 选项卡片栅格 */
+.billing-choices {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+    .billing-choices {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 单个卡片 */
+.billing-card {
+    position: relative;
+    border: 1px solid rgba(2, 6, 23, .08);
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    background: #fff;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .05s ease;
+}
+
+.billing-card:hover {
+    border-color: rgba(99, 102, 241, .35);
+    box-shadow: 0 6px 20px rgba(20, 184, 166, .12);
+    transform: translateY(-1px);
+}
+
+.billing-card.active {
+    border-color: transparent;
+    background:
+        linear-gradient(#fff, #fff) padding-box,
+        linear-gradient(135deg, rgba(99, 102, 241, .9), rgba(20, 184, 166, .9)) border-box;
+    box-shadow: 0 8px 24px rgba(20, 184, 166, .18);
+}
+
+.billing-card input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.billing-card-title {
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.billing-card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 2px 0 4px;
+}
+
+.billing-card-price .yen {
+    font-size: 14px;
+    opacity: .8;
+}
+
+.billing-card-price .num {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+
+.billing-card-price .unit {
+    font-size: 12px;
+    color: rgba(2, 6, 23, .65);
+}
+
+.billing-card-tip {
+    font-size: 12px;
+    color: rgba(2, 6, 23, .55);
+}
+
+/* 说明文本 */
+.billing-note {
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(2, 6, 23, .55);
+}
