@@ -322,14 +322,14 @@ const AdminUsers: React.FC = () => {
                         style={{ width: 280 }}
                     />
                 </Form.Item>
-                <Form.Item name="roleName">
+                {/*<Form.Item name="roleName">
                     <Select
                         allowClear
                         placeholder="角色"
                         options={roleOptions}
                         style={{ width: 160 }}
                     />
-                </Form.Item>
+                </Form.Item>*/}
                 <Form.Item name="status">
                     <Select
                         style={{ width: 140 }}

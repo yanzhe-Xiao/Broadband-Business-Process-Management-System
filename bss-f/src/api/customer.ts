@@ -48,9 +48,9 @@ export interface ProductItem {
     requireDeviceSn: string;
     requiredDeviceModel?: string;
     requiredDeviceQty?: string;
-    deviceProce?: string
+    deviceProce?: string;
     description?: string;
-
+    rating?:string;
 }
 
 export interface PageResp<T> {

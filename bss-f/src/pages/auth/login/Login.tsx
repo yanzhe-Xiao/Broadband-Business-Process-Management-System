@@ -120,12 +120,12 @@ export default function LoginPage() {
                     </Button>
 
                     <div className="login-footer-links">
-                        <Typography.Text type="secondary">
+                        {/* <Typography.Text type="secondary">
                             忘记密码？
                             <Typography.Link href="#" style={{ marginLeft: 6 }}>
                                 点此找回
                             </Typography.Link>
-                        </Typography.Text>
+                        </Typography.Text> */}
                         <Typography.Text type="secondary">
                             还没有账号？
                             <Typography.Link href="/register" style={{ marginLeft: 6 }}>

@@ -5,7 +5,14 @@ import { getProducts, type ProductItem, type SortType } from '../../../api/custo
 import { useAuthStore } from '../../../store/auth'
 // 顶部引入
 import { addToCartApi, getCart } from '../../../api/cart'
-
+function useDebounce<T>(value: T, delay = 500) {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(id)
+  }, [value, delay])
+  return debounced
+}
 export type ShowItem = {
     id: string
     title: string
@@ -44,7 +51,10 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
     const [minPrice, setMinPrice] = useState<number | ''>('')
     const [maxPrice, setMaxPrice] = useState<number | ''>('')
     const [onlyInStock, setOnlyInStock] = useState(false)
-
+    // 新增防抖后的值
+    const debouncedQuery = useDebounce(query, 500)
+    const debouncedMinPrice = useDebounce(minPrice, 500)
+    const debouncedMaxPrice = useDebounce(maxPrice, 500)
     // 分页（服务端）
     const [current, setCurrent] = useState(1)
     const [size] = useState(8)
@@ -67,8 +77,8 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                 keyword: query || undefined,
                 sort: sortKey,
                 onlyInStock,
-                minPrice: typeof minPrice === 'number' ? minPrice : undefined,
-                maxPrice: typeof maxPrice === 'number' ? maxPrice : undefined,
+                minPrice: typeof debouncedMinPrice === 'number' ? debouncedMinPrice : undefined,
+                maxPrice: typeof debouncedMaxPrice === 'number' ? debouncedMaxPrice : undefined,
             })
             console.log();
 
@@ -81,16 +91,28 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
             setLoading(false)
         }
     }
+    // 初始化拉一次
+    useEffect(() => {
+    fetchData(1, size)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    // 监听“防抖后”的条件变化，再触发搜索
+    useEffect(() => {
+    fetchData(1, size)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedQuery, sortKey, onlyInStock, debouncedMinPrice, debouncedMaxPrice])
+
 
     useEffect(() => {
         fetchData(1, size)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    useEffect(() => {
-        fetchData(1, size)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query, sortKey, onlyInStock, minPrice, maxPrice])
+    // useEffect(() => {
+    //     fetchData(1, size)
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [query, sortKey, onlyInStock, minPrice, maxPrice])
 
 
     useEffect(() => {
@@ -108,8 +130,8 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
     const pageData: ShowItem[] = useMemo(() => {
         return records.map((r, i) => {
             const rating =
-                typeof r.discount === 'number'
-                    ? Math.max(4, Math.min(4.9, 5 - Number(r.discount) * 0.01))
+                typeof r.rating === 'number'
+                    ? r.rating
                     : 4.4
             const stock =
                 typeof r.qty === 'number' && r.qty > 0
@@ -207,9 +229,25 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                     className="search"
                     placeholder="搜索商品（如：路由器 / Mesh / 网线）"
                     value={query}
-                    onChange={e => { setCurrent(1); setQuery(e.target.value) }}
-                    disabled={loading}
+                    onChange={e => { setCurrent(1); 
+                        setQuery(e.target.value)
+                     }}
+                    onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                        setCurrent(1)
+                        fetchData(1, size) // 立即搜索
+                    }
+                    }}
+                    // disabled={loading}
                 />
+
+                <Button
+                    style={{ marginLeft: 8 }}
+                    onClick={() => { setCurrent(1); fetchData(1, size) }} // 立即搜索
+                    loading={loading}
+                >
+                    搜索
+                </Button>
 
                 <div className="filters">
                     <div className="price">

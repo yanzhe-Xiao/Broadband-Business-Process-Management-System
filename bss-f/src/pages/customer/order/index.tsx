@@ -258,7 +258,7 @@ const MyOrders: React.FC = () => {
             </div>
 
             {/* 过滤 */}
-            <Form
+            {/* <Form
                 form={form}
                 layout="inline"
                 className="orders-filters"
@@ -288,7 +288,7 @@ const MyOrders: React.FC = () => {
                 <Form.Item>
                     <Button onClick={() => { form.resetFields(); fetchList(1, size) }}>重置</Button>
                 </Form.Item>
-            </Form>
+            </Form> */}
 
             {/* 表格 */}
             {data.length === 0 ? (

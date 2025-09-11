@@ -35,10 +35,12 @@ import {
     addPlan,
     type addTariffPlans,
 } from '../../../api/admin'
+import { getDeviceList, type DeviceInfo } from '../../../api/device'
+
 
 const statusOptions = [
-    { label: '在售', value: 'ACTIVE' },
-    { label: '下架', value: 'INACTIVE' },
+    { label: 'ACTIVE', value: 'ACTIVE' },
+    { label: 'INACTIVE', value: 'INACTIVE' },
 ]
 
 const isIpOptions = [
@@ -69,7 +71,45 @@ const Product: React.FC = () => {
     const [open, setOpen] = useState(false)
     const [editing, setEditing] = useState<AdminPlanItem | null>(null)
     const [upForm] = Form.useForm<AdminPlanItem>()
+    // **新增：设备下拉相关状态**
+    const [deviceOpts, setDeviceOpts] = useState<DeviceInfo[]>([])
+    const [deviceLoading, setDeviceLoading] = useState(false)
+    const [deviceSearchTimer, setDeviceSearchTimer] = useState<any>(null)
 
+    // 修复点：确保 deviceOpts 始终为数组
+const loadDevices = async (keyword?: string) => {
+    setDeviceLoading(true)
+    try {
+        const list = await getDeviceList(keyword ? { keyword } : undefined)
+        // 确保 list 是数组类型，否则设为空数组
+        setDeviceOpts(Array.isArray(list) ? list : [])
+    } catch (e: any) {
+        message.error(e?.message || '获取设备列表失败')
+        // 出错时也设为空数组，避免后续 .map 报错
+        setDeviceOpts([])
+    } finally {
+        setDeviceLoading(false)
+    }
+}
+
+
+    // **弹窗打开时加载设备数据**
+    useEffect(() => {
+        if (open) {
+            loadDevices()  // 弹窗打开时获取所有设备
+        }
+    }, [open])
+
+    // **搜索防抖函数（可选）**
+    const handleDeviceSearch = (val: string) => {
+        if (deviceSearchTimer) {
+            clearTimeout(deviceSearchTimer)
+        }
+        setDeviceSearchTimer(setTimeout(() => {
+            // 输入为空时加载全部设备
+            loadDevices(val || undefined)
+        }, 300))
+    }
     const fetchList = async (resetPage?: boolean) => {
         const values = form.getFieldsValue()
         const current = resetPage ? 1 : pagination.current
@@ -179,7 +219,7 @@ const Product: React.FC = () => {
         },
         {
             title: '状态', dataIndex: 'status', key: 'status', width: 100,
-            render: (s) => s === 'ACTIVE' ? <Tag color="green">在售</Tag> : <Tag>下架</Tag>
+            render: (s) => s === 'ACTIVE' ? <Tag color="green">ACTIVE</Tag> : <Tag>下架</Tag>
         },
         {
             title: '是否配置IP', dataIndex: 'isIp', key: "isIp", width: 100,
@@ -350,7 +390,7 @@ const Product: React.FC = () => {
                 <Form
                     form={upForm}
                     layout="vertical"
-                    initialValues={{ status: '在售', billingTypes: [] }}   // ← 默认不选
+                    initialValues={{ status: 'ACTIVE', billingTypes: [] }}   // ← 默认不选
                 >
                     <Form.Item label="套餐编码" name="planCode" rules={[{ required: true, message: '请输入编码' }]}>
                         <Input placeholder="例如：PLAN-1001" disabled={!!editing} />
@@ -379,10 +419,22 @@ const Product: React.FC = () => {
                         <InputNumber min={0} precision={1} max={5} style={{ width: '100%' }} placeholder="请输入评分" />
                     </Form.Item> */}
                     <Form.Item label="设备资源" name="deviceSN" >
-                        <InputNumber style={{ width: '100%' }} placeholder="请输入设备" />
+                        {/* 将数字输入框改为下拉选择框 */}
+                    <Select
+                        style={{ width: '100%' }}
+                        placeholder="请选择设备"
+                        showSearch
+                        onSearch={handleDeviceSearch}       // 输入搜索时调用
+                        filterOption={false}                // 关闭本地筛选，使用后端搜索
+                        loading={deviceLoading}
+                        options={deviceOpts.map(device => ({
+                            value: device.sn,
+                            label: device.sn
+                        }))}
+                    />
                     </Form.Item>
                     <Form.Item label="所需设备数量" name="deviceQty" >
-                        <InputNumber min={0} precision={0} style={{ width: '100%' }} placeholder="请输入评分" />
+                        <InputNumber min={0} precision={0} style={{ width: '100%' }} placeholder="10" />
                     </Form.Item>
                     <Form.Item label="带宽(Mbps)" name="bandwidth">
                         <InputNumber min={0} precision={0} style={{ width: '100%' }} />
