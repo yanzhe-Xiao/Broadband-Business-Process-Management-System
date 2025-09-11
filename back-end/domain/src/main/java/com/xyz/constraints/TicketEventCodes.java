@@ -3,10 +3,10 @@ package com.xyz.constraints;
 public enum TicketEventCodes {
     SITE_SURVEY("现场勘察", null),
     WIRING_SPLICING("布线/熔纤", SITE_SURVEY),
-    NETWORK_SPEED_TEST("上网测速", WIRING_SPLICING),
-    DEVICE_INSTALLATION("设备安装与上电", NETWORK_SPEED_TEST),
+    DEVICE_INSTALLATION("设备安装与上电", WIRING_SPLICING),
     OPTICAL_POWER_TEST("光功率测试", DEVICE_INSTALLATION),
-    CUSTOMER_SIGNATURE("用户签字确认", OPTICAL_POWER_TEST);
+    NETWORK_SPEED_TEST("上网测速", OPTICAL_POWER_TEST),
+    CUSTOMER_SIGNATURE("用户签字确认", NETWORK_SPEED_TEST);
 
     private final String description;
     private final TicketEventCodes previous;

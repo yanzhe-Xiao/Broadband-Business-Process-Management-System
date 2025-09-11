@@ -18,4 +18,7 @@ public interface TariffPlanService extends IService<TariffPlan> {
     public IPage<TariffPlanVO.TariffPlanDetail> getTariffPlanDetail(TariffPlanDTO.TariffPlanSearchCriteria criteria);
 
     public Integer addTariffPlanService(List<TariffPlanDTO.TariffPlanAvaliable> tariffPlanAvaliables);
+
+    public IPage<TariffPlanVO.TariffPlanDetail> getTariffPlanDetailAdmin(TariffPlanDTO.TariffPlanSearchCriteria criteria,String status);
+
 }

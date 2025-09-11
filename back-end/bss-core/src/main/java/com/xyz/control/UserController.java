@@ -1,13 +1,19 @@
 package com.xyz.control;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.xyz.advice.SuccessAdvice;
+import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
+import com.xyz.dto.PageReq;
 import com.xyz.dto.UserDTO;
 import com.xyz.service.AppUserService;
 import com.xyz.utils.UserAuth;
+import com.xyz.vo.Profile;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -55,5 +61,11 @@ public class UserController {
     public ResponseResult<String> testGetUsername(){
         String currentUsername = UserAuth.getCurrentUsername();
         return ResponseResult.success(currentUsername);
+    }
+
+    @GetMapping("/all")
+    public ResponseResult<PageResult<Profile>> getAllUsers(PageReq pageReq){
+        IPage<Profile> profileIPage = userService.queryUserPage(pageReq);
+        return ResponseResult.success(PageResult.of(profileIPage));
     }
 }

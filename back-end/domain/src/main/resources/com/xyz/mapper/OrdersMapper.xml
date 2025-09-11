@@ -35,4 +35,20 @@
         USER_ID = #{userId,jdbcType=NUMERIC}
         AND STATUS = #{status,jdbcType=VARCHAR}
     </select>
+
+    <!-- 1) 取消该订单下所有“待支付”的订单项 -->
+    <update id="cancelOrderItemsByOrderId">
+        UPDATE ORDER_ITEM
+        SET STATUS = '已取消',
+            STATUS_EXPIRE_AT = NULL
+        WHERE ORDER_ID = #{orderId}
+          AND STATUS = '待支付'
+    </update>
+
+    <!-- 2) 取消订单本身 -->
+    <update id="cancelOrderById">
+        UPDATE ORDERS
+        SET STATUS = '已取消',
+        WHERE ID = #{orderId}
+    </update>
 </mapper>

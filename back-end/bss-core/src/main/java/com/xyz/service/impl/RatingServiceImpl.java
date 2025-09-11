@@ -11,6 +11,7 @@ import com.xyz.orders.OrderItem;
 import com.xyz.orders.Orders;
 import com.xyz.orders.Rating;
 import com.xyz.orders.TariffPlan;
+import com.xyz.service.OrdersService;
 import com.xyz.service.RatingService;
 import com.xyz.mapper.RatingMapper;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,8 @@ public class RatingServiceImpl extends ServiceImpl<RatingMapper, Rating>
     TariffPlanMapper tariffPlanMapper;
     @Autowired
     OrdersMapper ordersMapper;
+    @Autowired
+    OrdersService ordersService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -127,6 +130,15 @@ public class RatingServiceImpl extends ServiceImpl<RatingMapper, Rating>
                             .set("status", OrderStatuses.COMPLETED)
             );
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int submitRatings(Long orderId, Long userId, int score, String comment) {
+        List<String> planCodes = ordersService.getPlanCodesByOrderId(orderId);
+        planCodes.forEach(planCode -> submitRating(orderId, planCode,userId,score,comment));
+        return planCodes.size();
+
     }
 
 }

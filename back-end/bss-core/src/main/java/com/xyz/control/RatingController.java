@@ -26,12 +26,13 @@ public class RatingController {
     @Autowired
     AppUserService appUserService;
 
-    public record RatingReq(Long orderId,String planCode, int score, String comment){}
+    // orderId和planCode决定了你要评价的东西 如果有多个套餐就要传两次 orderId不变，套餐planCode变就行
+    public record RatingReq(Long orderId, int score, String comment){}
 
     @PostMapping()
     public ResponseResult raing(@RequestBody RatingReq ratingReq){
         Long l = appUserService.usernameToUserId(UserAuth.getCurrentUsername());
-        ratingService.submitRating(ratingReq.orderId(),ratingReq.planCode(),l,ratingReq.score(), ratingReq.comment());
+        ratingService.submitRatings(ratingReq.orderId(),l,ratingReq.score(), ratingReq.comment());
         return ResponseResult.success();
     }
 }

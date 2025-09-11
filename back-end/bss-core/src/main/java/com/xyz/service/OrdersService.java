@@ -14,7 +14,7 @@ import java.util.List;
 * @createDate 2025-09-04 14:45:21
 */
 public interface OrdersService extends IService<Orders> {
-    public int commitOrder(OrderDTO.OrderAvaliableDTO dto);
+    public Long commitOrder(OrderDTO.OrderAvaliableDTO dto);
 
     public int payOrder(OrderDTO.OrderPaymentDTO paymentDTO);
 
@@ -28,4 +28,6 @@ public interface OrdersService extends IService<Orders> {
      * @return 套餐编码列表（无重复）
      */
     List<String> getPlanCodesByOrderId(Long orderId);
+
+    int cancleOrder(Long orderId);
 }

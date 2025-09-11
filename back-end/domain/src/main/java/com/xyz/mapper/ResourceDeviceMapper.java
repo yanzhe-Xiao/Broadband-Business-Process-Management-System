@@ -86,5 +86,7 @@ public interface ResourceDeviceMapper extends BaseMapper<ResourceDevice> {
      */
     int updateQtyBySn(@Param("qty") Integer qty, @Param("sn") String sn);
 
+    List<ResourceDevice> selectAll();
+
 
 }

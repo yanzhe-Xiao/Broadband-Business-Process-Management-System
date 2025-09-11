@@ -35,7 +35,7 @@ public class ResourceDevice {
     private Integer qty;
 
     /**
-     * 
+     *
      */
     private Double price;
 

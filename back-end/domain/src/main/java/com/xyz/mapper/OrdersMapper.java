@@ -15,6 +15,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 @Mapper
 public interface OrdersMapper extends BaseMapper<Orders> {
+    int cancelOrderItemsByOrderId(@Param("orderId") Long orderId);
+    int cancelOrderById(@Param("orderId") Long orderId);
     List<Orders> selectAllByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 }
 

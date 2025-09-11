@@ -31,5 +31,8 @@ public class AuthVo {
     protected String email;
 
     @Schema(description = "用户角色列表，用于权限控制", example = "ADMIN,USER")
-    protected String roles;
+    protected String roleName;
+
+    @Schema
+    protected String status;
 }

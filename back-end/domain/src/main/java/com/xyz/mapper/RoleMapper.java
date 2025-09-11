@@ -2,10 +2,10 @@ package com.xyz.mapper;
 
 import com.xyz.user.Role;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author X
@@ -44,6 +44,23 @@ public interface RoleMapper extends BaseMapper<Role> {
         """)
     int insertUserAndRoleByUserIdAndRoleName(@Param("userId") Long userId,
                                              @Param("roleName") String roleName);
+
+    // 建议放在 mapper.dto 包下
+    public record UserRoleNameDTO(Long userId, String roleName) {}
+
+    @Select("""
+        <script>
+            SELECT ur.user_id AS userId, r.role_name AS roleName
+            FROM user_role ur
+            JOIN role r ON ur.role_id = r.id
+            WHERE ur.user_id IN
+            <foreach collection="userIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </script>
+    """)
+    List<UserRoleNameDTO> selectRoleNameListByUserIds(@Param("userIds") List<Long> userIds);
+
 }
 
 

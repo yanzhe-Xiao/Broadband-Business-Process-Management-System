@@ -23,7 +23,7 @@ public class ImageUrlSplicing {
         ImageUrlSplicing.serverIp = serverIp;
     }
 
-    @Value("${server.port}")
+    @Value("${app.server-port}")
     public void setServerPort(String serverPort) {
         ImageUrlSplicing.serverPort = serverPort;
     }

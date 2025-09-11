@@ -85,10 +85,10 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
         if (maxPrice != null) qw.le(priceGetter, maxPrice);
 
         // 仅显示有库存
-        if (Boolean.TRUE.equals(onlyInStock)) {
+//        if (Boolean.TRUE.equals(onlyInStock)) {
             qw.gt(TariffPlan::getQty, 0);
             qw.eq(TariffPlan::getStatus,"ACTIVE");
-        }
+//        }
 
         // 排序
         if ("priceUp".equals(sort)) {
@@ -148,17 +148,18 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
                     .monthlyFee(plan.getMonthlyFee())
                     .yearlyFee(plan.getYearlyFee())
                     .foreverFee(plan.getForeverFee())
+                    .discount(plan.getDiscount())
                     .installationFee(OrderConstarint.INSTALLATION_FEE)
                     .contractPeriod(plan.getPlanPeriod())
                     .status(plan.getStatus())
                     .isIp(plan.getIsIp())
                     .bandwidth(plan.getBandwith())
                     .qty(plan.getQty())
-                    .requireDeviceSn(device != null ? device.getSn() : null)
-                    .requiredDeviceModel(device != null ? device.getModel() : null)
-                    .requiredDeviceQty(plan.getDeviceQty())
-                    .devicePrice(device != null ? device.getPrice() : null)
-                    .imageUrl(fullImageUrl)
+                    .requireDeviceSn(device != null ? device.getSn() : "")
+                    .requiredDeviceModel(device != null ? device.getModel() : "")
+                    .requiredDeviceQty(plan.getDeviceQty() == null ? 0 : plan.getDeviceQty())
+                    .devicePrice(device != null ? device.getPrice() : 0)
+                    .picture(fullImageUrl)
                     .rating(plan.getRating())
                     .build();
         });
@@ -211,6 +212,127 @@ public class TariffPlanServiceImpl extends ServiceImpl<TariffPlanMapper, TariffP
                 ).toList();
         boolean result = this.saveBatch(plans);
         return result ? plans.size() : 0;
+    }
+
+    @Override
+    public IPage<TariffPlanVO.TariffPlanDetail> getTariffPlanDetailAdmin(TariffPlanDTO.TariffPlanSearchCriteria criteria,String status) {
+        int current = Math.max(1, criteria.current());
+        int size = (criteria.size() == null || criteria.size() <= 0) ? 10 : criteria.size();
+
+        String keyword = trimToNull(criteria.keyword());
+        BigDecimal minPrice = criteria.minPrice();
+        BigDecimal maxPrice = criteria.maxPrice();
+        Boolean onlyInStock = criteria.onlyInStock();
+        String sort = trimToNull(criteria.sort());          // priceUp | priceDown | rating
+        String priceSort = trimToNull(criteria.priceSort()); // month | year | forever
+
+        // 默认 priceSort=month
+        if (!"year".equals(priceSort) && !"forever".equals(priceSort)) {
+            priceSort = "month";
+        }
+
+        // 选择价格字段引用
+        SFunction<TariffPlan, BigDecimal> priceGetter = switch (priceSort) {
+            case "year" -> TariffPlan::getYearlyFee;
+            case "forever" -> TariffPlan::getForeverFee;
+            default -> TariffPlan::getMonthlyFee; // month
+        };
+
+        LambdaQueryWrapper<TariffPlan> qw = Wrappers.lambdaQuery();
+
+        // 关键字匹配：编码或名称
+        if (keyword != null) {
+            qw.and(w -> w.like(TariffPlan::getPlanCode, keyword)
+                    .or()
+                    .like(TariffPlan::getName, keyword));
+        }
+
+        // 价格区间按 priceSort 指定字段过滤
+        if (minPrice != null) qw.ge(priceGetter, minPrice);
+        if (maxPrice != null) qw.le(priceGetter, maxPrice);
+
+        //TODO
+        if(status == null || status.isEmpty()){
+                qw.gt(TariffPlan::getQty, 0);
+        }else{
+                qw.gt(TariffPlan::getQty, 0);
+                qw.eq(TariffPlan::getStatus, status);
+        }
+
+
+        // 排序
+        if ("priceUp".equals(sort)) {
+            qw.orderByAsc(priceGetter);
+        } else if ("priceDown".equals(sort)) {
+            qw.orderByDesc(priceGetter);
+        } else if ("rating".equals(sort)) {
+            qw.orderByDesc(TariffPlan::getRating); // 确认表里有 rating
+        } else {
+            qw.orderByDesc(TariffPlan::getCreatedAt);
+        }
+
+        // 分页查询
+        IPage<TariffPlan> page = new Page<>(current, size);
+        IPage<TariffPlan> tariffPage = tariffPlanMapper.selectPage(page, qw);
+
+        // 批量查设备，避免 N+1
+        List<TariffPlan> plans = tariffPage.getRecords();
+        Map<String, ResourceDevice> deviceMap;
+        if (plans != null && !plans.isEmpty()) {
+            Set<String> sns = plans.stream()
+                    .map(TariffPlan::getDeviceSn)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            if (!sns.isEmpty()) {
+                // 如果没有 selectBatchBySn，可以用 in 查询
+                List<ResourceDevice> devices = resourceDeviceMapper.selectList(
+                        Wrappers.<ResourceDevice>lambdaQuery().in(ResourceDevice::getSn, sns)
+                );
+
+                deviceMap = devices.stream().collect(
+                        Collectors.toMap(
+                                ResourceDevice::getSn,
+                                d -> d,
+                                (a, b) -> a,                // 遇到重复 SN，保留第一个（理论上不会发生）
+                                LinkedHashMap::new
+                        )
+                );
+            } else {
+                deviceMap = Collections.emptyMap();
+            }
+        } else {
+            deviceMap = Collections.emptyMap();
+        }
+
+        // 转 VO
+        return tariffPage.convert(plan -> {
+            ResourceDevice device = null;
+            String sn = plan.getDeviceSn();
+            if (sn != null) device = deviceMap.get(sn);
+            String fullImageUrl = ImageUrlSplicing.splicingURL(plan.getImageUrl());
+            return TariffPlanVO.TariffPlanDetail.builder()
+                    .planCode(plan.getPlanCode())
+                    .name(plan.getName())
+                    .description(plan.getDescription())
+                    .monthlyFee(plan.getMonthlyFee())
+                    .yearlyFee(plan.getYearlyFee())
+                    .foreverFee(plan.getForeverFee())
+                    .discount(plan.getDiscount())
+                    .installationFee(OrderConstarint.INSTALLATION_FEE)
+                    .contractPeriod(plan.getPlanPeriod())
+                    .status(plan.getStatus())
+                    .isIp(plan.getIsIp())
+                    .bandwidth(plan.getBandwith())
+                    .qty(plan.getQty())
+                    .requireDeviceSn(device != null ? device.getSn() : "")
+                    .requiredDeviceModel(device != null ? device.getModel() : "")
+                    .requiredDeviceQty(plan.getDeviceQty() == null ? 0 : plan.getDeviceQty())
+                    .devicePrice(device != null ? device.getPrice() : 0)
+                    .picture(fullImageUrl)
+                    .rating(plan.getRating())
+                    .build();
+        });
     }
 }
 

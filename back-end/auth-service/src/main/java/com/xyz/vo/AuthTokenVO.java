@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 public class AuthTokenVO extends AuthVo {
 
     @Schema(description = "访问令牌（JWT）", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-    private String accessToken;
+    private String token;
 
     @Schema(description = "令牌类型，固定为 Bearer", example = "Bearer")
     private String tokenType;
@@ -49,5 +49,5 @@ public class AuthTokenVO extends AuthVo {
     protected String email;
 
     @Schema(description = "用户角色列表，用于前端进行权限控制", example = "ROLE_ADMIN")
-    protected String roles;
+    protected String roleName;
 }

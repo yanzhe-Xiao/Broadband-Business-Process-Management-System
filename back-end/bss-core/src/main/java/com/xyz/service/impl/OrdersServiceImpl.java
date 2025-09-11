@@ -1,12 +1,13 @@
 package com.xyz.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xyz.constraints.IpConstraint;
 import com.xyz.constraints.OrderConstarint;
+import com.xyz.constraints.RoleNames;
 import com.xyz.dto.OrderDTO;
 import com.xyz.mapper.*;
 import com.xyz.orders.OrderItem;
@@ -49,10 +50,12 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
     ResourceDeviceMapper resourceDeviceMapper;
     @Autowired
     TicketMapper ticketMapper;
+    @Autowired
+    RoleMapper roleMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int commitOrder(OrderDTO.OrderAvaliableDTO dto) {
+    public Long commitOrder(OrderDTO.OrderAvaliableDTO dto) {
         //TODO 判断oderItemId里的user是不是这里提供的user √
         //TODO 在创建订单的时候就应先不分配ip和但扣除库存了 扣除套餐的数量 扣除前应先校验数量 付款后再进行ip的分配 √
         //TODO 需要删掉dto里的status，应默认直接设置为待支付 √
@@ -100,7 +103,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         } else {
             throw new RuntimeException("提交订单失败，未知原因，请联系客服");
         }
-        return insert;
+        return entity.getId();
     }
 
     @Override
@@ -291,14 +294,20 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
             return new Page<>(pageNo, pageSize, 0);
         }
 
+        //todo 查看当前状态是否是管理员，管理员可以看所有订单
+        // NEW: 判定是否平台管理员
+        String roleName = roleMapper.selectRoleNameByUserId(userId);
+        boolean isAdmin = RoleNames.ROLE_NAME_ADMIN.equals(roleName);
         // 1) 分页查订单
+        // 1) 分页查订单（CHG：管理员不加 user_id 限制）
         Page<Orders> orderPage = new Page<>(pageNo, pageSize);
-        IPage<Orders> oPage = ordersMapper.selectPage(
-                orderPage,
-                Wrappers.<Orders>lambdaQuery()
-                        .eq(Orders::getUserId, userId)
-                        .orderByDesc(Orders::getId)
-        );
+        LambdaQueryWrapper<Orders> orderQw = Wrappers.<Orders>lambdaQuery()
+                .orderByDesc(Orders::getId);
+        if (!isAdmin) {
+            orderQw.eq(Orders::getUserId, userId);
+        }
+        IPage<Orders> oPage = ordersMapper.selectPage(orderPage, orderQw);
+
         List<Orders> orders = oPage.getRecords();
         if (orders == null || orders.isEmpty()) {
             return new Page<>(pageNo, pageSize, oPage.getTotal());
@@ -306,12 +315,14 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
 
         List<Long> orderIds = orders.stream().map(Orders::getId).toList();
 
-        // 2) 查订单项
-        List<OrderItem> allItems = orderItemMapper.selectList(
-                Wrappers.<OrderItem>lambdaQuery()
-                        .in(OrderItem::getOrderId, orderIds)
-                        .eq(OrderItem::getUsername, username)
-        );
+        // 2) 查订单项（CHG：管理员不按 username 过滤）
+        LambdaQueryWrapper<OrderItem> itemQw = Wrappers.<OrderItem>lambdaQuery()
+                .in(OrderItem::getOrderId, orderIds);
+        if (!isAdmin) {
+            itemQw.eq(OrderItem::getUsername, username);
+        }
+        List<OrderItem> allItems = orderItemMapper.selectList(itemQw);
+
         Map<Long, List<OrderItem>> itemsByOrder = allItems.stream()
                 .collect(Collectors.groupingBy(OrderItem::getOrderId));
 
@@ -479,6 +490,15 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
 
         // 转 List 返回
         return new ArrayList<>(planCodeSet);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int cancleOrder(Long orderId) {
+        int affect = 0;
+        affect += ordersMapper.cancelOrderItemsByOrderId(orderId);
+        affect += ordersMapper.cancelOrderById(orderId);
+        return affect;
     }
 }
 

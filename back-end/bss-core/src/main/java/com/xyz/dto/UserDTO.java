@@ -20,15 +20,13 @@ import jakarta.validation.constraints.Size;
 public class UserDTO {
     // 新增/更新用户
     public record UpsertUserDTO(
-            @NotBlank @Size(min = 3, max = 64) String username,
-            @NotBlank @Size(min = 6, max = 128) String password,   // 更新时也要求传入
-            @NotBlank @Size(max = 128) String fullName,
+            String username,
+            String password,
+            @Size(max = 128) String fullName,
             @Size(max = 32) String phone,
             @Email @Size(max = 128) String email,
-            @ValidByPrefix(prefix = "ROLE_NAME_", sources = {RoleNames.class})
-            @NotBlank String roleName, // 直接用 RoleNames 常量
-            @ValidByPrefix(prefix = "USER_STATUS_", sources = {UserStatus.class})
-            @NotBlank String status    // ACTIVE / INACTIVE
+            String roleName, // 直接用 RoleNames 常量
+            String status
     ) {}
 
     public record ResetPasswordDTO(

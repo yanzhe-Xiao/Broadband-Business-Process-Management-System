@@ -10,6 +10,7 @@ import com.xyz.ticket.TicketEvent;
 import com.xyz.service.TicketEventService;
 import com.xyz.mapper.TicketEventMapper;
 import com.xyz.ticket.TicketEventImageUrl;
+import com.xyz.vo.TicketEventDetailFlowVO;
 import com.xyz.vo.TicketEventDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,54 @@ public class TicketEventServiceImpl extends ServiceImpl<TicketEventMapper, Ticke
                 .imageUrls(imageUrls)
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketEventDetailFlowVO> queryEventDetail(Long ticketId) {
+        if (ticketId == null) {
+            throw new IllegalArgumentException("ticketId 不能为空");
+        }
+
+        // 1) 查该工单的所有事件（按时间升序）
+        List<TicketEvent> events = ticketEventMapper.selectList(
+                Wrappers.<TicketEvent>lambdaQuery()
+                        .eq(TicketEvent::getTicketId, ticketId)
+                        .orderByAsc(TicketEvent::getHappenedAt)
+        );
+        if (events == null || events.isEmpty()) {
+            return List.of();
+        }
+
+        // 2) 批量查图片URL，并按 eventId 分组；取出时顺便做 URL 拼接
+        List<Long> eventIds = events.stream().map(TicketEvent::getId).toList();
+
+        List<TicketEventImageUrl> imgs = eventIds.isEmpty()
+                ? List.of()
+                : ticketEventImageUrlMapper.selectList(
+                Wrappers.<TicketEventImageUrl>lambdaQuery()
+                        .in(TicketEventImageUrl::getTicketEventId, eventIds)
+        );
+
+        Map<Long, List<String>> imageUrlMap = imgs.stream()
+                .collect(Collectors.groupingBy(
+                        TicketEventImageUrl::getTicketEventId,
+                        Collectors.mapping(
+                                u -> ImageUrlSplicing.splicingURL(u.getImageUrl()),
+                                Collectors.toList()
+                        )
+                ));
+
+        // 3) 组装 VO 列表
+        return events.stream()
+                .map(e -> TicketEventDetailFlowVO.builder()
+                        .eventCode(e.getEventCode())
+                        .note(e.getNote())
+                        .happenedAt(e.getHappenedAt())
+                        .imageUrls(imageUrlMap.getOrDefault(e.getId(), List.of()))
+                        .build())
+                .toList();
+    }
+
 
 
 }

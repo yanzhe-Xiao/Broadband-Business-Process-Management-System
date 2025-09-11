@@ -85,4 +85,11 @@
         </where>
         ORDER BY t.id DESC
     </select>
+    <select id="selectOneByOrderId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from TICKET
+        where
+        ORDER_ID = #{orderId,jdbcType=NUMERIC}
+    </select>
 </mapper>

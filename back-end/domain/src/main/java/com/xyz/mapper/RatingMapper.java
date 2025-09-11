@@ -1,4 +1,5 @@
 package com.xyz.mapper;
+import java.util.List;
 
 import com.xyz.orders.Rating;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -16,6 +17,8 @@ import java.math.BigDecimal;
 @Mapper
 public interface RatingMapper extends BaseMapper<Rating> {
     BigDecimal selectAvgScoreByPlanCode(@Param("planCode") String planCode);
+
+    List<Rating> selectAllByOrderId(@Param("orderId") Long orderId);
 
 }
 

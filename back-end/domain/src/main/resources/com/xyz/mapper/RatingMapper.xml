@@ -24,4 +24,11 @@
         FROM RATING
         WHERE plan_code = #{planCode}
     </select>
+    <select id="selectAllByOrderId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from RATING
+        where
+        ORDER_ID = #{orderId,jdbcType=NUMERIC}
+    </select>
 </mapper>

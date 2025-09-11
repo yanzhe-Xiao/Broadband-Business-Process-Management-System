@@ -60,6 +60,12 @@ public class ResourceDeviceServiceImpl extends ServiceImpl<ResourceDeviceMapper,
         boolean result = this.saveBatch(resourceDevices);
         return result ? resourceDevices.size() : 0;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResourceDevice> getAllDevices() {
+        return resourceDeviceMapper.selectAll();
+    }
 }
 
 

@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,9 @@ public class OrderItemController {
     OrderItemService orderItemService;
 
     @PostMapping("/add")
-    public ResponseResult addOrderItem(@RequestBody @Valid List<OrderItemDTO.@Valid OrderItemController> orderItemControllers){
+    public ResponseResult addOrderItem(@RequestBody OrderItemDTO.@Valid OrderItemController orderItemController1){
+        ArrayList<OrderItemDTO.OrderItemController> orderItemControllers = new ArrayList<>();
+        orderItemControllers.add(orderItemController1);
         List<OrderItemDTO.OrderItemAvaliable> orderItemAvaliables = orderItemControllers.stream().map(orderItemController -> {
             return OrderItemDTO.OrderItemAvaliable.withUsername(orderItemController, UserAuth.getCurrentUsername());
         }).collect(Collectors.toList());
@@ -45,9 +48,10 @@ public class OrderItemController {
         return ResponseResult.success(SuccessAdvice.updateSuccessMessage(i));
     }
 
-    @DeleteMapping("/delete")
-    public ResponseResult deleteOrderItem(@RequestBody List<Long> ids){
-        int i = orderItemService.deleteOrderItem(ids);
+//     record DeteleDto(List<Long> ids){}
+    @PostMapping("/delete")
+    public ResponseResult deleteOrderItem(@RequestBody List<Long> ids ){
+        int i = orderItemService.deleteOrderItem( ids);
         return ResponseResult.success(SuccessAdvice.deleteSuccessMessage(i));
     }
 

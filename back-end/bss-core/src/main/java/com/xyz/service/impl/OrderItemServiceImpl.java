@@ -325,7 +325,8 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
 
         // 1) 分页查订单项（仅按用户名）
         LambdaQueryWrapper<OrderItem> qw = Wrappers.<OrderItem>lambdaQuery()
-                .eq(OrderItem::getUsername, username);
+                .eq(OrderItem::getUsername, username)
+                .eq(OrderItem::getStatus,OrderConstarint.ORDER_ITEM_STATUS_IN_CART);
         IPage<OrderItem> page = new Page<>(pageNo, pageSize);
         IPage<OrderItem> oiPage = orderItemMapper.selectPageByUserGroupedOrder(page, username);
 

@@ -62,14 +62,14 @@ public class AuthController {
 
         // 5. 构建并返回成功的响应
         return ResponseResult.success("登录成功", AuthTokenVO.builder()
-                .accessToken(issued.accessToken())
+                .token(issued.accessToken())
                 .tokenType("Bearer")
                 .expiresIn(issued.expiresInSeconds())
                 .jti(meta.jti())
                 .issuedAt(meta.issuedAtMs())
                 .expireAt(meta.expireAtMs())
                 .username(user.getUsername())
-                .roles(roleName)
+                .roleName(roleName)
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
@@ -99,7 +99,7 @@ public class AuthController {
      * @return 包含JWT访问令牌及用户信息的响应结果。
      * @throws Exception 如果注册过程中发生错误（例如用户名已存在）。
      */
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/register")
     public ResponseResult<AuthTokenVO> register(@RequestBody @Valid RegisterReq req) throws Exception {
         // 1. 调用认证服务进行注册，包括用户名查重、密码加密和数据持久化
         AppUser user = authService.register(req.username(), req.password(), req.fullName(),
@@ -112,14 +112,14 @@ public class AuthController {
 
         // 3. 构建并返回成功的响应
         return ResponseResult.success("注册成功", AuthTokenVO.builder()
-                .accessToken(issued.accessToken())
+                .token(issued.accessToken())
                 .tokenType("Bearer")
                 .expiresIn(issued.expiresInSeconds())
                 .jti(meta.jti())
                 .issuedAt(meta.issuedAtMs())
                 .expireAt(meta.expireAtMs())
                 .username(user.getUsername())
-                .roles(roles)
+                .roleName(roles)
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
@@ -151,7 +151,7 @@ public class AuthController {
      * @return 包含当前用户基本信息的响应结果。
      * @throws Exception 如果令牌无效或解析失败。
      */
-    @PostMapping(value = "/me")
+    @GetMapping(value = "/me")
     public ResponseResult<AuthVo> loginByToken(
             @RequestHeader("Authorization") String authorizationHeader) throws Exception {
         // 1. 校验并提取 "Bearer " 前缀后的 token 字符串
@@ -176,10 +176,11 @@ public class AuthController {
         // 5. 返回用户信息，结构与登录时类似，但不重新签发token
         return ResponseResult.success("已登录", AuthVo.builder()
                 .username(user.getUsername())
-                .roles(role)
+                .roleName(role)
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
+                .status(user.getStatus())
                 .build());
     }
 

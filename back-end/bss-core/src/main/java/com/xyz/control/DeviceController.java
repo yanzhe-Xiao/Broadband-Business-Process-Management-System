@@ -5,6 +5,7 @@ import com.xyz.advice.SuccessAdvice;
 import com.xyz.common.PageResult;
 import com.xyz.common.ResponseResult;
 import com.xyz.dto.DeviceDTO;
+import com.xyz.resources.ResourceDevice;
 import com.xyz.service.ResourceDeviceService;
 import com.xyz.vo.resources.DeviceAvaliableVO;
 import jakarta.validation.Valid;
@@ -29,9 +30,9 @@ public class DeviceController {
     ResourceDeviceService resourceDeviceService;
 
     @GetMapping("avaliable")
-    public PageResult<DeviceAvaliableVO> getAvaliableDevice(int current,int size){
+    public ResponseResult< PageResult<DeviceAvaliableVO>> getAvaliableDevice(int current,int size){
         IPage<DeviceAvaliableVO> avaliableDevice = resourceDeviceService.getAvaliableDevice(current, size);
-        return PageResult.of(avaliableDevice);
+        return ResponseResult.success(PageResult.of(avaliableDevice));
     }
 
 
@@ -39,5 +40,11 @@ public class DeviceController {
     public ResponseResult addDevice(@RequestBody @Valid List<DeviceDTO.@Valid DeviceAvaliableDTO> devices){
         Integer nums = resourceDeviceService.addDevices(devices);
         return ResponseResult.success(SuccessAdvice.insertSuccessMessage(nums));
+    }
+
+    @GetMapping("/all")
+    public ResponseResult<List<ResourceDevice>> getAllDevice(){
+        List<ResourceDevice> allDevices = resourceDeviceService.getAllDevices();
+        return ResponseResult.success(allDevices);
     }
 }

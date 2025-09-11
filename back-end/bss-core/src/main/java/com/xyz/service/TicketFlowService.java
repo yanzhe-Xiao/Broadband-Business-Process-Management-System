@@ -45,13 +45,13 @@ public class TicketFlowService {
     @Autowired
     TicketEventImageUrlMapper ticketEventImageUrlMapper;
     @Transactional(rollbackFor = Exception.class)
-    public void markArrived(Long ticketId, String note, Long userId,String base64) {
-        Ticket t = ticketMapper.selectById(ticketId);
+    public void markArrived(Long ticketId, String note, Long userId,List<String> base64) {
+        Ticket t = ticketMapper.selectOneByOrderId(ticketId);
         assertIsTicketValiad(t,userId,null);
 
         // 事件
         TicketEvent ticketEvent = TicketEvent.builder()
-                .ticketId(ticketId)
+                .ticketId(t.getId())
                 .eventCode(TicketEventCodes.SITE_SURVEY.getDescription())
                 .note(note)
                 .happenedAt(new Date())
@@ -64,19 +64,19 @@ public class TicketFlowService {
         ticketMapper.update(null, Wrappers.<Ticket>update()
                 .eq("id", ticketId)
                 .set("status", TicketStatuses.IN_PROGRESS));
-
-        insertImageUrl(base64,ticketEventId);
+        base64.forEach(base -> insertImageUrl(base,ticketEventId));
+//        insertImageUrl(base64,ticketEventId);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void markCompleted(Long ticketId, String note,Long userId,String base64) {
-        Ticket t = ticketMapper.selectById(ticketId);
+    public void markCompleted(Long ticketId, String note,Long userId,List<String> base64) {
+        Ticket t = ticketMapper.selectOneByOrderId(ticketId);
         assertIsTicketValiad(t,userId,TicketEventCodes.CUSTOMER_SIGNATURE.getPrevious().getDescription());
 
 
         // 事件
         TicketEvent ticketEvent = TicketEvent.builder()
-                .ticketId(ticketId)
+                .ticketId(t.getId())
                 .eventCode(TicketEventCodes.CUSTOMER_SIGNATURE.getDescription())
                 .note(note)
                 .happenedAt(new Date())
@@ -108,7 +108,7 @@ public class TicketFlowService {
 //                            .set("updated_at", new Date()));
         }
 
-        insertImageUrl(base64,ticketEventId);
+        base64.forEach(base -> insertImageUrl(base,ticketEventId));
 
 
         // ===== 事务提交后 1 分钟把订单置为 待评价 =====
@@ -128,13 +128,14 @@ public class TicketFlowService {
         );
     }
 
-    public void markOtherStatus(Long ticketId, String note,Long userId,String base64, TicketEventCodes status){
-        Ticket t = ticketMapper.selectById(ticketId);
+    @Transactional(rollbackFor = Exception.class)
+    public void markOtherStatus(Long ticketId, String note,Long userId,List<String> base64, TicketEventCodes status){
+        Ticket t = ticketMapper.selectOneByOrderId(ticketId);
         assertIsTicketValiad(t,userId,status.getPrevious().getDescription());
 
         // 事件
         TicketEvent ticketEvent = TicketEvent.builder()
-                .ticketId(ticketId)
+                .ticketId(t.getId())
                 .eventCode(status.getDescription())
                 .note(note)
                 .happenedAt(new Date())
@@ -142,7 +143,7 @@ public class TicketFlowService {
 
         ticketEventService.save(ticketEvent);
         Long ticketEventId = ticketEvent.getId(); // 获取保存后的ID
-        insertImageUrl(base64, ticketEventId);
+        base64.forEach(base -> insertImageUrl(base,ticketEventId));
     }
 
     @Transactional(rollbackFor = Exception.class)

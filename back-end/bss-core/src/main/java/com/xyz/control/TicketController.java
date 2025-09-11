@@ -8,13 +8,13 @@ import com.xyz.service.AppUserService;
 import com.xyz.service.TicketEventService;
 import com.xyz.service.TicketFlowService;
 import com.xyz.service.TicketService;
-import com.xyz.ticket.Ticket;
 import com.xyz.utils.UserAuth;
 import com.xyz.vo.TicketEventDetailVO;
-import com.xyz.vo.TicketPageVO;
+import com.xyz.vo.TicketFlowPageVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -38,11 +38,11 @@ public class TicketController {
     @Autowired
     TicketEventService ticketEventService;
 
-    public record TicketReq(Long ticketId, String note,String base64, String status){}
+    public record TicketReq(Long ticketId, String note, List<String> base64, String eventCode){}
     @PostMapping("/flow")
     public ResponseResult ticketFlow(@RequestBody TicketReq ticketReq){
         Long id = appUserService.usernameToUserId(UserAuth.getCurrentUsername());
-        String status = ticketReq.status();
+        String status = ticketReq.eventCode;
         if (status.equals(TicketEventCodes.SITE_SURVEY.getDescription())) {
             ticketFlowService.markArrived(ticketReq.ticketId(), ticketReq.note(), id, ticketReq.base64());
         } else if (status.equals(TicketEventCodes.CUSTOMER_SIGNATURE.getDescription())) {
@@ -68,14 +68,16 @@ public class TicketController {
     }
 
     @GetMapping("/page")
-    public PageResult<TicketPageVO> page(
+    public ResponseResult<PageResult<TicketFlowPageVo>>  page(
             @RequestParam(defaultValue = "1") int current,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String engineer,   // 用户名/姓名关键字
             @RequestParam(required = false) String addressKw   // 安装地址关键字
     ) {
-        return PageResult.of(ticketService.pageTicketVO(current, size, status, engineer, addressKw));
+        engineer = UserAuth.getCurrentUsername();
+        return ResponseResult.success(PageResult.of(ticketService.pageTicketVO(current, size, status, engineer,
+                addressKw)));
     }
 
     @GetMapping("/flow/get")

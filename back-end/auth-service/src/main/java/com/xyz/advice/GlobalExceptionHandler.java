@@ -1,12 +1,20 @@
 package com.xyz.advice;
 
+import com.xyz.common.HttpStatusEnum;
 import com.xyz.common.ResponseResult;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.UUID;
+
 /**
  * <p>Package Name: com.xyz.advice </p>
  * <p>Description: 全局异常处理程序，用于捕获和处理控制器层抛出的各种异常，并返回统一格式的响应结果。</p>
@@ -17,6 +25,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * @since
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     /**
@@ -65,8 +74,11 @@ public class GlobalExceptionHandler {
      * @param e 捕获到的 Exception 异常对象。
      * @return 返回一个包含500状态码和通用错误信息的通用响应结果，提示服务器内部错误。
      */
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public ResponseResult<Void> handleOther(Exception e) {
-        return ResponseResult.fail(500, "服务器开小差了");
+    public ResponseResult<Void> handleAll(Exception e, HttpServletRequest req) {
+        String rid = UUID.randomUUID().toString();
+        log.error("[500] Exception rid={} uri={} msg={}", rid, req.getRequestURI(), e.getMessage(), e);
+        return ResponseResult.fail(HttpStatusEnum.ERROR.getCode(), "系统内部错误（RID=" + rid + "）");
     }
 }

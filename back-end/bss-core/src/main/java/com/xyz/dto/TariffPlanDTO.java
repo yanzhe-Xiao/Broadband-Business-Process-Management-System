@@ -117,9 +117,6 @@ public class TariffPlanDTO {
             @Schema(description = "是否仅显示有库存的套餐", example = "true")
             Boolean onlyInStock,
 
-            @Schema(description = "用户角色名", example = "客户")
-            String roleName,
-
             @Schema(description = "每页显示条数", example = "8")
             Integer size,
 
@@ -148,7 +145,20 @@ public class TariffPlanDTO {
                     old.maxPrice(),
                     old.minPrice(),
                     old.onlyInStock(),
-                    old.roleName(),
+                    old.size(),
+                    old.sort(),
+                    username,
+                    old.priceSort()
+            );
+        }
+
+        public static TariffPlanSearchCriteria withUsername(TariffPlanSearchCriteriaControllerAdmin old, String username) {
+            return new TariffPlanSearchCriteria(
+                    old.current(),
+                    old.keyword(),
+                    old.maxPrice(),
+                    old.minPrice(),
+                    old.onlyInStock(),
                     old.size(),
                     old.sort(),
                     username,
@@ -162,7 +172,8 @@ public class TariffPlanDTO {
 
             @Schema(description = "当前页码")
             int current,
-
+            @Schema(description = "每页显示条数", example = "8")
+            Integer size,
             @Schema(description = "关键字（用于匹配套餐编码或名称）", example = "111123456")
             String keyword,
 
@@ -174,12 +185,6 @@ public class TariffPlanDTO {
 
             @Schema(description = "是否仅显示有库存的套餐", example = "true")
             Boolean onlyInStock,
-
-            @Schema(description = "用户角色名", example = "客户")
-            String roleName,
-
-            @Schema(description = "每页显示条数", example = "8")
-            Integer size,
 
             @Schema(description = "排序方式", example = "priceUp")
             @Pattern(
@@ -201,4 +206,43 @@ public class TariffPlanDTO {
     ) {}
 
 
+    @Schema(name = "TariffPlanSearchCriteriaController", description = "套餐计划搜索条件传输对象")
+    public record TariffPlanSearchCriteriaControllerAdmin(
+
+            @Schema(description = "当前页码")
+            int current,
+            @Schema(description = "每页显示条数", example = "8")
+            Integer size,
+            @Schema(description = "关键字（用于匹配套餐编码或名称）", example = "111123456")
+            String keyword,
+
+            @Schema(description = "最大价格", example = "2")
+            BigDecimal maxPrice,
+
+            @Schema(description = "最小价格", example = "1")
+            BigDecimal minPrice,
+
+            @Schema(description = "是否仅显示有库存的套餐", example = "true")
+            Boolean onlyInStock,
+
+            @Schema(description = "排序方式", example = "priceUp")
+            @Pattern(
+                    regexp = "^(priceUp|priceDown|rating)$",
+                    message = "排序方式只能是priceUp/priceDown/rating"
+            )
+            String sort,
+
+//            @Schema(description = "用户名", example = "username")
+//            String username,
+
+            @Schema(description = "价格分类", example = "month")
+            @Pattern(
+                    regexp = "^(month|year|forever)$",
+                    message = "排序方式只能是month|year|forever"
+            )
+            String priceSort,
+
+            String status
+
+    ) {}
 }

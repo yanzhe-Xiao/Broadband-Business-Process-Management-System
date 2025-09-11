@@ -33,11 +33,11 @@ public class OrderController {
     OrderOrchestrationService orderOrchestrationService;
 
     @PostMapping("/commit")
-    public ResponseResult commit(@RequestBody OrderDTO.OrderControllerDTO dto){
+    public ResponseResult<Long> commit(@RequestBody OrderDTO.OrderControllerDTO dto){
         OrderDTO.OrderAvaliableDTO newDto = OrderDTO.OrderAvaliableDTO.withUsername(dto,UserAuth
                 .getCurrentUsername());
-        int i = ordersService.commitOrder(newDto);
-        return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
+        Long orderId = ordersService.commitOrder(newDto);
+        return ResponseResult.success(orderId);
     }
 
     @PostMapping("/pay")
@@ -50,11 +50,12 @@ public class OrderController {
         return ResponseResult.success(SuccessAdvice.updateSuccessMessage(i));
     }
 
+    public record GetOrder(int current,int size){}
     @PostMapping("/get")
-    public PageResult<OrderVO.OrderLookVO> get(int current, int size){
+    public ResponseResult<PageResult<OrderVO.OrderLookVO>> get(@RequestBody GetOrder getOrder){
         String username = UserAuth.getCurrentUsername();
-        IPage<OrderVO.OrderLookVO> order = ordersService.getOrder(current, size, username);
-        return PageResult.of(order);
+        IPage<OrderVO.OrderLookVO> order = ordersService.getOrder(getOrder.current, getOrder.size, username);
+        return ResponseResult.success(PageResult.of(order)) ;
     }
 
     @DeleteMapping("/delete")
@@ -64,9 +65,16 @@ public class OrderController {
         return ResponseResult.success(SuccessAdvice.deleteSuccessMessage(i));
     }
 
+    // 你可以调这个方法来拿到一个订单里的所有的planCodes
     @GetMapping("/{orderId}/plan-codes")
     public ResponseResult<List<String>> getPlanCodes(@PathVariable Long orderId) {
         List<String> planCodes = ordersService.getPlanCodesByOrderId(orderId);
         return ResponseResult.success(planCodes);
+    }
+
+    @GetMapping("/cancle")
+    public ResponseResult cancle(Long id){
+        int i = ordersService.cancleOrder(id);
+        return ResponseResult.success(SuccessAdvice.updateSuccessMessage(i));
     }
 }

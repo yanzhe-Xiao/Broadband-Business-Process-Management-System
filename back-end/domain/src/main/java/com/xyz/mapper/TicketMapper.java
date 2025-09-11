@@ -30,6 +30,8 @@ public interface TicketMapper extends BaseMapper<Ticket> {
                                          @Param("engineer") String engineer,
                                          @Param("addressKw") String addressKw
     );
+
+    Ticket selectOneByOrderId(@Param("orderId") Long orderId);
 }
 
 

@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -45,6 +47,20 @@ public class SecurityConfig {
         var jwt = new JwtAuthenticationConverter();
         jwt.setJwtGrantedAuthoritiesConverter(conv);
         return jwt;
+    }
+
+    /**
+     * 创建并注册一个密码编码器（PasswordEncoder）的Bean。
+     * Spring Security要求密码必须以加密形式存储。
+     *
+     * @return 返回一个支持多种加密算法的委派密码编码器实例。
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        // 使用 PasswordEncoderFactories.createDelegatingPasswordEncoder() 创建一个委派密码编码器。
+        // 这种编码器支持多种密码哈希算法，并通过前缀（如"{bcrypt}"）来识别使用哪种算法。
+        // 这是目前推荐的最佳实践。
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }
 

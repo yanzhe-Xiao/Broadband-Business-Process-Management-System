@@ -95,4 +95,9 @@
         where
         SN = #{sn,jdbcType=VARCHAR}
     </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from RESOURCE_DEVICE
+    </select>
 </mapper>

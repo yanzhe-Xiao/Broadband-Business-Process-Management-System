@@ -14,4 +14,6 @@ import java.math.BigDecimal;
 */
 public interface RatingService extends IService<Rating> {
     public void submitRating(Long orderId, String planCode, Long userId, int score, String comment);
+
+    public int submitRatings(Long orderId,Long userId,int score,String comment);
 }

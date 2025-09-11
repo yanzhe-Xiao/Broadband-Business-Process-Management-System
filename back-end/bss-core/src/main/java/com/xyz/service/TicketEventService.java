@@ -2,6 +2,7 @@ package com.xyz.service;
 
 import com.xyz.ticket.TicketEvent;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xyz.vo.TicketEventDetailFlowVO;
 import com.xyz.vo.TicketEventDetailVO;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface TicketEventService extends IService<TicketEvent> {
      * 按 ticketId + eventCode 查询唯一事件，返回 note + imageUrls + happenedAt
      */
     TicketEventDetailVO queryEventDetail(Long ticketId, String eventCode);
+
+    List<TicketEventDetailFlowVO> queryEventDetail(Long ticketId);
 }

@@ -28,15 +28,23 @@ public class TariffPlanController {
     TariffPlanService tariffPlanService;
 
     @PostMapping("/customer/menu")
-    public PageResult<TariffPlanVO.TariffPlanDetail> getTariffPlanService(@RequestBody TariffPlanDTO.TariffPlanSearchCriteriaController searchCriteria){
+    public ResponseResult<PageResult<TariffPlanVO.TariffPlanDetail>> getTariffPlanService(@RequestBody TariffPlanDTO.TariffPlanSearchCriteriaController searchCriteria){
         TariffPlanDTO.TariffPlanSearchCriteria newDto =
                 TariffPlanDTO.TariffPlanSearchCriteria.withUsername(searchCriteria, UserAuth.getCurrentUsername());
-        return PageResult.of(tariffPlanService.getTariffPlanDetail(newDto));
+        return ResponseResult.success(PageResult.of(tariffPlanService.getTariffPlanDetail(newDto)));
     }
 
     @PostMapping("/tariffplan/add")
     public ResponseResult addTariffPlans(@RequestBody List<TariffPlanDTO.TariffPlanAvaliable>  plans){
         Integer i = tariffPlanService.addTariffPlanService(plans);
         return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
+    }
+
+    @PostMapping("/admin/menu")
+    public ResponseResult<PageResult<TariffPlanVO.TariffPlanDetail>> getTariffPlanServiceAdmin(@RequestBody TariffPlanDTO.TariffPlanSearchCriteriaControllerAdmin searchCriteria){
+        TariffPlanDTO.TariffPlanSearchCriteria newDto =
+                TariffPlanDTO.TariffPlanSearchCriteria.withUsername(searchCriteria, UserAuth.getCurrentUsername());
+        return ResponseResult.success(PageResult.of(tariffPlanService.getTariffPlanDetailAdmin(newDto,
+                searchCriteria.status())));
     }
 }

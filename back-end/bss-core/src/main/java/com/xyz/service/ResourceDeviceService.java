@@ -17,4 +17,6 @@ public interface ResourceDeviceService extends IService<ResourceDevice> {
     public IPage<DeviceAvaliableVO> getAvaliableDevice(int current,int size);
 
     public Integer addDevices(List<DeviceDTO.DeviceAvaliableDTO> devices);
+
+    public List<ResourceDevice> getAllDevices();
 }

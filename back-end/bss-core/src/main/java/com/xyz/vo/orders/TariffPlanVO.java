@@ -24,6 +24,7 @@ public class TariffPlanVO {
             BigDecimal monthlyFee, // 月费
             BigDecimal yearlyFee,
             BigDecimal foreverFee,
+            BigDecimal discount,
             Double installationFee, // 安装费
             Integer contractPeriod, // 合约期，单位月
             String status, // 套餐状态
@@ -32,7 +33,7 @@ public class TariffPlanVO {
             Integer bandwidth, // 带宽，单位MB
             Integer qty,
             BigDecimal rating,
-            String imageUrl,
+            String picture,
             // 设备资源信息
             String requireDeviceSn,
             String requiredDeviceModel, // 所需设备型号

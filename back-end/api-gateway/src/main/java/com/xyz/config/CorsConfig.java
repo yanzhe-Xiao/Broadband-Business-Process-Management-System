@@ -15,8 +15,9 @@ public class CorsConfig {
         CorsConfiguration cfg = new CorsConfiguration();
 
         // 允许的前端来源
-        cfg.addAllowedOriginPattern("http://127.0.0.1:3000");
-        cfg.addAllowedOriginPattern("http://localhost:3000");
+        cfg.addAllowedOriginPattern("http://127.0.0.1:5170");
+        cfg.addAllowedOriginPattern("http://localhost:5170");
+        cfg.addAllowedOriginPattern("http://192.168.3.90:5170");
 
         // 允许携带 cookie/认证头（如果你需要的话）
         cfg.setAllowCredentials(true);

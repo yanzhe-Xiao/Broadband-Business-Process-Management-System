@@ -35,7 +35,7 @@
                      /* 组内最大时间：若 UPDATED_AT 为空，用 CREATED_AT 兜底 */
                      MAX(COALESCE(oi.UPDATED_AT, oi.CREATED_AT)) OVER (PARTITION BY oi.PLAN_CODE) AS GRP_LATEST
                  FROM ORDER_ITEM oi
-                 WHERE oi.USERNAME = #{username}
+                 WHERE oi.USERNAME = #{username} AND oi.STATUS = '在购物车中'
              ) t
         /* 先按组时间倒序，使同 planCode 的记录相邻；再按记录自身时间/ID 细排 */
         ORDER BY t.GRP_LATEST DESC, t.UPDATED_AT DESC NULLS LAST, t.CREATED_AT DESC NULLS LAST, t.ID DESC
