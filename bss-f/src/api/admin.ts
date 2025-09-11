@@ -94,7 +94,7 @@ export async function createPlan(data: AdminPlanItem): Promise<void> {
 }
 
 export async function addPlan(data: addTariffPlans): Promise<void> {
-    await http.post('/api/tariffplan/add/test', data)
+    await http.post('/api/tariffplan/add', data)
 }
 
 /** 更新套餐（按 planCode） */
