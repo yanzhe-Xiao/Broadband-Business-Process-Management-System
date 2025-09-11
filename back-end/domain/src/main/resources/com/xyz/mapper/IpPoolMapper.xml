@@ -84,7 +84,7 @@
         where IP = #{ip,jdbcType=VARCHAR}
     </update>
     <select id="selectMaxAvaliableBandwidth" resultType="java.lang.Integer">
-        select MAX(AVALIABLE_BANDWIDTH) AS max_bandwidth
+        select SUM(AVALIABLE_BANDWIDTH) AS max_bandwidth
         from IP_POOL
         where STATUS = 'FREE'
     </select>

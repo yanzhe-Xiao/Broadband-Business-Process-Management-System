@@ -90,6 +90,7 @@ public class TariffPlanDTO {
             entity.setBandwith(dto.bandwidth());
             entity.setDescription(dto.description());
             entity.setDeviceQty(dto.deviceQty());
+            entity.setDeviceSn(dto.deviceSN);
             // ⭐ 将 base64 存盘并得到可访问 URL，落到 entity.imageUrl
             if (dto.imageBase64() != null && !dto.imageBase64().isBlank()) {
                 String url = saveBase64Fn.apply(dto.imageBase64());

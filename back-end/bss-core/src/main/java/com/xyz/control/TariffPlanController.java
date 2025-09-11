@@ -10,6 +10,7 @@ import com.xyz.vo.orders.TariffPlanVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,8 +36,10 @@ public class TariffPlanController {
     }
 
     @PostMapping("/tariffplan/add")
-    public ResponseResult addTariffPlans(@RequestBody List<TariffPlanDTO.TariffPlanAvaliable>  plans){
-        Integer i = tariffPlanService.addTariffPlanService(plans);
+    public ResponseResult addTariffPlans(@RequestBody TariffPlanDTO.TariffPlanAvaliable  plan){
+        ArrayList<TariffPlanDTO.TariffPlanAvaliable> tariffPlanAvaliables = new ArrayList<>();
+        tariffPlanAvaliables.add(plan);
+        Integer i = tariffPlanService.addTariffPlanService(tariffPlanAvaliables);
         return ResponseResult.success(SuccessAdvice.insertSuccessMessage(i));
     }
 
