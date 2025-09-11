@@ -209,7 +209,7 @@ const EngineerDashboard: React.FC = () => {
             </div>
 
             {/* 筛选 */}
-            <Form
+            {/* <Form
                 form={form}
                 layout="inline"
                 className="eng-filters"
@@ -239,7 +239,7 @@ const EngineerDashboard: React.FC = () => {
                 <Form.Item>
                     <Button onClick={() => { form.resetFields(); fetchList(1, size) }}>重置</Button>
                 </Form.Item>
-            </Form>
+            </Form> */}
 
             {/* 工单卡片 + 流程预览 */}
             {records.length === 0 ? (

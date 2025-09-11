@@ -39,8 +39,8 @@ import { getDeviceList, type DeviceInfo } from '../../../api/device'
 
 
 const statusOptions = [
-    { label: '在售', value: 'ACTIVE' },
-    { label: '下架', value: 'INACTIVE' },
+    { label: 'ACTIVE', value: 'ACTIVE' },
+    { label: 'INACTIVE', value: 'INACTIVE' },
 ]
 
 const isIpOptions = [
@@ -219,7 +219,7 @@ const loadDevices = async (keyword?: string) => {
         },
         {
             title: '状态', dataIndex: 'status', key: 'status', width: 100,
-            render: (s) => s === 'ACTIVE' ? <Tag color="green">在售</Tag> : <Tag>下架</Tag>
+            render: (s) => s === 'ACTIVE' ? <Tag color="green">ACTIVE</Tag> : <Tag>下架</Tag>
         },
         {
             title: '是否配置IP', dataIndex: 'isIp', key: "isIp", width: 100,
@@ -390,7 +390,7 @@ const loadDevices = async (keyword?: string) => {
                 <Form
                     form={upForm}
                     layout="vertical"
-                    initialValues={{ status: '在售', billingTypes: [] }}   // ← 默认不选
+                    initialValues={{ status: 'ACTIVE', billingTypes: [] }}   // ← 默认不选
                 >
                     <Form.Item label="套餐编码" name="planCode" rules={[{ required: true, message: '请输入编码' }]}>
                         <Input placeholder="例如：PLAN-1001" disabled={!!editing} />
