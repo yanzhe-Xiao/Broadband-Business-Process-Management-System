@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '../store/auth'
 
 export const http = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://192.168.3.6:8080',
     timeout: 15000,
 })
 

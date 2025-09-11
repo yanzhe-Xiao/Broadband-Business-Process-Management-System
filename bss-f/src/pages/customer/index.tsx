@@ -8,7 +8,7 @@ import {
     LogoutOutlined,
     ProfileOutlined,
 } from '@ant-design/icons'
-import { Button, Layout, Menu, theme, Dropdown, Avatar, Space, Badge, message } from 'antd'
+import { Button, Layout, Menu, theme, Dropdown, Avatar, Space, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import './customer.css'
 import Product from './product'
@@ -16,6 +16,8 @@ import { LazyLoading } from '../../../components'
 import { useAuthStore } from '../../store/auth'
 import ShoppingCart from './shoppingCart'
 import ProfilePage from './home'
+
+import MyOrders from './order'
 const { Header, Sider, Content } = Layout
 
 // 模拟当前用户信息
@@ -26,7 +28,6 @@ const currentUser = {
 }
 
 // 模拟未读订单数量
-const unreadOrders = 3
 
 // 定义菜单项类型
 type MenuKey = 'products' | 'profile' | 'orders' | 'shoppingCart'
@@ -61,11 +62,7 @@ const Customer: React.FC = () => {
         {
             key: 'orders',
             icon: <ProfileOutlined />,
-            label: (
-                <>
-                    我的订单
-                </>
-            ),
+            label: '我的订单'
         },
     ]
 
@@ -115,7 +112,7 @@ const Customer: React.FC = () => {
                     </Suspense>)
             case 'orders':
                 return (
-                    <div className="card-like">这里是我的订单页面的内容... 有 {unreadOrders} 个待处理订单。</div>
+                    <MyOrders />
                 )
             case 'shoppingCart':
                 return (
@@ -166,14 +163,11 @@ const Customer: React.FC = () => {
                     />
 
                     <div className="header-actions">
-                        <Badge count={unreadOrders} offset={[10, 0]} size='small' style={{ zIndex: 1000 }}>
-                            <ShoppingCartOutlined className="header-icon" />
-                        </Badge>
-
+                        <ShoppingCartOutlined className="header-icon" />
                         <Dropdown overlay={userMenu} placement="bottomRight">
                             <Space className="user-chip">
                                 <Avatar src={currentUser.avatar} icon={<UserOutlined />} />
-                                <span className="user-name">{name}</span>
+                                <span className="user-name" style={{ textAlign: 'center', marginTop: '26px' }}>{name}</span>
                             </Space>
                         </Dropdown>
                     </div>

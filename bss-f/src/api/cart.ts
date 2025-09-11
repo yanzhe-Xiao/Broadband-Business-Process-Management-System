@@ -6,13 +6,13 @@ export interface AddCartReq {
     planCode: string
     qty: number
     status: string         // 例如：'在购物车中'
-    username: string | null
+    username?: string | null
     planType: PlanType     // 'month' | 'year' | 'forever'
 }
 
 //添加购物车
 export async function addToCartApi(body: AddCartReq): Promise<void> {
-    await http.post('/cart/add', body)
+    await http.post('/api/order-item/add', body)
 }
 
 
@@ -44,7 +44,11 @@ export interface PageResp<T> {
     current: number
     pages: number
 }
-
+export interface code<T> {
+    code: string
+    message: string
+    data: T
+}
 /** 分页拉取购物车 */
 export async function getCart(params: { username: string | null; current?: number; size?: number }) {
     const { username, current = 1, size = 10 } = params
@@ -59,10 +63,30 @@ export async function getCart(params: { username: string | null; current?: numbe
     }
 }
 
+export interface Address {
+    orderItemId: number[]
+    province: string
+    city: string
+    district: string
+    detailAddress: string
+}
+export interface code<T> {
+    code: string
+    message: string
+    data: T
+}
+export interface Order {
+    orderId: number
+}
+
+export async function sendAddress(data: Address): Promise<Order> {
+    const res = await http.post<code<Order>>("/api/order/commit", data)
+    return res.data.data
+}
 
 /** 更新数量 */
-export async function updateCartQty(body: { id: string; qty: number }) {
-    await http.post('/cart/updateQty', body)
+export async function updateCartQty(body: { id: string; qty: number; planType: string }) {
+    await http.post('/api/order-item/update', body)
 }
 
 /** 删除单条 */
@@ -71,8 +95,8 @@ export async function removeCartItem(id: string) {
 }
 
 /** 批量删除 */
-export async function removeCartBatch(ids: string[]) {
-    await http.post('/cart/removeBatch', { ids })
+export async function removeCartBatch(ids: number[]) {
+    await http.post('/api/order-item/delete', ids)
 }
 
 /** 清空当前用户购物车 */
@@ -80,11 +104,12 @@ export async function clearCart(username: string | null) {
     await http.post('/cart/clear', { username })
 }
 
-/** 结算（示例） */
+/** 支付 */
 export async function checkoutApi(payload: {
     username: string | null
     itemIds: string[]
+    orderId: number
 }) {
     // 实际根据你的后端改
-    await http.post('/cart/checkout', payload)
+    await http.post('/api/order/pay', payload)
 }

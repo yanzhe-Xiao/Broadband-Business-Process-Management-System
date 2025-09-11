@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button, Form, Input, Typography, Card, message, Divider } from 'antd'
 import { UserOutlined, LockOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import { loginApi } from '../../../api/auth'
@@ -9,16 +9,17 @@ import './LoginPage.css'
 export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const nav = useNavigate()
-    const loc = useLocation() as any
+    // const loc = useLocation() as any
     const login = useAuthStore((s) => s.login)
     const [messageApi, contextHolder] = message.useMessage()
 
     const onFinish = async (values: { username: string; password: string }) => {
         setLoading(true)
         try {
-            const data = await loginApi(values)
+            const data1 = await loginApi(values)
+            let data = data1.data;
             login({ token: data.token, roleName: data.roleName, username: data.username })
-            const from = loc.state?.from?.pathname as string | undefined
+            // const from = loc.state?.from?.pathname as string | undefined
             let address = '/login';
             if (data.roleName === '客户') {
                 address = '/app'
@@ -29,11 +30,14 @@ export default function LoginPage() {
             } else if (data.roleName === '装维工程师') {
                 address = '/engineer'
             }
+            console.log(data.roleName, data.token, data.username);
+
             messageApi.open({
                 type: 'success',
                 content: '登录成功',
                 duration: 1,
-                onClose: () => nav(from ?? address, { replace: true })
+                // onClose: () => nav(from ?? address, { replace: true })
+                onClose: () => nav(address, { replace: true })
             })
 
 

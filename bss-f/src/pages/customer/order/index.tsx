@@ -20,7 +20,7 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 import { ReloadOutlined, SearchOutlined, FileTextOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import './workorders.css'
+import './order.css'
 import { useAuthStore } from '../../../store/auth'
 import { getMyOrders, type OrderRecord, type OrderItem, submitOrderReview } from '../../../api/order'
 
@@ -248,7 +248,7 @@ const MyOrders: React.FC = () => {
                 <div className="left">
                     <div className="badge">ORD</div>
                     <div className="title-wrap">
-                        <h3>订单管理</h3>
+                        <h3>我的订单</h3>
                         <p>待支付 <b>{pendingCount}</b> 单 · 共 <b>{total}</b> 单</p>
                     </div>
                 </div>

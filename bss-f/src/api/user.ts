@@ -4,7 +4,7 @@ import { http } from '../api/http'
 /** ------- 通用类型 ------- */
 export type ID = string
 
-export type UserStatus = 'active' | 'disabled' | 'pending'
+export type UserStatus = 'ACTIVE' | 'DISABLED' | 'LOCKED'
 export type Profile = {
     username: string
     fullName: string
@@ -15,11 +15,16 @@ export type Profile = {
     avatar?: string // 可选：后端返回头像URL或Base64
     password?: string
 }
+export interface code<T> {
+    code: string
+    message: string
+    data: T
+}
 
 // 拉取个人资料
 export async function getProfile(): Promise<Profile> {
-    const res = await http.get<Profile>('/api/user')
-    return res.data
+    const res = await http.get<code<Profile>>('/auth/me')
+    return res.data.data
 }
 
 // 更新基本信息（不含密码）
@@ -102,12 +107,12 @@ export async function uploadMyAvatar(file: File): Promise<{ avatar: string }> {
 }
 /** 分页查询用户 */
 export interface UserRow extends Profile {
-    id: ID
+    id?: ID
 }
 export async function listUsers(params: PageReq): Promise<PageResp<UserRow>> {
     try {
-        const res = await http.get<PageResp<UserRow>>('/api/users', { params })
-        const p = res.data
+        const res = await http.get<code<PageResp<UserRow>>>('/api/user/all', { params })
+        const p = res.data.data
         // 兜底转换，避免 undefined 影响渲染
         return {
             records: p.records ?? [],
@@ -129,12 +134,12 @@ export interface CreateUserReq {
     roleName: string
     email?: string
     phone?: string
-    status?: UserStatus
+    status?: UserStatus | string
     avatar?: string
 }
 export async function createUser(data: CreateUserReq): Promise<UserRow> {
     try {
-        const res = await http.post<UserRow>('/api/users', data)
+        const res = await http.post<UserRow>('/api/user', data)
         return res.data
     } catch (e: any) {
         throw new Error(pickErrMsg(e, '创建用户失败'))
@@ -143,9 +148,9 @@ export async function createUser(data: CreateUserReq): Promise<UserRow> {
 
 /** 更新用户（管理员，可改任意字段；不含密码时可不传） */
 export type UpdateUserReq = Partial<Omit<UserRow, 'id' | 'username'>> & { password?: string }
-export async function updateUser(id: ID, data: UpdateUserReq): Promise<UserRow> {
+export async function updateUser(username: string, data: UpdateUserReq): Promise<UserRow> {
     try {
-        const res = await http.put<UserRow>(`/api/users/${encodeURIComponent(id)}`, data)
+        const res = await http.put<UserRow>(`/api/user`, { ...data, username: username })
         return res.data
     } catch (e: any) {
         throw new Error(pickErrMsg(e, '更新用户失败'))
@@ -156,6 +161,14 @@ export async function updateUser(id: ID, data: UpdateUserReq): Promise<UserRow> 
 export async function deleteUser(id: ID): Promise<void> {
     try {
         await http.delete(`/api/users/${encodeURIComponent(id)}`)
+    } catch (e: any) {
+        throw new Error(pickErrMsg(e, '删除用户失败'))
+    }
+}
+/** 删除用户（管理员） */
+export async function deleteUserByUsername(username: string): Promise<void> {
+    try {
+        await http.delete(`/api/user/${username}`,)
     } catch (e: any) {
         throw new Error(pickErrMsg(e, '删除用户失败'))
     }
@@ -173,7 +186,7 @@ export async function setUserStatus(id: ID, status: UserStatus): Promise<void> {
 /** 管理员重置用户密码 */
 export async function adminResetPassword(username: string, newPassword: string): Promise<void> {
     try {
-        await http.post('/api/users/reset-password', { username, newPassword })
+        await http.post('/api/user/reset-password', { username, newPassword })
     } catch (e: any) {
         throw new Error(pickErrMsg(e, '重置密码失败'))
     }

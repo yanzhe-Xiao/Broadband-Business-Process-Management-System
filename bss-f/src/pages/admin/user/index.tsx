@@ -32,35 +32,32 @@ import {
     listUsers,
     createUser,
     updateUser,
-    deleteUser,
     setUserStatus,
     adminResetPassword,
     uploadMyAvatar, // 可选给“编辑本人头像”，此处也用于管理员新增/编辑通用上传
     type PageReq,
     type UserRow,
     type UserStatus,
+    deleteUserByUsername,
 } from '../../../api/user'
 
 /** 可选：你系统支持的角色列表（也可从后端获取） */
 const roleOptions = [
     { label: '平台管理员', value: '平台管理员' },
-    { label: '客服坐席', value: '客服坐席' },
     { label: '装维工程师', value: '装维工程师' },
     { label: '客户', value: '客户' },
-    { label: 'admin', value: 'admin' },
-    { label: 'user', value: 'user' },
 ]
 
 const statusText: Record<UserStatus | string, string> = {
-    active: '已启用',
-    disabled: '已禁用',
-    pending: '待审核',
+    ACTIVE: '已启用',
+    DISABLED: '已禁用',
+    LOCKED: '待审核',
 }
 
 const statusColor: Record<UserStatus | string, string> = {
-    active: 'success',
-    disabled: 'default',
-    pending: 'warning',
+    ACTIVE: 'success',
+    DISABLED: 'default',
+    LOCKED: 'warning',
 }
 
 /** 创建/编辑表单类型 */
@@ -70,7 +67,7 @@ type UpsertForm = {
     password?: string
     fullName: string
     roleName: string
-    status?: UserStatus
+    status?: UserStatus | string | undefined
     email?: string
     phone?: string
     avatar?: string
@@ -116,7 +113,7 @@ const AdminUsers: React.FC = () => {
             setTotal(resp.total)
             setCurrent(resp.current)
             setSize(resp.size)
-            setSelectedRowKeys(prev => prev.filter(k => resp.records.some(i => i.id === k)))
+            setSelectedRowKeys(prev => prev.filter(k => resp.records.some(i => i.username === k)))
         } catch (e: any) {
             message.error(e?.message || '获取用户列表失败')
         } finally {
@@ -171,14 +168,14 @@ const AdminUsers: React.FC = () => {
                     size="small"
                     value={s}
                     options={[
-                        { label: '已启用', value: 'active' },
-                        { label: '已禁用', value: 'disabled' },
-                        { label: '待审核', value: 'pending' },
+                        { label: '已启用', value: 'ACTIVE' },
+                        { label: '已禁用', value: 'DISABLED' },
+                        { label: '待审核', value: 'LOCKED' },
                     ]}
                     onChange={async (val) => {
                         const hide = message.loading('更新状态...')
                         try {
-                            await setUserStatus(r.id, val as UserStatus)
+                            await setUserStatus(r?.id ?? "", val as UserStatus)
                             message.success('状态已更新')
                             setData(prev => prev.map(it => it.id === r.id ? { ...it, status: val } : it))
                         } catch (e: any) {
@@ -212,7 +209,7 @@ const AdminUsers: React.FC = () => {
                                 username: r.username,
                                 fullName: r.fullName,
                                 roleName: r.roleName,
-                                status: (['active', 'disabled', 'pending'] as string[]).includes(r.status) ? (r.status as UserStatus) : 'active',
+                                status: r.status,
                                 email: r.email,
                                 phone: r.phone,
                                 avatar: r.avatar,
@@ -237,7 +234,7 @@ const AdminUsers: React.FC = () => {
                         okButtonProps={{ danger: true }}
                         onConfirm={async () => {
                             try {
-                                await deleteUser(r.id)
+                                await deleteUserByUsername(r.username)
                                 message.success('已删除')
                                 fetchList()
                             } catch (e: any) {
@@ -272,8 +269,9 @@ const AdminUsers: React.FC = () => {
                     onConfirm={async () => {
                         try {
                             // 逐个删除（也可后端提供批量删除接口）
-                            for (const id of selectedRowKeys) {
-                                await deleteUser(String(id))
+                            for (const username of selectedRowKeys) {
+                                // await deleteUser(String(id))
+                                await deleteUserByUsername(String(username))
                             }
                             message.success('已删除所选')
                             setSelectedRowKeys([])
@@ -295,7 +293,7 @@ const AdminUsers: React.FC = () => {
                         setEditing(null)
                         setUpOpen(true)
                         upForm.resetFields()
-                        upForm.setFieldsValue({ roleName: 'user', status: 'active' })
+                        upForm.setFieldsValue({ roleName: '客户', status: 'ACTIVE' })
                     }}
                 >
                     新增用户
@@ -337,9 +335,9 @@ const AdminUsers: React.FC = () => {
                         style={{ width: 140 }}
                         options={[
                             { label: '全部', value: 'all' },
-                            { label: '已启用', value: 'active' },
-                            { label: '已禁用', value: 'disabled' },
-                            { label: '待审核', value: 'pending' },
+                            { label: '已启用', value: 'ACTIVE' },
+                            { label: '已禁用', value: 'DISABLED' },
+                            { label: '待审核', value: 'LOCKED' },
                         ]}
                     />
                 </Form.Item>
@@ -426,7 +424,7 @@ const AdminUsers: React.FC = () => {
                                         username: viewRow.username,
                                         fullName: viewRow.fullName,
                                         roleName: viewRow.roleName,
-                                        status: (['active', 'disabled', 'pending'] as string[]).includes(viewRow.status) ? (viewRow.status as UserStatus) : 'active',
+                                        status: (['ACTIVE', 'DISABLED', 'LOCEKD'] as string[]).includes(viewRow.status) ? (viewRow.status as UserStatus) : 'ACTIVE',
                                         email: viewRow.email,
                                         phone: viewRow.phone,
                                         avatar: viewRow.avatar,
@@ -439,7 +437,7 @@ const AdminUsers: React.FC = () => {
                                     okButtonProps={{ danger: true }}
                                     onConfirm={async () => {
                                         try {
-                                            await deleteUser(viewRow.id)
+                                            await deleteUserByUsername(viewRow.username)
                                             message.success('已删除')
                                             setViewOpen(false)
                                             setViewRow(null)
@@ -469,7 +467,7 @@ const AdminUsers: React.FC = () => {
                         if (editing) {
                             // 编辑
                             const { id, username, ...rest } = values
-                            await updateUser(editing.id, rest)
+                            await updateUser(editing.username, rest)
                             message.success('保存成功')
                         } else {
                             // 新增
@@ -483,7 +481,7 @@ const AdminUsers: React.FC = () => {
                                 roleName: values.roleName,
                                 email: values.email,
                                 phone: values.phone,
-                                status: values.status || 'active',
+                                status: values.status || 'ACTIVE',
                                 avatar: values.avatar,
                             })
                             message.success('创建成功')
@@ -507,7 +505,7 @@ const AdminUsers: React.FC = () => {
                 <Form
                     form={upForm}
                     layout="vertical"
-                    initialValues={{ status: 'active', roleName: 'user' }}
+                    initialValues={{ status: 'ACTIVE', roleName: 'user' }}
                 >
                     <Form.Item label="头像" name="avatar" valuePropName="fileUrl">
                         <Upload
@@ -572,9 +570,9 @@ const AdminUsers: React.FC = () => {
                     <Form.Item label="状态" name="status">
                         <Select
                             options={[
-                                { label: '已启用', value: 'active' },
-                                { label: '已禁用', value: 'disabled' },
-                                { label: '待审核', value: 'pending' },
+                                { label: '已启用', value: 'ACTIVE' },
+                                { label: '已禁用', value: 'DISABLED' },
+                                { label: '待审核', value: 'LOCKED' },
                             ]}
                         />
                     </Form.Item>

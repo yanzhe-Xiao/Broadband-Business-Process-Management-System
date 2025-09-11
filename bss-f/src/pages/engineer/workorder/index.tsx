@@ -11,36 +11,36 @@ import {
     type EngineerOrder, type FlowStep, type WorkStatus
 } from '../../../api/flowPath'
 
-const statusText: Record<WorkStatus, string> = {
-    pending: '待接单',
-    accepted: '已接单',
-    onroute: '出发中',
-    arrived: '已到场',
-    working: '施工中',
-    done: '已完工',
-    canceled: '已取消'
-}
-const statusColor: Record<WorkStatus, string> = {
-    pending: 'default',
-    accepted: 'processing',
-    onroute: 'gold',
-    arrived: 'blue',
-    working: 'purple',
-    done: 'success',
-    canceled: 'error'
-}
-const priorityColor = { low: 'default', medium: 'warning', high: 'error' } as const
+// const statusText: Record<WorkStatus, string> = {
+//     pending: '待接单',
+//     accepted: '已接单',
+//     onroute: '出发中',
+//     arrived: '已到场',
+//     working: '施工中',
+//     done: '已完工',
+//     canceled: '已取消'
+// }
+// const statusColor: Record<WorkStatus, string> = {
+//     pending: 'default',
+//     accepted: 'processing',
+//     onroute: 'gold',
+//     arrived: 'blue',
+//     working: 'purple',
+//     done: 'success',
+//     canceled: 'error'
+// }
+// const priorityColor = { low: 'default', medium: 'warning', high: 'error' } as const
 
 // ===== 可切换 mock（没有后端时用）=====
 const USE_MOCK = false
-const mockData: EngineerOrder[] = [
+const mockData: EngineerOrder<FlowStep>[] = [
     {
         id: 'wo_1001',
-        orderNo: 'WO-20250909-001',
-        customerName: '李雷',
-        customerPhone: '13800000001',
-        address: '上海市浦东新区 XX 路 100 号',
-        planName: '千兆宽带',
+        orderId: 'WO-20250909-001',
+        engineerFullName: '李雷',
+        engineerPhone: '13800000001',
+        installAddress: '上海市浦东新区 XX 路 100 号',
+        // planName: '千兆宽带',
         createdAt: new Date().toISOString(),
         priority: 'high',
         status: 'working',
@@ -56,10 +56,10 @@ const mockData: EngineerOrder[] = [
     },
     {
         id: 'wo_1002',
-        orderNo: 'WO-20250909-002',
-        customerName: '韩梅梅',
-        customerPhone: '13800000002',
-        address: '北京市海淀区 XX 大街 88 号',
+        orderId: 'WO-20250909-002',
+        engineerFullName: '韩梅梅',
+        engineerPhone: '13800000002',
+        installAddress: '北京市海淀区 XX 大街 88 号',
         planName: '500M 宽带',
         createdAt: new Date().toISOString(),
         priority: 'medium',
@@ -82,7 +82,7 @@ const EngineerDashboard: React.FC = () => {
 
     // 分页/数据
     const [, setLoading] = useState(false)
-    const [records, setRecords] = useState<EngineerOrder[]>([])
+    const [records, setRecords] = useState<EngineerOrder<FlowStep>[]>([])
     const [current, setCurrent] = useState(1)
     const [size, setSize] = useState(8)
     const [total, setTotal] = useState(0)
@@ -96,7 +96,7 @@ const EngineerDashboard: React.FC = () => {
                 const all = mockData.filter(i => {
                     const kw = (form.getFieldValue('keyword') || '').trim()
                     const st = form.getFieldValue('status') || 'all'
-                    const okKw = !kw || (i.orderNo.includes(kw) || i.customerName.includes(kw) || i.address.includes(kw))
+                    const okKw = !kw || (String(i.orderId).includes(kw) || i.engineerFullName.includes(kw) || i.installAddress.includes(kw))
                     const okSt = st === 'all' || i.status === st
                     return okKw && okSt
                 })
@@ -109,7 +109,10 @@ const EngineerDashboard: React.FC = () => {
             } else {
                 const st = form.getFieldValue('status') || 'all'
                 const kw = form.getFieldValue('keyword') || ''
-                const resp = await listEngineerOrders({ username, current: page, size: pageSize, keyword: kw, status: st })
+                const resp = await listEngineerOrders({ current: page, size: pageSize, keyword: kw, status: st })
+                console.log(resp);
+
+
                 setRecords(resp.records)
                 setTotal(resp.total)
                 setCurrent(resp.current)
@@ -128,7 +131,7 @@ const EngineerDashboard: React.FC = () => {
 
     // ==== Drawer 相关状态 ====
     const [flowOpen, setFlowOpen] = useState(false)
-    const [flowOrder, setFlowOrder] = useState<EngineerOrder | null>(null)
+    const [flowOrder, setFlowOrder] = useState<EngineerOrder<FlowStep> | null>(null)
     const [flowLoading, setFlowLoading] = useState(false)
     const [files, setFiles] = useState<File[]>([])
     const [remark, setRemark] = useState('')
@@ -143,7 +146,7 @@ const EngineerDashboard: React.FC = () => {
     const step = useMemo(() => flowOrder?.steps[currentStepIndex] ?? null, [flowOrder, currentStepIndex])
 
     // 打开 Drawer
-    const openFlow = (ord: EngineerOrder) => {
+    const openFlow = (ord: EngineerOrder<FlowStep>) => {
         setFlowOrder(ord)
         setRemark('')
         setFiles([])
@@ -188,6 +191,7 @@ const EngineerDashboard: React.FC = () => {
     const isDoneCollapsed = (key: string) => (doneCollapsed[key] ?? true)
     const toggleDone = (key: string) =>
         setDoneCollapsed(prev => ({ ...prev, [key]: !isDoneCollapsed(key) }))
+
 
     return (
         <Card className="eng-card" bodyStyle={{ padding: 16 }}>
@@ -248,15 +252,15 @@ const EngineerDashboard: React.FC = () => {
                             <Card key={item.id} className="eng-card-item" bodyStyle={{ padding: 16 }}>
                                 <div className="row1">
                                     <div className="left">
-                                        <div className="no">{item.orderNo}</div>
+                                        <div className="no">{item.orderId}</div>
                                         <div className="meta">
-                                            <span>{item.customerName}（{item.customerPhone}）</span>
-                                            <span className="light"> · {item.address}</span>
+                                            <span>{item.engineerFullName}（{item.engineerPhone}）</span>
+                                            <span className="light"> · {item.installAddress}</span>
                                         </div>
                                     </div>
                                     <div className="right">
-                                        <Tag color={priorityColor[item.priority]}>{item.priority.toUpperCase()}</Tag>
-                                        <Tag color={statusColor[item.status]}>{statusText[item.status]}</Tag>
+                                        {/* <Tag color={priorityColor[item?.priority == 'undefined' ? 'high' : 'high']}>{item.priority.toUpperCase()}</Tag> */}
+                                        {/* <Tag color={statusColor[item.status]}>{statusText[item.status]}</Tag> */}
                                         <span className="ts">{dayjs(item.createdAt).format('MM-DD HH:mm')}</span>
                                     </div>
                                 </div>
@@ -276,7 +280,8 @@ const EngineerDashboard: React.FC = () => {
                                         套餐：<b>{item.planName || '-'}</b>
                                     </div>
                                     <Space>
-                                        {item.status !== 'done' && item.status !== 'canceled' && (
+                                        {/* {item.status !== 'done' && item.status !== 'canceled' ? ( */}
+                                        {item.currentKey !== '' ? (
                                             <Button
                                                 size="small"
                                                 onClick={() => {
@@ -285,23 +290,25 @@ const EngineerDashboard: React.FC = () => {
                                                     setFlowOrder(item)
                                                     setFlowOpen(true)
                                                     openFlow(item)
-                                                    console.log(item);
-
                                                 }}
                                             >
                                                 继续施工
                                             </Button>
-                                        )}
-                                        {/* <Button
-                                            size="small"
-                                            onClick={() => {
-                                                setFlowOrder(item)   // 当前工单
-                                                setFlowOpen(true)    // 打开抽屉
-                                                openFlow(item)
-                                            }}
-                                        >
-                                            查看详情
-                                        </Button> */}
+                                        ) : item.currentKey === '' ? (
+                                            <Button
+                                                size="small"
+                                                onClick={() => {
+                                                    setFlowOrder(item)
+                                                    setFlowOpen(true)
+                                                    openFlow(item)
+                                                }}
+                                            >
+                                                查看
+                                            </Button>
+                                        ) : null}
+
+
+
                                     </Space>
                                 </div>
                             </Card>
@@ -326,7 +333,7 @@ const EngineerDashboard: React.FC = () => {
                             <div className="flowx-head-left">
                                 <div className="flowx-chip">FLOW</div>
                                 <div className="flowx-titles">
-                                    <div className="flowx-title">施工流程 · 工单 {flowOrder.orderNo}</div>
+                                    <div className="flowx-title">施工流程 · 工单 {flowOrder.orderId}</div>
                                     <div className="flowx-sub">在步骤卡片内填写备注、上传凭证并推进流程</div>
                                 </div>
                             </div>
@@ -342,6 +349,8 @@ const EngineerDashboard: React.FC = () => {
                                 current={currentStepIndex}
                                 className="flowx-steps"
                                 items={flowOrder.steps.map((s, idx) => {
+                                    console.log('flowOrder', s);
+
                                     const isCurrent = idx === currentStepIndex
                                     const isFinished = s.status === 'finish'
                                     const isFuture = idx > currentStepIndex
@@ -431,9 +440,9 @@ const EngineerDashboard: React.FC = () => {
                                                                             // 调用接口
                                                                             // const newProofUrls = files.map(f => URL.createObjectURL(f));
                                                                             await submitStep({
-                                                                                orderId: flowOrder.id,
-                                                                                stepKey: s.key,
-                                                                                remark,
+                                                                                ticketId: flowOrder.orderId,
+                                                                                eventCode: s.title,
+                                                                                note: remark,
                                                                                 files: base64List,
                                                                             })
 

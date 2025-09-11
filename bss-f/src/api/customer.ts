@@ -3,18 +3,20 @@ import { http } from "./http";
 export type SortType = 'pop' | 'priceUp' | 'priceDown' | 'rating'
 
 export interface CustomerReq {
-    username: string | null;
-    roleName: string | null;
+    // username: string | null;
+    // roleName: string | null;
     /** 分页：当前页，从 1 开始 */
     current: number;
     /** 分页：每页条数 */
     size: number;
-    name?: string;
+    keyword?: string;
     minPrice?: string | number;
     maxPrice?: string | number;
     onlyInStock?: string | boolean;
+    priceSort?: string | 'month'
+
     sort?: SortType;
-    keyword?: string;
+
 }
 
 export interface ProductItem {
@@ -22,7 +24,7 @@ export interface ProductItem {
     planCode: string;           // 套餐代码
     name: string;               // 名称
     price: number;              // 价格（如为字符串也可改为 string）
-    monthlyFree?: number | string | null;       // (可用)每月赠送（例如月费减免/流量等)
+    monthlyFee?: number | string | null;       // (可用)每月赠送（例如月费减免/流量等)
     planPeriod?: string | number; // 套餐周期（如 12/24/月度等）
     discount?: number | string;   // 折扣
     status?: string;              // 状态（如 onSale/下架/缺货 等）
@@ -36,8 +38,8 @@ export interface ProductItem {
 
 
     //新增
-    yearlyFree?: number | string | null;
-    foreverFree?: number | string | null;
+    yearlyFee?: number | string | null;
+    foreverFee?: number | string | null;
     installationFree?: number;      //安装费
     contractPeriod?: number;
     isIp?: number;
@@ -58,13 +60,17 @@ export interface PageResp<T> {
     current: number;
     pages: number;
 }
-
+export interface code<T> {
+    code: string
+    message: string
+    data: T
+}
 export async function getProducts(data: CustomerReq): Promise<PageResp<ProductItem>> {
     try {
-        const res = await http.get<PageResp<ProductItem>>('/customer/menu', {
-            params: data,   // GET 请求参数放到 params
+        const res = await http.post<code<PageResp<ProductItem>>>('/api/customer/menu', {
+            ...data,   // GET 请求参数放到 params
         })
-        const payload = res.data
+        const payload = res.data.data
         return {
             records: payload.records ?? [],
             total: Number(payload.total ?? 0),

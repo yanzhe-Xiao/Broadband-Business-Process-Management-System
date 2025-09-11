@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import { Upload } from 'antd'
+import type { UploadFile } from 'antd/es/upload/interface'
+// import { getDeviceList, type DeviceInfo } from '../../../api/device'
+
 import {
     PlusOutlined,
     ReloadOutlined,
@@ -33,14 +37,22 @@ import {
 } from '../../../api/admin'
 
 const statusOptions = [
-    { label: '在售', value: 'onSale' },
-    { label: '下架', value: 'offSale' },
+    { label: '在售', value: 'ACTIVE' },
+    { label: '下架', value: 'INACTIVE' },
 ]
 
 const isIpOptions = [
     { label: '是', value: 1 },
     { label: '否', value: 2 },
 ]
+const fileToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+    })
+
 
 const Product: React.FC = () => {
     // 查询表单
@@ -79,6 +91,33 @@ const Product: React.FC = () => {
             setLoading(false)
         }
     }
+    // Upload 受控
+    const [fileList, setFileList] = useState<UploadFile[]>([])
+    // 打开弹窗时，给 Upload 做回显（编辑用）
+    useEffect(() => {
+        if (!open) {
+            setFileList([])
+            return
+        }
+        if (editing) {
+            // 优先用已有 base64，否则用 picture(URL)
+            const url = editing.imageBase64 || editing.picture
+            if (url) {
+                setFileList([{
+                    uid: '-1',
+                    name: 'cover.png',
+                    status: 'done',
+                    url, // antd 直接预览
+                }])
+                // 同步回表单字段，保证不改图也能提交
+                upForm.setFieldsValue({ imageBase64: url })
+            }
+        } else {
+            setFileList([])
+            upForm.setFieldsValue({ imageBase64: undefined })
+        }
+    }, [open, editing, upForm])
+
 
     useEffect(() => {
         fetchList(true)
@@ -91,55 +130,60 @@ const Product: React.FC = () => {
         setPagination({ current: pg.current || 1, size: pg.pageSize || 10 })
         setTimeout(() => fetchList(), 0)
     }
-    // 小工具
-    // const fmtCNY = (v?: number) => (typeof v === 'number' ? `¥ ${v.toFixed(2)}` : '-')
 
-    // 统一状态/需求 IP 渲染
-    // const StatusTag: React.FC<{ s?: string }> = ({ s }) =>
-    //     s === 'onSale' ? <Tag color="green">在售</Tag> : <Tag>下架</Tag>
-
-    // const IpTag: React.FC<{ v?: string | number | boolean }> = ({ v }) =>
-    //     String(v) === '1' || v === true ? <Tag color="geekblue">需IP</Tag> : <Tag>无需IP</Tag>
     const columns: ColumnsType<AdminPlanItem> = [
         {
             title: '展示', dataIndex: 'imageBase64', key: 'imageBase64', width: 110,
-            render: (b64: string, r) => {
-                const src = b64?.startsWith('http') ? b64 : b64 ? `data:image/*;base64,${b64}` : r.picture
-                return <Image src={src} width={88} height={56} style={{ objectFit: 'cover', borderRadius: 8 }} />
+            render: (_, r) => {
+                return <Image src={r.picture} width={88} height={56} style={{ objectFit: 'cover', borderRadius: 8 }} />
             }
         },
         { title: '套餐编码', dataIndex: 'planCode', key: 'planCode', width: 150, sorter: true, ellipsis: true },
         { title: '套餐名称', dataIndex: 'name', key: 'name', width: 220, ellipsis: true },
-        {
-            title: '售卖价(¥)', dataIndex: 'price', key: 'price', width: 120, sorter: true,
-            render: (v) => (typeof v === 'number' ? `¥ ${v.toFixed(2)}` : '-')
-        },
+        // {
+        //     title: '售卖价(¥)', dataIndex: 'price', key: 'price', width: 120, sorter: true,
+        //     render: (v) => (typeof v === 'number' ? `¥ ${v.toFixed(2)}` : '-')
+        // },
         {
             title: '计费', key: 'billing', width: 240, ellipsis: true,
             render: (_, r) => (
                 <span className="billing-tags">
-                    {r.monthlyPrice != null && <Tag color="processing">月 {`¥ ${Number(r.monthlyPrice).toFixed(2)}`}</Tag>}
-                    {r.yearlyPrice != null && <Tag color="success">年 {`¥ ${Number(r.yearlyPrice).toFixed(2)}`}</Tag>}
-                    {r.lifetimePrice != null && <Tag color="purple">永久 {`¥ ${Number(r.lifetimePrice).toFixed(2)}`}</Tag>}
-                    {!r.monthlyPrice && !r.yearlyPrice && !r.lifetimePrice && <Tag>未设置</Tag>}
+                    {r.monthlyFee != null && <Tag color="processing">月 {`¥ ${Number(r.monthlyFee).toFixed(2)}`}</Tag>}
+                    {r.yearlyFee != null && <Tag color="success">年 {`¥ ${Number(r.yearlyFee).toFixed(2)}`}</Tag>}
+                    {r.foreverFee != null && <Tag color="purple">永久 {`¥ ${Number(r.foreverFee).toFixed(2)}`}</Tag>}
+                    {!r.monthlyFee && !r.yearlyFee && !r.foreverFee && <Tag>未设置</Tag>}
                 </span>
             )
         },
-        { title: '有效期(月)', dataIndex: 'planPeriod', key: 'planPeriod', width: 110, sorter: true },
+        // { title: '有效期(月)', dataIndex: 'planPeriod', key: 'planPeriod', width: 110, sorter: true },
         {
             title: '折扣(%)', dataIndex: 'discount', key: 'discount', width: 100, sorter: true,
             render: (v) => v == null ? '-' : `${v}%`
         },
         { title: '库存', dataIndex: 'qty', key: 'qty', width: 100 },
-        { title: '设备数', dataIndex: 'deviceQty', key: 'deviceQty', width: 110 },
-        { title: '带宽(Mbps)', dataIndex: 'bandwidth', key: 'bandwidth', width: 120, sorter: true },
+        {
+            title: "设备", dataIndex: 'requireDeviceSn', key: 'requireDeviceSn', width: 100
+            , render: (v) => v == "" ? '-' : v
+        },
+        {
+            title: "设备模型", dataIndex: 'requiredDeviceModel', key: "requiredDeviceModel", width: 100
+            , render: (v) => v == "" ? '-' : v
+        },
+        {
+            title: '设备数', dataIndex: 'requiredDeviceQty', key: 'requiredDeviceQty', width: 110,
+        },
+        { title: '带宽(MB)', dataIndex: 'bandwidth', key: 'bandwidth', width: 120, sorter: true },
         {
             title: '评分', dataIndex: 'rating', key: 'rating', width: 90, sorter: true,
             render: (v) => v != null ? Number(v).toFixed(1) : '-'
         },
         {
             title: '状态', dataIndex: 'status', key: 'status', width: 100,
-            render: (s) => s === 'onSale' ? <Tag color="green">在售</Tag> : <Tag>下架</Tag>
+            render: (s) => s === 'ACTIVE' ? <Tag color="green">在售</Tag> : <Tag>下架</Tag>
+        },
+        {
+            title: '是否配置IP', dataIndex: 'isIp', key: "isIp", width: 100,
+            render: (s) => s === 1 ? '是' : '否'
         },
 
         // ⭐ 固定在右侧的操作列
@@ -176,6 +220,7 @@ const Product: React.FC = () => {
         try {
             const values = await upForm.validateFields()
             console.log(values);
+            delete values.billingTypes
 
             if (editing) {
                 await updatePlan(values as AdminPlanItem)
@@ -194,6 +239,25 @@ const Product: React.FC = () => {
         }
     }
 
+
+    // const [deviceOpts, setDeviceOpts] = useState<DeviceInfo[]>([])
+    // const [deviceLoading, setDeviceLoading] = useState(false)
+    // const [deviceSearchTimer, setDeviceSearchTimer] = useState<any>(null)
+
+    // const loadDevices = async (kw?: string) => {
+    //     setDeviceLoading(true)
+    //     try {
+    //         const list = await getDeviceList(kw ? { keyword: kw } : undefined)
+    //         setDeviceOpts(list || [])
+    //     } finally {
+    //         setDeviceLoading(false)
+    //     }
+    // }
+    // useEffect(() => {
+    //     if (open) {
+    //         loadDevices()
+    //     }
+    // }, [open])
     return (
         <div className="admin-plans-page">
             <Card className="admin-plans-card" bodyStyle={{ padding: 16 }}>
@@ -286,7 +350,7 @@ const Product: React.FC = () => {
                 <Form
                     form={upForm}
                     layout="vertical"
-                    initialValues={{ status: 'onSale', billingTypes: [] }}   // ← 默认不选
+                    initialValues={{ status: '在售', billingTypes: [] }}   // ← 默认不选
                 >
                     <Form.Item label="套餐编码" name="planCode" rules={[{ required: true, message: '请输入编码' }]}>
                         <Input placeholder="例如：PLAN-1001" disabled={!!editing} />
@@ -296,9 +360,9 @@ const Product: React.FC = () => {
                         <Input placeholder="例如：千兆宽带 1000M" />
                     </Form.Item>
 
-                    <Form.Item label="套餐有效期（月）" name="planPeriod">
+                    {/* <Form.Item label="套餐有效期（月）" name="planPeriod">
                         <InputNumber min={1} precision={0} style={{ width: '100%' }} placeholder="月" />
-                    </Form.Item>
+                    </Form.Item> */}
                     <Form.Item label="折扣率" name="discount" tooltip="100表示无折扣">
                         <InputNumber min={0} max={100} precision={0} style={{ width: '100%' }} placeholder="请输入折扣" />
                     </Form.Item>
@@ -311,9 +375,9 @@ const Product: React.FC = () => {
                     <Form.Item label="是否需要IP" name="isIp">
                         <Select options={isIpOptions} />
                     </Form.Item>
-                    <Form.Item label="评分" name="rating" >
+                    {/* <Form.Item label="评分" name="rating" >
                         <InputNumber min={0} precision={1} max={5} style={{ width: '100%' }} placeholder="请输入评分" />
-                    </Form.Item>
+                    </Form.Item> */}
                     <Form.Item label="设备资源" name="deviceSN" >
                         <InputNumber style={{ width: '100%' }} placeholder="请输入设备" />
                     </Form.Item>
@@ -332,15 +396,54 @@ const Product: React.FC = () => {
                         <Input.TextArea showCount maxLength={100} />
                     </Form.Item>
                     <Form.Item
-                        label="展示图片 URL"
-                        name="imageBase64"
-                        rules={[{ required: true, message: '请填写图片 URL' }]}
+                        label="展示图片"
+                        required
+                        // 自定义校验：必须存在 imageBase64
+                        rules={[
+                            {
+                                validator: async () => {
+                                    const val = upForm.getFieldValue('imageBase64')
+                                    if (!val) return Promise.reject(new Error('请上传展示图片'))
+                                },
+                            },
+                        ]}
                     >
-                        <Input placeholder="https://..." />
+                        <Upload
+                            listType="picture-card"
+                            fileList={fileList}
+                            accept="image/*"
+                            maxCount={1}
+                            // 阻止自动上传（改为本地处理）
+                            beforeUpload={() => false}
+                            onChange={async (info) => {
+                                const fl = info.fileList.slice(-1)  // 只保留最后一张
+                                setFileList(fl)
+                                const f = fl[0]
+                                // 新选的本地文件（originFileObj 存在），转成 Base64 存到表单
+                                if (f?.originFileObj) {
+                                    const base64 = await fileToBase64(f.originFileObj as File)
+                                    upForm.setFieldsValue({ imageBase64: base64 })
+                                }
+                                // 若只是回显/保持原图（无 originFileObj），保持当前 form 值不变
+                            }}
+                            onRemove={() => {
+                                setFileList([])
+                                upForm.setFieldsValue({ imageBase64: undefined })
+                            }}
+                        >
+                            {fileList.length >= 1 ? null : (
+                                <div style={{ width: 100 }}>
+                                    <div style={{ fontSize: 28, lineHeight: 1 }}>＋</div>
+                                    <div>上传</div>
+                                </div>
+                            )}
+                        </Upload>
+                        {/* 隐藏域：真正提交给后端的 base64 值 */}
+                        <Form.Item name="imageBase64" noStyle>
+                            <Input type="hidden" />
+                        </Form.Item>
                     </Form.Item>
-                    <Form.Item>
-                        <Image src={upForm.getFieldValue('picture')} width={160} style={{ borderRadius: 8 }} />
-                    </Form.Item>
+
 
                     {/* === 新增：计费方式选择 === */}
                     <Form.Item label="计费方式" name="billingTypes" tooltip="可多选">
@@ -357,7 +460,7 @@ const Product: React.FC = () => {
                     {billingTypes.includes('monthly') && (
                         <Form.Item
                             label="月费金额（¥/月）"
-                            name="monthlyPrice"
+                            name="monthlyFee"
                             rules={[
                                 ({ getFieldValue }) => ({
                                     validator(_, value) {
@@ -377,7 +480,7 @@ const Product: React.FC = () => {
                     {billingTypes.includes('yearly') && (
                         <Form.Item
                             label="年费金额（¥/年）"
-                            name="yearlyPrice"
+                            name="yearlyFee"
                             rules={[
                                 ({ getFieldValue }) => ({
                                     validator(_, value) {
@@ -397,7 +500,7 @@ const Product: React.FC = () => {
                     {billingTypes.includes('lifetime') && (
                         <Form.Item
                             label="永久买断金额（¥）"
-                            name="lifetimePrice"
+                            name="foreverFee"
                             rules={[
                                 ({ getFieldValue }) => ({
                                     validator(_, value) {

@@ -14,9 +14,9 @@ import { getProfile, changePassword, type Profile, updateAllProfile, calcStrengt
 const { Title, Text } = Typography
 
 const statusColor: Record<string, string> = {
-    active: 'green',
-    disabled: 'red',
-    pending: 'orange',
+    ACTIVE: 'green',
+    DISABLED: 'red',
+    LOCKED: 'orange',
 }
 
 const ProfilePage: React.FC = () => {
@@ -135,7 +135,7 @@ const ProfilePage: React.FC = () => {
 
                             <Title level={3} className="pro-name">{data.fullName}</Title>
                             <Tag color={statusColor[data.status] || 'blue'} className="pro-status">
-                                {String(data.status).toUpperCase()}
+                                {String(data.status ?? "active").toUpperCase()}
                             </Tag>
 
                             <Space direction="vertical" size={6} style={{ marginTop: 16 }}>
@@ -179,7 +179,7 @@ const ProfilePage: React.FC = () => {
                                 <Descriptions.Item label="角色">{data.roleName}</Descriptions.Item>
                                 <Descriptions.Item label="状态">
                                     <Tag color={statusColor[data.status] || 'blue'}>
-                                        {String(data.status).toUpperCase()}
+                                        {String(data.status ?? "active").toUpperCase()}
                                     </Tag>
                                 </Descriptions.Item>
                             </Descriptions>

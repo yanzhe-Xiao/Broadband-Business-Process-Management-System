@@ -10,9 +10,6 @@ export interface AdminPlanItem {
     availableBandwidth?: number
     deviceName?: string
     model?: string
-
-
-
     monthlyFee?: number;
     yearlyFee?: number;
     foreverFee?: number;
@@ -27,6 +24,7 @@ export interface AdminPlanItem {
     description?: string;
     deviceQty?: number;
     imageBase64?: string;
+    requiredDeviceQty?: string | null | number
 
     [k: string]: any
 }
@@ -48,12 +46,19 @@ export interface AdminPlanQuery {
     maxPrice?: number
     sortField?: string
     sortOrder?: 'asc' | 'desc'
+    onlyInStock?: boolean
+}
+export interface code<T> {
+    code: string
+    message: string
+    data: T
 }
 
 /** 分页获取套餐 */
 export async function getPlanPage(params: AdminPlanQuery): Promise<PageResp<AdminPlanItem>> {
-    const res = await http.post<PageResp<AdminPlanItem>>('/get', { params })
-    const p = res.data
+
+    const res = await http.post<code<PageResp<AdminPlanItem>>>('/api/admin/menu', params)
+    const p = res.data.data
     return {
         records: p.records ?? [],
         total: Number(p.total ?? 0),
@@ -63,7 +68,7 @@ export async function getPlanPage(params: AdminPlanQuery): Promise<PageResp<Admi
     }
 }
 
-
+export type PLAN_STATUS = "ACTIVE" | "INACTIVE"
 export interface addTariffPlans {
     planCode: string;
     name: string;
@@ -73,9 +78,9 @@ export interface addTariffPlans {
     planPeriod?: number;
     discount?: number;
     qty?: number;
-    status?: string;
+    status?: string | PLAN_STATUS;
     isIp?: number;
-    rating?: number;
+    // rating?: number;
     deviceSN?: string;
     bandwidth?: number;
     description?: string;
@@ -89,7 +94,7 @@ export async function createPlan(data: AdminPlanItem): Promise<void> {
 }
 
 export async function addPlan(data: addTariffPlans): Promise<void> {
-    await http.post('/tariffplan/add', data)
+    await http.post('/api/tariffplan/add/test', data)
 }
 
 /** 更新套餐（按 planCode） */

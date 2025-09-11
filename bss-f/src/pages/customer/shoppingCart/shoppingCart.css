@@ -148,3 +148,284 @@
     opacity: .6;
     cursor: not-allowed;
 }
+
+
+
+.pay-modal .ant-modal-content {
+    border-radius: 16px;
+}
+
+.pay-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pay-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 4px 0;
+}
+
+.pay-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #14b8a6);
+    box-shadow: 0 10px 18px rgba(20, 184, 166, .2);
+}
+
+.pay-title {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.pay-sub {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.pay-amount {
+    margin-left: auto;
+    font-weight: 800;
+    font-size: 20px;
+}
+
+.pay-methods {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (min-width:560px) {
+    .pay-methods {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.pay-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid rgba(2, 6, 23, .08);
+    border-radius: 12px;
+    background: #fff;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+    position: relative;
+    transition: all .2s ease;
+}
+
+.pay-card:hover {
+    border-color: #6366f1;
+    box-shadow: 0 8px 16px rgba(99, 102, 241, .08);
+}
+
+.pay-card.active {
+    border-color: #6366f1;
+    box-shadow: 0 10px 20px rgba(99, 102, 241, .12);
+}
+
+.pay-icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain
+}
+
+.pay-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.pay-label {
+    font-weight: 600;
+}
+
+.pay-desc {
+    font-size: 12px;
+    color: #64748b
+}
+
+.pay-check {
+    margin-left: auto;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #c7cbe0;
+    position: relative;
+}
+
+.pay-card.active .pay-check {
+    border-color: #6366f1;
+    background: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .15) inset;
+}
+
+.pay-panel {
+    background: linear-gradient(180deg, #fff, #f8fafc);
+    border: 1px solid rgba(2, 6, 23, .06);
+    border-radius: 12px;
+    padding: 16px;
+    display: grid;
+    place-items: center;
+}
+
+.pay-hint {
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.qr {
+    width: 180px;
+    height: 180px;
+    background:
+        repeating-linear-gradient(45deg, #e2e8f0 0 6px, #cbd5e1 6px 12px);
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 6px #fff, 0 8px 20px rgba(2, 6, 23, .08);
+}
+
+.pay-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* --- Address Panel --- */
+.addr-panel {
+    border: 1px solid rgba(2, 6, 23, .06);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fff, #f8fafc);
+    padding: 14px;
+}
+
+.addr-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.addr-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: .5px;
+    background: linear-gradient(135deg, #6366f1, #14b8a6);
+    box-shadow: 0 10px 18px rgba(20, 184, 166, .2);
+}
+
+.addr-title {
+    font-weight: 700;
+}
+
+.addr-sub {
+    color: #64748b;
+    font-size: 12px;
+    margin-left: auto;
+}
+
+.addr-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.addr-col-span {
+    grid-column: 1 / -1;
+}
+
+/* 让详细地址跨 3 列 */
+@media (max-width:720px) {
+    .addr-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .addr-col-span {
+        grid-column: auto;
+    }
+}
+
+/* 你已有的 pay-modal / pay-wrap / pay-card 等样式保持不变 */
+/* --- Address Panel --- */
+.addr-panel {
+    border: 1px solid rgba(2, 6, 23, .06);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fff, #f8fafc);
+    padding: 14px;
+}
+
+.addr-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.addr-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: .5px;
+    background: linear-gradient(135deg, #6366f1, #14b8a6);
+    box-shadow: 0 10px 18px rgba(20, 184, 166, .2);
+}
+
+.addr-title {
+    font-weight: 700;
+}
+
+.addr-sub {
+    color: #64748b;
+    font-size: 12px;
+    margin-left: auto;
+}
+
+.addr-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.addr-col-span {
+    grid-column: 1 / -1;
+}
+
+/* 让详细地址跨 3 列 */
+@media (max-width:720px) {
+    .addr-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .addr-col-span {
+        grid-column: auto;
+    }
+}
+
+/* 你已有的 pay-modal / pay-wrap / pay-card 等样式保持不变 */
+.qr-img {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(2, 6, 23, .12);
+    background: #fff;
+    padding: 8px;
+}
+
+/* 步骤头部、卡片等保持你当前的 pay-* / addr-* 样式即可 */

@@ -12,9 +12,9 @@ export type ShowItem = {
     price: number
     rating: number
     stock: number | string
-    monthlyFree?: number | null | string,
-    yearlyFree?: number | null | string;
-    foreverFree?: number | null | string;
+    monthlyFee?: number | null | string,
+    yearlyFee?: number | null | string;
+    foreverFee?: number | null | string;
     bandWidth?: number | null,
     cover: string
     tags?: string[]
@@ -26,7 +26,7 @@ export type ProductProps = {
 
 const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
     // ======= 状态 =======
-    const { roleName, username } = useAuthStore()
+    const { username } = useAuthStore()
 
     //小红点
     const [, setCartCount] = useState(0)
@@ -60,8 +60,8 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
         setLoading(true)
         try {
             const res = await getProducts({
-                roleName,
-                username,
+                // roleName,
+                // username,
                 current: page,
                 size: pageSize,
                 keyword: query || undefined,
@@ -70,6 +70,8 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                 minPrice: typeof minPrice === 'number' ? minPrice : undefined,
                 maxPrice: typeof maxPrice === 'number' ? maxPrice : undefined,
             })
+            console.log();
+
             setRecords(res.records ?? [])
             setTotal(Number(res.total ?? 0))
             setCurrent(Number(res.current ?? page))
@@ -117,9 +119,9 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                 id: r.planCode || `${r.name}-${i}`,
                 title: r.name,
                 price: Number(r.price ?? 0),
-                monthlyFree: r.monthlyFree ?? null,
-                yearlyFree: r.yearlyFree ?? null,
-                foreverFree: r.foreverFree ?? null,
+                monthlyFee: r.monthlyFee ?? null,
+                yearlyFee: r.yearlyFee ?? null,
+                foreverFee: r.foreverFee ?? null,
                 bandWidth: r.bandWidth ?? null,
                 rating,
                 stock,
@@ -170,9 +172,9 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
     const [chooseSelected, setChooseSelected] = useState<BillingType | null>(null)
     const getBillingOptions = (item: ShowItem) => {
         const opts: { type: BillingType; label: string; price: number }[] = []
-        const m = Number(item.monthlyFree)
-        const y = Number(item.yearlyFree)
-        const f = Number(item.foreverFree)
+        const m = Number(item.monthlyFee)
+        const y = Number(item.yearlyFee)
+        const f = Number(item.foreverFee)
         if (!Number.isNaN(m) && m > 0) opts.push({ type: 'monthly', label: `月费 ¥${m.toFixed(2)}`, price: m })
         if (!Number.isNaN(y) && y > 0) opts.push({ type: 'yearly', label: `年费 ¥${y.toFixed(2)}`, price: y })
         if (!Number.isNaN(f) && f > 0) opts.push({ type: 'lifetime', label: `永久 ¥${f.toFixed(2)}`, price: f })
@@ -196,11 +198,7 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                     <h2 style={{ fontSize: '24px', fontWeight: 600 }}>精选网络设备</h2>
                     <p style={{ height: '30px' }}>为高带宽与稳定连接而生，挑一款最适合你的设备。</p>
                 </div>
-                label: (
-                {/* <Badge count={cartCount} size="small" offset={[6, -2]}> */}
-                <span>购物车</span>
-                {/* </Badge> */}
-                ),
+
             </div>
 
             {/* 工具条 */}
@@ -276,9 +274,9 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                             <div className="product-meta">
                                 <span className="price">
                                     {(() => {
-                                        const m = Number(p.monthlyFree)
-                                        const y = Number(p.yearlyFree)
-                                        const f = Number(p.foreverFree)
+                                        const m = Number(p.monthlyFee)
+                                        const y = Number(p.yearlyFee)
+                                        const f = Number(p.foreverFee)
                                         if (!Number.isNaN(m) && m > 0) return `¥ ${m.toFixed(2)}/月`
                                         if (!Number.isNaN(y) && y > 0) return `¥ ${y.toFixed(2)}/年`
                                         if (!Number.isNaN(f) && f > 0) return `¥ ${f.toFixed(2)}`
@@ -348,13 +346,13 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                             <Descriptions column={1} bordered size="small" className="detail-desc">
                                 <Descriptions.Item label="套餐编码">{detail.planCode}</Descriptions.Item>
                                 <Descriptions.Item label="月费">
-                                    {String(typeof (detail as any).monthlyFree === 'undefined' || detail.monthlyFree === 0 ? '-' : detail.monthlyFree + "¥/月")}
+                                    {String(typeof (detail as any).monthlyFee === 'undefined' || detail.monthlyFee === 0 ? '-' : detail.monthlyFee + "¥/月")}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="年费">
-                                    {String(typeof (detail as any).yearlyFree === 'undefined' || detail.yearlyFree === 0 ? '-' : detail.yearlyFree + "¥/年")}
+                                    {String(typeof (detail as any).yearlyFee === 'undefined' || detail.yearlyFee === 0 ? '-' : detail.yearlyFee + "¥/年")}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="永久费">
-                                    {String(typeof (detail as any).foreverFree === 'undefined' || detail.foreverFree === 0 ? '-' : detail.foreverFree + "¥")}
+                                    {String(typeof (detail as any).foreverFee === 'undefined' || detail.foreverFee === 0 ? '-' : detail.foreverFee + "¥")}
                                 </Descriptions.Item>
                                 {detail.bandWidth ?? -1 === -1 ? <></> :
                                     <Descriptions.Item label="宽带">
@@ -380,9 +378,9 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                                             rating: 4.5,
                                             stock: detail.qty ?? 0,
                                             cover: detail.picture || 'https://picsum.photos/seed/fallback/600/400',
-                                            monthlyFree: (detail as any).monthlyFree,
-                                            yearlyFree: (detail as any).yearlyFree,
-                                            foreverFree: (detail as any).foreverFree,
+                                            monthlyFee: (detail as any).monthlyFee,
+                                            yearlyFee: (detail as any).yearlyFee,
+                                            foreverFee: (detail as any).foreverFee,
                                         })
                                     }
                                 >
@@ -418,7 +416,6 @@ const Product: React.FC<ProductProps> = ({ onAddToCart }) => {
                             planCode: chooseItem.id,      // 你的 id 即 planCode
                             qty: 1,
                             status: '在购物车中',
-                            username,                     // 来自 useAuthStore
                             planType: mapBillingToPlanType(chooseSelected),
                         })
 

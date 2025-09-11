@@ -7,7 +7,7 @@ import {
     MenuUnfoldOutlined,
     LogoutOutlined,
 } from '@ant-design/icons'
-import { Button, Layout, Menu, theme, Dropdown, Avatar, Space, Badge, message } from 'antd'
+import { Button, Layout, Menu, theme, Dropdown, Avatar, Space, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import './engineer.css'
 import { LazyLoading } from '../../../components'
@@ -23,8 +23,6 @@ const currentUser = {
         'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
 }
 
-// 模拟未读订单数量
-const unreadOrders = 3
 
 // 定义菜单项类型
 type MenuKey = 'workorders' | 'flowstep' | 'profile'
@@ -72,7 +70,7 @@ const Engineer: React.FC = () => {
                     icon: <LogoutOutlined />,
                     label: '退出登录',
                     onClick: () => {
-                        logout()                // ✅ 清理 token
+                        logout()                // 
                         messageApi.open({
                             type: 'success',
                             content: '退出成功',
@@ -140,14 +138,11 @@ const Engineer: React.FC = () => {
                     />
 
                     <div className="header-actions">
-                        <Badge count={unreadOrders} offset={[10, 0]} size='small' style={{ zIndex: 1000 }}>
-                            <ShoppingCartOutlined className="header-icon" />
-                        </Badge>
-
+                        <ShoppingCartOutlined className="header-icon" />
                         <Dropdown overlay={userMenu} placement="bottomRight">
                             <Space className="user-chip">
                                 <Avatar src={currentUser.avatar} icon={<UserOutlined />} />
-                                <span className="user-name">{name}</span>
+                                <span className="user-name" style={{ textAlign: 'center', marginTop: '26px' }}>{name}</span>
                             </Space>
                         </Dropdown>
                     </div>

@@ -179,14 +179,10 @@ const Admin: React.FC = () => {
                     />
 
                     <div className="header-actions">
-                        {/* <Badge count={unreadOrders} offset={[10, 0]} size='small' style={{ zIndex: 1000 }}> */}
-                        <ShoppingCartOutlined className="header-icon" />
-                        {/* </Badge> */}
-
                         <Dropdown overlay={userMenu} placement="bottomRight">
-                            <Space className="user-chip">
+                            <Space className="user-chip" >
                                 <Avatar src={currentUser.avatar} icon={<UserOutlined />} />
-                                <span className="user-name">{name}</span>
+                                <span className="user-name" style={{ textAlign: 'center', marginTop: '26px' }}>{name}</span>
                             </Space>
                         </Dropdown>
                     </div>

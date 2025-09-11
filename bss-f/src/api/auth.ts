@@ -12,11 +12,15 @@ export interface LoginResp {
     roleName: 'user' | 'admin' | '客户' | '平台管理员' | '客服坐席' | '装维工程师'
     username: string
 }
+export interface code<T> {
+    code: string
+    message: string
+    data: T
+}
 
-
-export async function loginApi(data: LoginReq): Promise<LoginResp> {
+export async function loginApi(data: LoginReq): Promise<code<LoginResp>> {
     try {
-        const res = await http.post<LoginResp>('/auth/me', data)
+        const res = await http.post<code<LoginResp>>('/auth/login', data)
         return res.data
     } catch (e: any) {
         const status = e?.response?.status
